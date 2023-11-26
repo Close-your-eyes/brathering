@@ -1,24 +1,16 @@
 ncbi_data <- webscrape_ncbi(accession = "NC_001348.1") # https://www.ncbi.nlm.nih.gov/nuccore/NC_001348.1/
 feat <- ncbi_data[["features"]]
 feat_sub <- feat %>% dplyr::filter(Feature == "CDS") %>% dplyr::filter(Subfeature == "locus_tag")
-seqs <- get_seqs_from_feature_df(feature_df = feat_sub, origin = ncbi_data$origin, concat = F)
+seqs <- get_seqs_from_feature_df(feature_df = feat_sub, origin = ncbi_data$origin, concat = T)
 
 
-# telling of indels is wrong?!
-## indels in pattern counted?
-## different color for gaps?
-alignment <- igsc::MultiplePairwiseAlignmentsToOneSubject(subject = ref_genome,
-                                                          patterns = seqs[[45]],
-                                                          rm_indel_inducing_pattern = F,
-                                                          type = "global-local")
+alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = ncbi_data$origin,
+                                                    patterns = seqs[1:5],
+                                                    rm_indel_inducing_pattern = F,
+                                                    type = "global")
 
-alignment <- igsc::MultiplePairwiseAlignmentsToOneSubject(subject = substr(ref_genome,
-                                                                           start = alignment[["min.max.subject.position"]][1] - 500,
-                                                                           stop = alignment[["min.max.subject.position"]][2] + 500),
-                                                          patterns = seqs[[45]],
-                                                          rm_indel_inducing_pattern = F,
-                                                          type = "global-local")
-alignment[["match.plot"]]
+alignment[["match.plot"]] + ggplot2::xlim(c(alignment[["min.max.subject.position"]][1] - 500,
+                                            alignment[["min.max.subject.position"]][2] + 500))
 
 algn <- Biostrings::pairwiseAlignment(subject = Biostrings::DNAStringSet(ncbi_data$origin),
                                       pattern = Biostrings::DNAStringSet(seqs[2]),

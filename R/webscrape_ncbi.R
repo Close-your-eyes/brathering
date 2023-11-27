@@ -72,6 +72,10 @@ get_features <- function(x) {
   list_grouped <- setNames(split(seqs[alt_inds], meta_data_belonging), seqs[inds])
   df <- prep_list(x = list_grouped)
 
+  df_distinct <- dplyr::distinct(df, ID, Feature)
+  message("Features found:")
+  print(table(df_distinct$Feature))
+
   return(df)
 }
 

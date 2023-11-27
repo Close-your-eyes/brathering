@@ -1,3 +1,4 @@
+library(brathering)
 ncbi_data <- webscrape_ncbi(accession = "NC_001348.1") # https://www.ncbi.nlm.nih.gov/nuccore/NC_001348.1/
 feat <- ncbi_data[["features"]]
 feat_sub <- feat %>% dplyr::filter(Feature == "CDS") %>% dplyr::filter(Subfeature == "locus_tag")
@@ -11,7 +12,16 @@ alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = ncbi_data$origin,
                                                     rm_indel_inducing_pattern = F,
                                                     type = "global")
 
-alignment[["match.plot"]] + ggplot2::xlim(c(alignment[["min.max.subject.position"]][1] - 500,
+tt <- strsplit(seqs[[1]], "")[[1]]
+tt <- c(tt[1:108], "TA", tt[109:length(tt)])
+tt <- paste(tt, collapse = "")
+alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = ncbi_data$origin,
+                                                    patterns = tt,
+                                                    rm_indel_inducing_pattern = F,
+                                                    type = "local")
+
+
+alignment[["match.plot"]] + ggplot2::xlim(c(alignment[["min.max.subject.position"]][1] - 100,
                                             alignment[["min.max.subject.position"]][2] + 500))
 
 algn <- Biostrings::pairwiseAlignment(subject = Biostrings::DNAStringSet(ncbi_data$origin),

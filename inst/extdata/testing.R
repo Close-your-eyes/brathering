@@ -8,7 +8,7 @@ seqs <- get_seqs_from_feature_df(feature_df = feat_sub, origin = ncbi_data$origi
 # how to speed up match/mismatch/gap assigment in plotting?
 # check with examples that actually insert gaps in subject.
 alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = ncbi_data$origin,
-                                                    patterns = seqs[1:5],
+                                                    patterns = Biostrings::DNAStringSet(unlist(seqs[1:5])),
                                                     rm_indel_inducing_pattern = F,
                                                     type = "global")
 

@@ -1,3 +1,4 @@
+#BiocManager::install("Rsubread")
 library(brathering)
 library(magrittr)
 ncbi_data <- webscrape_ncbi(accession = "NC_001348.1") # https://www.ncbi.nlm.nih.gov/nuccore/NC_001348.1/
@@ -5,14 +6,32 @@ feat <- ncbi_data[["features"]]
 feat_sub <- dplyr::filter(feat, Feature == "CDS", Subfeature == "locus_tag")
 seqs <- get_seqs_from_feature_df(feature_df = feat_sub, origin = ncbi_data$origin, concat = T)
 
+#?Rsubread::align()
+#library(Rsubread)
+# Build an index for the artificial sequence included in file 'reference.fa'.
+ref <- system.file("extdata","reference.fa",package="Rsubread")
+ref_import <- igsc::read_fasta(ref)
+Rsubread::buildindex(basename="./reference_index",reference=ref) # this save index files to getwd()
+file.info(list.files(dirname(ref), full.names = T))
+
+# align a sample read dataset ('reads.txt') to the sample reference
+reads <- system.file("extdata","reads.txt.gz",package="Rsubread")
+
+align.stat <- align(index = "./reference_index", readfile1 = reads,
+                    output_file = "./Rsubread_alignment.BAM", phredOffset = 64)
+
+align.stat
 
 # how to speed up match/mismatch/gap assigment in plotting?
 # check with examples that actually insert gaps in subject.
-alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 20000),
-                                                    patterns = Biostrings::DNAStringSet(unlist(seqs[1:5])),
+nchar(unlist(seqs[1:4]))
+alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 2000),
+                                                    patterns = Biostrings::DNAStringSet(unlist(seqs[1:4])),
                                                     rm_indel_inducing_pattern = F,
                                                     type = "local",
-                                                    seq_type = "NT")
+                                                    seq_type = "NT",
+                                                    algnmt_plot_args = list(add_length_suffix = T,
+                                                                            plot.pattern.names = T))
 alignment[["match.plot"]]
 
 test_pattern <- strsplit(seqs[[1]], "")[[1]]

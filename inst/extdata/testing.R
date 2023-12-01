@@ -22,16 +22,38 @@ align.stat <- align(index = "./reference_index", readfile1 = reads,
 
 align.stat
 
-# how to speed up match/mismatch/gap assigment in plotting?
-# check with examples that actually insert gaps in subject.
-nchar(unlist(seqs[1:4]))
-alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 2000),
-                                                    patterns = Biostrings::DNAStringSet(unlist(seqs[1:4])),
+alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 5000),
+                                                    patterns = list(Biostrings::DNAStringSet(unlist(seqs[c(1:4,2,2,4)]))),
                                                     rm_indel_inducing_pattern = F,
                                                     type = "local",
                                                     seq_type = "NT",
                                                     algnmt_plot_args = list(add_length_suffix = T,
-                                                                            plot.pattern.names = T))
+                                                                            plot.pattern.names = T,
+                                                                            plot.pattern.names_fun = ggplot2::geom_text,
+                                                                            group_on_yaxis = T))
+
+alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 15000),
+                                                    patterns = list(Biostrings::DNAStringSet(unlist(seqs[c(1:5)])),
+                                                                    Biostrings::DNAStringSet(unlist(seqs[5:9])),
+                                                                    Biostrings::DNAStringSet(unlist(seqs[c(5:8)]))),
+                                                    rm_indel_inducing_pattern = F,
+                                                    type = "local",
+                                                    seq_type = "NT",
+                                                    algnmt_plot_args = list(add_length_suffix = T,
+                                                                            plot.pattern.names = T,
+                                                                            plot.pattern.names_fun = ggplot2::geom_text,
+                                                                            group_on_yaxis = T,
+                                                                            min_gap = 400))
+alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 15000),
+                                                    patterns = seqs[c(1:4, 5:7, 5:8, 9)],
+                                                    rm_indel_inducing_pattern = F,
+                                                    type = "local",
+                                                    seq_type = "NT",
+                                                    algnmt_plot_args = list(add_length_suffix = T,
+                                                                            plot.pattern.names = T,
+                                                                            plot.pattern.names_fun = ggplot2::geom_text,
+                                                                            group_on_yaxis = T,
+                                                                            min_gap = 1000))
 alignment[["match.plot"]]
 
 test_pattern <- strsplit(seqs[[1]], "")[[1]]

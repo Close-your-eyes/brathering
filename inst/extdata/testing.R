@@ -1,4 +1,5 @@
 #BiocManager::install("Rsubread")
+wd <- dirname(rstudioapi::getActiveDocumentContext()$path)
 library(brathering)
 library(magrittr)
 ncbi_data <- webscrape_ncbi(accession = "NC_001348.1") # https://www.ncbi.nlm.nih.gov/nuccore/NC_001348.1/
@@ -21,6 +22,30 @@ align.stat <- align(index = "./reference_index", readfile1 = reads,
                     output_file = "./Rsubread_alignment.BAM", phredOffset = 64)
 
 align.stat
+
+ref <- substr(ncbi_data$origin, 1, 5000)
+igsc::write_fasta(ref, file = file.path(wd, "example.fa"))
+igsc::write_fasta(seqs[c(1:4,2,2,4)], file = file.path(wd, "reads.fa"))
+
+Rsubread::buildindex(basename = file.path(wd, "reference_index"), reference = file.path(wd, "example.fa"))
+align.stat <- Rsubread::align(index = file.path(wd, "reference_index"), readfile1 = file.path(wd, "reads.fa"),
+                              output_file = file.path(wd, "Rsubread_example_alignment.BAM"), phredOffset = 64)
+
+
+origin_region <- GenomicRanges::GRanges(
+    seqnames = names(ncbi_data$origin), strand = "+",
+    ranges = IRanges::IRanges(
+        start = c(1),
+        end = c(5000)
+    )
+)
+params <- Rsamtools::ScanBamParam(which = origin_region,
+                                  what = Rsamtools::scanBamWhat())
+reads <- Rsamtools::scanBam("/Users/vonskopnik/Documents/R_packages/brathering/inst/extdata/Rsubread_example_alignment.BAM", param = params)
+
+out <- scexpr::reads_from_bam("/Users/vonskopnik/Documents/R_packages/brathering/inst/extdata/Rsubread_example_alignment.BAM",
+                       genomic_ranges = origin_region,
+                       add_tags = c())
 
 alignment <- MultiplePairwiseAlignmentsToOneSubject(subject = substr(ncbi_data$origin, 1, 5000),
                                                     patterns = list(Biostrings::DNAStringSet(unlist(seqs[c(1:4,2,2,4)]))),

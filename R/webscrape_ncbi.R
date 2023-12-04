@@ -8,7 +8,7 @@ webscrape_ncbi <- function(accession) {
     origin <- NULL
   } else {
     origin <- get_origin(x = ncbi_text)
-    names(origin) <- paste0(accession, "_origin")
+    names(origin) <- accession
   }
 
   if (!grepl("FEATURES", ncbi_text, ignore.case = F)) {
@@ -42,7 +42,7 @@ get_origin <- function(x) {
   seq <- seq[length(seq)] # get last index in any case
   seq <- gsub(" {1,}", "", gsub("\n", "", seq))
   seq <- toupper(gsub("//", "", gsub("[[:digit:]]{1,}", "", seq)))
-  names(seq) <- "origin"
+  #names(seq) <- "origin"
   return(seq)
 }
 
@@ -163,6 +163,14 @@ prep_list <- function(x) {
   out$range <- rep(range, lengths(x))
 
 
+  if (any(grepl("order", out$range))) {
+      message("order found in range of features Not sure how to handle that currently. Are the Ns in origin?")
+  }
+  if (any(grepl(">", out$range)) || any(grepl("<", out$range))) {
+      message("'<' or '>' found in range of features This may not handable by other methods.")
+  }
+
+  out$range <- gsub("order\\(", "", out$range)
   out$ind <- as.character(out$ind)
   out$complement <- grepl("complement", out$range)
   out$range <- gsub("complement\\(", "", out$range)

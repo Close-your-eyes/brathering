@@ -12,11 +12,19 @@ mRNA_seq <- get_seqs_from_feature_df(feature_df = mRNA, origin = ncbi_data$origi
 # gtf files contains separate rows for gene, transcript, exon, etc.
 #
 gtf <- vroom::vroom("/Volumes/CMS_SSD_2TB/refdata-gex-GRCh38-2020-A_viral_mod/genes.gtf", skip = 5, n_max = 500, col_names = F)
+gtf2 <- vroom::vroom("/Volumes/CMS_SSD_2TB/refdata-gex-GRCh38-2020-A_viral_mod/genes.gtf", n_max = 20, col_names = F)
 sub <- gtf[1:10,]
-# write_gtf_and_genome has to write a header for gtf
-# then decide how to pass info to X9 and which to include in a standardized way?
-# from processed df like 'mRNA' value could be used to match entries in feat df
-# then pull exon and mRNA entries and add as separate lines to gtf
+strsplit(gtf[1,9,drop=T], ";")
+
+feat_sub <- dplyr::filter(feat, Subfeature == "gene")
+
+
+# how to handle genes from a virus genome? exons have to be added to gtf in order to make CellRanger regcognize them
+ncbi_data2 <- webscrape_ncbi(accession = "NC_001348.1")
+feat2 <- ncbi_data2[["features"]]
+
+ncbi_data_list <- list(ncbi_data, ncbi_data2)
+
 
 exons <- dplyr::filter(feat, Feature == "exon", Subfeature == "number")
 exons_seqs <- get_seqs_from_feature_df(feature_df = exons, origin = ncbi_data$origin, concat = F)

@@ -1,3 +1,5 @@
+## obsolete
+
 append_genome_and_gtf <- function(feature_df, origin, genome_file_path, gtf_file_path) {
 
   ## checks checks checks needed

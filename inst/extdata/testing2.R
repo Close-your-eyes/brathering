@@ -19,7 +19,7 @@ strsplit(gtf[1,9,drop=T], ";")
 feat_sub <- dplyr::filter(feat, Subfeature == "gene")
 
 
-# how to handle genes from a virus genome? exons have to be added to gtf in order to make CellRanger regcognize them
+# how to handle genes from a virus genome? exons have to be added to gtf in order to make CellRanger recognize them
 ncbi_data2 <- webscrape_ncbi(accession = "NC_001348.1")
 feat2 <- ncbi_data2[["features"]]
 

@@ -84,8 +84,8 @@ write_gtf_and_genome <- function(ncbi_data_list,
                   ".", # unused
                   ifelse(features[y,"complement",drop=T], "-", "+"), # when complement, then to minus strand
                   ".", # unused
-                  paste0("gene_id \"", features[y,"value",drop=T], "\"; ", "transcript_id \"", features[y,"value",drop=T], "\";"), # attributes
-                  collapse = "\t")
+                  paste0("gene_id \"", gsub("\\.", "", make.names(features[y,"value",drop=T])), "\"; ", "transcript_id \"", gsub("\\.", "", make.names(features[y,"value",drop=T])), "\";"), # attributes
+                  sep = "\t")
         })
 
         return(list(lines_to_genome = c(paste0(">", names(x[["origin"]])), splitString(x[["origin"]], n = 60)),

@@ -1,3 +1,11 @@
+#' Scrape data from NCBI nucleotide pages
+#'
+#' @param accession accession number to get data from
+#'
+#' @return
+#' @export
+#'
+#' @examples
 webscrape_ncbi <- function(accession) {
   ncbi_text <- rentrez::entrez_fetch("nucleotide", accession, rettype = "text")
 
@@ -54,15 +62,6 @@ get_features <- function(x) {
   seq <- seq[-length(seq)] # remove last index
   seqs <- strsplit(seq, "\n")[[1]][-1]
   seqs <- fix_lines2(z = seqs)
-  #seqs <- fix_translation_lines(z = seqs)
-
-  ## identify features differently (not by !grepl("/", seqs))
-  ## because descriptions other than translation can have line breaks, then the next does not start with /
-  #inds_log <- grepl("^ {5}[[:alpha:]]", seqs) # find exactly 5 spaces at the beginning
-  #inds <- which(inds_log)
-  #seqs <- trimws(gsub(" {1,}", " ", seqs))
-  #seqs <- fix_lines(z = seqs, exclude_lines = inds) # removes line breaks
-  #inds_log <- !grepl("^/", seqs) # redetect feature lines
   seqs <- trimws(gsub(" {1,}", " ", seqs))
   inds_log <- !grepl("^/", seqs) # redetect feature lines
 
@@ -109,19 +108,13 @@ fix_lines2 <- function(z, exclude_lines = NULL) {
     break_lines <- which(!grepl("^ {1,}/", z))
     break_lines <- break_lines[!grepl("^ {5}[[:alpha:]]", z[break_lines])] # find exactly 5 spaces at the beginning
 
-    # give meaningful names to different funs, which find_consecutive_sequences
-    runs <- find_consecutive_sequences(break_lines)
-    lines_to_concat <- unlist(lapply(runs, function(x) {
-        return(c(min(x)-1, x))
-    }))
 
-    #lines <- setdiff(lines, exclude_lines) # exclude feature lines
-    runs <- rle(diff(lines_to_concat) == 1)
-    consecutive_positions <- which(runs$values)
-    consecutive_sequences <- Map(function(start, end) lines_to_concat[start:(end + 1)],
-                                 consecutive_positions,
-                                 consecutive_positions + runs$lengths[consecutive_positions] - 1)
-    for (i in consecutive_sequences) {
+    # give meaningful names to different funs, which find_consecutive_sequences
+    runs <- find_consecutive_sequences(x = break_lines)
+    lines_to_concat <- lapply(runs, function(x) c(min(x)-1, x))
+    # find_consecutive_sequences2(lines_to_concat)
+
+    for (i in lines_to_concat) { #consecutive_sequences
         z[i[1]] <- paste(c(z[i[1]], trimws(z[i[-1]])), collapse = "")
     }
     z <- z[-break_lines]
@@ -197,12 +190,21 @@ prep_list <- function(x) {
   return(tibble::as_tibble(out))
 }
 
-find_consecutive_sequences <- function(vec) {
-    diffs <- c(1, diff(vec))
+find_consecutive_sequences <- function(x) {
+    diffs <- c(1, diff(x))
     starts <- c(1, which(diffs != 1))
-    ends <- c(starts[-1] - 1, length(vec))
+    ends <- c(starts[-1] - 1, length(x))
 
-    consecutive_sequences <- Map(function(start, end) vec[start:end], starts, ends)
+    consecutive_sequences <- Map(function(start, end) x[start:end], starts, ends)
 
     return(consecutive_sequences)
+}
+
+find_consecutive_sequences2 <- function(x) {
+    runs <- rle(diff(x) == 1)
+    consecutive_positions <- which(runs$values)
+    consecutive_sequences <- Map(function(start, end) x[start:(end + 1)],
+                                 consecutive_positions,
+                                 consecutive_positions + runs$lengths[consecutive_positions] - 1)
+
 }

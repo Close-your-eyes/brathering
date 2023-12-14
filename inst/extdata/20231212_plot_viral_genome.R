@@ -15,10 +15,15 @@ feat_sub <-
     dplyr::filter(Subfeature == "locus_tag")
 
 
-data <- get_seqs_from_feature_df(feature_df = feat_sub,
+data <- get_seqs_from_feature_df(feature_df = feat_sub[1:10,],
                                  origin = ncbi_data$origin)
-data_long <-
-    data %>%
-    tidyr::pivot_longer(cols = -position, names_to = "seq.name", values_to = "seq")
 
-algnmt_plot <- igsc::algnmt_plot(algnmt = data[["df_long"]][[1]], algnmt_type = "NT", ) # add_length_suffix = T causes error ?!
+# TODO: add option to plot lines from start to end of one algmt (e.g. to visualize small pieces that belong together)
+al_plot <- algnmt_plot(algnmt = data[["df_long"]][[1]],
+                       algnmt_type = "NT",
+                       text = F,
+                       plot.pattern.names = T, # make that possible without pattern.lims (which requires pairwise alignment)
+                       add_length_suffix = T,
+                       group_on_yaxis = T) # add_length_suffix = T causes error ?!
+
+

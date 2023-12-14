@@ -1,9 +1,15 @@
-#' Title
+#' Get sequences based on data generated with webscrape_ncbi
 #'
-#' @param feature_df
-#' @param origin
-#' @param concat
-#' @param make_revcomp
+#' @param feature_df data frame of features as returned by webscrape_ncbi
+#' @param origin reference sequence for features
+#' @param concat concatenate sequences which have gaps in origin
+#' @param make_revcomp return the reverse complement of sequences when complement column is TRUE,
+#' for alignment to origin do not have revcomp return,
+#' for writing features into a ref genome do have the it return
+#' @param min_to_max return whole sequences from start to end including gaps (TRUE), or remove gaps (FALSE)
+#' @param return which formats to return; restriction to what is needed saves memory and increases speed
+#' @param matches_to_origin_and_feature mark matches and mismatches in origin and/or feature sequences
+#' @param order_features order features by min position
 #'
 #' @return
 #' @export
@@ -13,23 +19,19 @@ get_seqs_from_feature_df <- function(feature_df,
                                      origin,
                                      concat = T,
                                      make_revcomp = F,
-                                     min_to_max_boundary = F,
+                                     min_to_max = F,
                                      return = c("sequences", "df_wide", "df_long"),
                                      matches_to_origin_and_feature = list(c(F,T),c(F,F)),
                                      order_features = F) {
 
-    # for alignment to origin, do not have revcomp computed
-    # for appending a ref genome, do have the revcomp computed
-
-    # set min_to_max_boundary to TRUE to have one whole sequence to add to genome file (instead of concat exons)
-
     return <- match.arg(return, c("sequences", "df_wide", "df_long"), several.ok = T)
 
-    # prepare boundaries
+
+    # how to handle those symbols from NCBI actually?
     if (any(grepl("<|>", feature_df$range))) {
         message("'<' or '>' found in range column. Those will be removed.")
     }
-
+    # prepare boundaries
     boundaries <- lapply(feature_df$range, function(x) strsplit(strsplit(gsub("<|>", "", x), ",")[[1]], "\\.\\."))
     if (order_features) {
         temp_order <- order(sapply(boundaries, function(x) min(as.numeric(unlist(x)))))
@@ -37,7 +39,7 @@ get_seqs_from_feature_df <- function(feature_df,
         feature_df <- feature_df[temp_order,]
     }
 
-    if (min_to_max_boundary) {
+    if (min_to_max) {
         boundaries <- lapply(boundaries, function(x) list(c(min(unlist(x)), max(unlist(x)))))
         for (i in seq_along(boundaries)) {
             feature_df$range[i] <- paste0(min(boundaries[[i]][[1]]), "..", max(boundaries[[i]][[1]]))
@@ -97,6 +99,7 @@ get_seqs_from_feature_df <- function(feature_df,
     df0 <- purrr::reduce(c(list(df0), dfs), dplyr::left_join, by = "position")
 
     ## assign matches and mismatches
+    ## similar procedure as in igsc::MultiplePairwiseAlignmentsToOneSubject
     if (any(unlist(matches_to_origin_and_feature))) {
         match_mismatch_list <- lapply(stats::setNames(names(df0)[-c(1,2)], names(df0)[-c(1,2)]), function(x) df0[,x] == df0[,"origin"]) # subject seq in df (not df.original) may already contain "insertion"; for overlapping pattern where one receives an insertion and the other not, this is relevant
         if (any(sapply(matches_to_origin_and_feature, "[", 1))) {

@@ -16,14 +16,24 @@ feat_sub <-
 
 
 data <- get_seqs_from_feature_df(feature_df = feat_sub[1:10,],
-                                 origin = ncbi_data$origin)
+                                 origin = ncbi_data$origin,
+                                 order_features = T)
+
+
+tt <- MultiplePairwiseAlignmentsToOneSubject(subject = ncbi_data$origin,
+                                             patterns = data[["sequences"]][1:5],
+                                             algnmt_plot_args = list(add_length_suffix = T, pattern_lim_size = 2, group_on_yaxis = T))
 
 # TODO: add option to plot lines from start to end of one algmt (e.g. to visualize small pieces that belong together)
 al_plot <- algnmt_plot(algnmt = data[["df_long"]][[1]],
                        algnmt_type = "NT",
-                       text = F,
-                       plot.pattern.names = T, # make that possible without pattern.lims (which requires pairwise alignment)
+                       line = T,
+                       pattern_lim_size = 2,
+                       pattern_names = T,
                        add_length_suffix = T,
-                       group_on_yaxis = T) # add_length_suffix = T causes error ?!
+                       subject_lim_lines = T,
+                       pos_shift = "+40000",
+                       group_on_yaxis = T)
 
 
+al_plot + ggplot2::xlim(25000,80000)

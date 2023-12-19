@@ -17,7 +17,17 @@ feat_sub <-
 
 data <- get_seqs_from_feature_df(feature_df = feat_sub[1:10,],
                                  origin = ncbi_data$origin,
-                                 order_features = T)
+                                 order_features = T,
+                                 compare_seq_df_long_args = list(change_pattern = T))
+
+## test compare seqs:
+df <-
+    data[["df_wide"]][["base_base"]] %>%
+    dplyr::filter(!is.na(HHV4_BNRF1) | !is.na(`HHV4_EBNA-LP`)) %>%
+    dplyr::select(position, origin, HHV4_BNRF1, `HHV4_EBNA-LP`) %>%
+    tidyr::pivot_longer(cols = -position, names_to = "seq.name", values_to = "seq")
+
+test <- compare_seqs_df(df, ref = "origin")
 
 
 tt <- MultiplePairwiseAlignmentsToOneSubject(subject = ncbi_data$origin,

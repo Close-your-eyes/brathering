@@ -36,129 +36,22 @@ cd81_range <- GenomicRanges::GRanges(seqnames = "chr11", strand = "+", ranges = 
 reads <- scexpr::reads_from_bam(bamfile_path, genomic_ranges = cd81_range, revcomp_minus_strand = F)
 
 #reads_sub <- reads %>% dplyr::filter(cigar == "98M") %>% dplyr::filter(grepl("I", cigar))
-reads_sub <- reads %>% dplyr::filter(cigar == "98M") %>% dplyr::slice_sample(n = 20)
-reads_sub <- reads %>% dplyr::filter(cigar != "98M") %>% dplyr::slice_sample(n = 20)
-
-# check at which position the reads match
-## reads on - strand need reverse complement; if revcomp_minus_strand in reads_from_bam is TRUE, if FALSE
-#check_al <- Biostrings::matchPattern(pattern = reads_sub$seq[1], subject = chr11, max.mismatch = 10) # on + strand
-#check_al@ranges
-#check_al <- Biostrings::matchPattern(pattern = as.character(Biostrings::reverseComplement(Biostrings::DNAString(reads_sub$seq[2]))), subject = chr11, max.mismatch = 10) # on - strand; but only if revcomp_minus_strand = TRUE
-#check_al@ranges
+#reads_sub <- reads %>% dplyr::filter(cigar == "98M") %>% dplyr::slice_sample(n = 20)
+#reads_sub <- reads %>% dplyr::filter(cigar != "98M") %>% dplyr::slice_sample(n = 20)
+reads_sub <- reads %>% dplyr::slice_sample(n = 40)
 
 
-pattern_df <- purrr::pmap_dfr(list(reads_sub$start, reads_sub$seq, reads_sub$readName), function(x,y,z) data.frame(seq = strsplit(y, "")[[1]], position = x:(x+97), seq.name = z))
+pattern_df <- purrr::pmap_dfr(list(reads_sub$cigar, reads_sub$start, reads_sub$seq, reads_sub$readName), function(x,y,z,a) igsc::cigar_to_position(x,y,z,a, rm_clipped = T))
 algnmt_df <- data.frame(seq = strsplit(chr11_cd81, "")[[1]], position = 2378344:2391242, seq.name = "chr11")
 algnmt_df <- rbind(algnmt_df, pattern_df)
-algnmt_df_wide <- tidyr::pivot_wider(algnmt_df, names_from = seq.name, values_from = seq) %>% tidyr::drop_na(3)
-
-plot <- igsc::algnmt_plot(algnmt = algnmt_df,
-                          algnmt_type = "NT",
-                          ref = "chr11")
-ggsave(plot, filename = "al_plot.pdf", device = cairo_pdf, path = wd, height = 3, width = 12)
-
-
-pattern_df <- purrr::pmap_dfr(list(reads_sub$cigar, reads_sub$start, reads_sub$seq, reads_sub$readName), function(x,y,z,a) cigar_to_position(x,y,z,a))
-algnmt_df <- data.frame(seq = strsplit(chr11_cd81, "")[[1]], position = 2378344:2391242, seq.name = "chr11")
-algnmt_df <- rbind(algnmt_df, pattern_df)
-plot <- igsc::algnmt_plot(algnmt = algnmt_df,
-                          algnmt_type = "NT",
-                          ref = "chr11",
-                          line = T)
-ggsave(plot, filename = "al_plot.pdf", device = cairo_pdf, path = wd, height = 3, width = 12)
-
-
-## the principle works now, position as returned by STAR aligner starts at 1 for every chromosome
-## now try converting the CIGAR strings
-
-cigar <- "16S67M5729N15M"
-start <- 2384616
-seq <- "TTTTTCTTATATGGGGAGCGGGCGCCTCCGGAGGCTGGAGTATCTTGGGGGGGGGGAGCAGGTGGCAGAGAGGCTTCCCACAGCTGGCTGGAGGCGTG"
-cigar_to_position <- function(cigar, start, seq, name = NULL, name_col = "seq.name") {
-    # https://davetang.org/wiki/tiki-index.php?page=SAM
-    # https://github.com/NBISweden/GAAS/blob/master/annotation/knowledge/cigar.md
-
-    # clipping means that respective bases were not uses for the alignment, but are retained in the output
-    # usually at the end of reads
-    # maybe because sequencing errors are more likely towards the ends?!
-    cigar_split <- strsplit(cigar, "(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)", perl=TRUE)[[1]]
-    val <- c(0,as.integer(cigar_split[grep("\\d", cigar_split, perl=TRUE)]))
-    op <- cigar_split[grep("\\D", cigar_split, perl=TRUE)]
-    val_cum <- cumsum(val)
-
-    # these are the positions in seq
-    val_seq <- val[-1][which(op %in% c("S", "M", "=", "X"))]
-    val_seq_cum <- c(0,cumsum(val_seq))
-
-    seq_df <- data.frame(seq = character(val_cum[length(val_cum)]), position = seq(start, start+val_cum[length(val_cum)]-1))
-    # i is counter for op
-    # j is counter for val_seq_cum
-    j <- 1
-    for (i in seq_along(op)) {
-        if (op[i] %in% c("S", "M")) {
-            seq_df$seq[(val_cum[i]+1):val_cum[i+1]] <- strsplit(substr(seq, val_seq_cum[j]+1, val_seq_cum[j+1]), "")[[1]]
-            j <- j + 1
-        }
-        if (op[i] == "N") {
-            seq_df$seq[(val_cum[i]+1):val_cum[i+1]] <- rep(NA, val[i+1])
-            # j remains the same
-        }
-        if (op[i] %in% c("I", "D", "H")) {
-            message("New operation found in cigar string. index: ", i)
-            stop("New operation found in cigar string.")
-        }
-
-        #if I, D, H missing
-
-    }
-
-    if (!is.null(name)) {
-        seq_df[,name_col] <- name
-    }
-    return(seq_df)
-}
-
-# from chat gpt:
-# Function to parse CIGAR string and assign positions to nucleotides
-assign_positions <- function(sequence, cigar_string) {
-    # Initialize variables
-    positions <- numeric(0)
-    current_position <- 1
-
-    # Split CIGAR string into operations and lengths
-    cigar_tokens <- gregexpr("[0-9]+[A-Z=]", cigar_string, perl=TRUE)[[1]]
-    operations <- regmatches(cigar_string, cigar_tokens)
-    lengths <- as.integer(gsub("[A-Z=]", "", operations))
-
-    # Loop through CIGAR operations
-    for (i in seq_along(operations)) {
-        operation <- substr(operations[i], nchar(operations[i]), nchar(operations[i]))
-        length <- lengths[i]
-
-        # Update positions based on CIGAR operation
-        if (operation %in% c("M", "=")) {
-            positions <- c(positions, current_position:(current_position + length - 1))
-            current_position <- current_position + length
-        } else if (operation == "D") {
-            positions <- c(positions, rep(NA, length))
-            current_position <- current_position + length
-        } else if (operation == "I") {
-            current_position <- current_position + length
-        } else if (operation == "S") {
-            # Soft clipping, positions are not affected
-        } else {
-            stop("Unsupported CIGAR operation: ", operation)
-        }
-    }
-
-    # Create a data frame with positions and nucleotides
-    result <- data.frame(position = positions, nucleotide = strsplit(sequence, "")[[1]])
-    return(result)
-}
-
-# Example usage
-sequence <- "ATCGTACG"
-cigar_string <- "2=1X3=1D2I"
-result <- assign_positions(sequence, cigar_string)
-print(result)
+plot <- algnmt_plot(algnmt = algnmt_df,
+                    algnmt_type = "NT",
+                    ref = "chr11",
+                    group_on_yaxis = F, # error when TRUE
+                    line = T)
+ggsave(plot, filename = "al_plot.pdf", device = cairo_pdf, path = wd, height = 6, width = 12)
+algnmt_df_compares <- igsc::compare_seq_df_long(algnmt_df %>% dplyr::filter(seq.name == "chr11" | grepl("19542", seq.name)), change_pattern = T, ref = "chr11", seq_original = NULL,
+                                                pattern_mismatch_as = "base") %>%
+    tidyr::pivot_wider(names_from = seq.name, values_from = seq) %>%
+    tidyr::drop_na()
 

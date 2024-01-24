@@ -1,9 +1,24 @@
-write_gtf_and_genome <- function(ncbi_data_list,
-                                 genome_file_path,
-                                 gtf_file_path,
-                                 gtf_header = c("##description: own ref", "##provider: CMS", "##conctact: vonskopnik@pm.me", "##format: gtf", paste0("##date: ", Sys.Date())),
-                                 append = F,
-                                 overwrite = F) {
+write_gtf_and_genome_for_cellranger <- function(ncbi_data_list,
+                                                genome_file_name = "genome.fa",
+                                                gtf_file_name = "genes.gtf",
+                                                save_path = NULL,
+                                                gtf_header = c("##description: own ref", "##provider: CMS", "##conctact: vonskopnik@pm.me", "##format: gtf", paste0("##date: ", Sys.Date())),
+                                                append = F,
+                                                features_to_become_exon = c("CDS"),
+                                                overwrite = F) {
+
+    # https://www.10xgenomics.com/support/software/cell-ranger/latest/tutorials/cr-tutorial-mr
+    # https://www.ensembl.org/info/website/upload/gff.html
+    # https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/references#multi
+
+    # cellranger count only uses exons - define somewhere which features become exons: features_to_become_exon
+
+    # only two things are needed for every "chromosome" to be added: the sequence (origin) and the feature data frame which needs at least 3 columns (Feature, range, value) ?
+
+    # write a minimal example for that
+
+    # ncbi_data_list - rename this argument, has to be a list of origin and feature df; check every entry then; list has to be named which will dictate the name of the chromosome
+    # name of origin is not necessary
 
     # write_gtf_and_genome fun has to write a header for gtf
     # in order to provide the origin, ncbi_data has to be passed to that fun
@@ -26,23 +41,28 @@ write_gtf_and_genome <- function(ncbi_data_list,
     ncbi_data2[["values_to_genome_gtf"]] <- c("HHV3_gp01", "HHV3_gp02", "HHV3_gp03")
     ncbi_data_list <- list(ncbi_data, ncbi_data2)'
 
+    if (is.null(save_path)) {
+        stop("Please provide a save_path.")
+    }
+    if (append && overwrite) {
+        stop("append (= attach new lines to existing file) and overwrite (= replacing an existing file), both set to TRUE does not make sense. select one only, please.")
+    }
+    if (genome_file_name != "genome.fa") {
+        message("for 10X pipeline (mkref and cellranger) the genome_file may be preferably named 'genome.fa")
+    }
+    if (gtf_file_name != "genes.gtf") {
+        message("for 10X pipeline (mkref and cellranger) the gtf_file may be preferably named 'genes.gtf")
+    }
+    genome_file_path <- file.path(save_path, genome_file_name)
+    gtf_file_path <- file.path(save_path, gtf_file_name)
+
     if (file.exists(gtf_file_path) && append && !overwrite) {
-        stop("gtf file exists and must be appended. Set append to TRUE or select another file. Or set overwrite = TRUE.")
+        stop(gtf_file_path, " exists. It must be appended (append = T) or overwritten (overwrite = T) or another file needs to be written.")
     }
     if (file.exists(genome_file_path) && append && !overwrite) {
-        stop("genome file exists and must be appended. Set append to TRUE or select another file. Or set overwrite = TRUE.")
+        stop(genome_file_path, " exists. It must be appended (append = T) or overwritten (overwrite = T) or another file needs to be written.")
     }
-
-    if (basename(genome_file_path) != "genome.fa") {
-        stop("genome file has to be named 'genome.fa")
-    }
-    if (basename(gtf_file_path) != "genes.gtf") {
-        stop("gtf file has to be named 'genes.gtf")
-    }
-
-    dir.create(dirname(genome_file_path), showWarnings = F, recursive = T)
-    dir.create(dirname(gtf_file_path), showWarnings = F, recursive = T)
-
+    dir.create(save_path, showWarnings = F, recursive = T)
 
     if (any(y <- !sapply(lapply(ncbi_data_list, names), function(x) "features" %in% x && "origin" %in% x && "features_to_genome_gtf" %in% x && "values_to_genome_gtf" %in% x))) {
         stop("Indices ", paste(which(y), collapse = ", "), " do not contain 'features', 'origin', 'values_to_genome_gtf' and 'features_to_genome_gtf'.")
@@ -94,7 +114,7 @@ write_gtf_and_genome <- function(ncbi_data_list,
 
 
     # think about this
-'    if (overwrite && file.exists(genome_file_path) && !append) {
+    '    if (overwrite && file.exists(genome_file_path) && !append) {
         file.remove(genome_file_path)
     }
     if (overwrite && file.exists(genome_file_path) && !append) {

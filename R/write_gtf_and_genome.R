@@ -6,7 +6,8 @@ write_gtf_and_genome_for_cellranger <- function(data,
                                                 features_to_become_exon = c("CDS"),
                                                 other_features_to_write = NULL,
                                                 append = F,
-                                                overwrite = F) {
+                                                overwrite = F,
+                                                genome_file_linewidth = 60) {
 
     # https://www.10xgenomics.com/support/software/cell-ranger/latest/tutorials/cr-tutorial-mr
     # https://www.ensembl.org/info/website/upload/gff.html
@@ -110,7 +111,7 @@ write_gtf_and_genome_for_cellranger <- function(data,
     # check for numbers, dots and comma only in range column
     for (i in purrr::map_dfr(data, `[[`, "features")[["range"]]) {
         if (!grepl("^[0-9.,]+$", i)) {
-            stop("At least one range contains other symbols than digits and dots. This should not be. Please check.")
+            stop("At least one range contains other symbols than digits and dots and commas. This should not be. Please check.")
         }
     }
     # check if complement column is logical
@@ -144,15 +145,13 @@ write_gtf_and_genome_for_cellranger <- function(data,
                       sep = "\t")
             })
 
-            return(list(lines_to_genome = c(paste0(">", x), splitString(data[[x]][["origin"]], n = 60)),
-                        lines_to_gtf = lines_to_gtf))
+            return(list(genome = c(paste0(">", x), splitString(data[[x]][["origin"]], n = genome_file_linewidth)),
+                        gtf = lines_to_gtf))
         } else {
             message("zero rows in features data frame remained for ", x, ". check 'features_to_become_exon' and 'other_features_to_write' !?")
             return(NULL)
         }
-    }, .progress = T)
-
-
+    })
 
 
     if (overwrite && file.exists(genome_file_path)) {
@@ -163,19 +162,24 @@ write_gtf_and_genome_for_cellranger <- function(data,
     }
 
     # write files
-    vroom::vroom_write_lines(unlist(sapply(lines_to_genome_and_gtf, "[", "lines_to_genome"), use.names = F),
+    vroom::vroom_write_lines(unlist(sapply(lines_to_genome_and_gtf, "[", "genome"), use.names = F),
                              genome_file_path,
                              append = append)
 
     ## gtf header?
     if (append) {
-        message("Since gtf file is appended, the header lines provided are ignored.")
+        message("Since gtf file is being appended, the header lines provided are ignored.")
         gtf_header <- NULL
     }
     vroom::vroom_write_lines(c(gtf_header,
-                               unlist(sapply(lines_to_genome_and_gtf, "[", "lines_to_gtf"), use.names = F)),
+                               unlist(sapply(lines_to_genome_and_gtf, "[", "gtf"), use.names = F)),
                              gtf_file_path,
                              append = append)
+
+    message(genome_file_path,
+            gtf_file_path)
+
+    return(lines_to_genome_and_gtf)
 }
 
 

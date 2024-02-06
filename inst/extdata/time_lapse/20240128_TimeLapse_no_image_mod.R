@@ -16,70 +16,49 @@ library(parallel) # for mclapply
 # magick: https://cran.r-project.org/web/packages/magick/vignettes/intro.html#The_grid_package
 # av: https://www.r-bloggers.com/2020/02/working-with-audio-in-r-using-av/, https://docs.ropensci.org/av/index.html
 
-
+formats <- av_encoders()
+unique(formats$type)
 
 # image folder and duration of image sequence
-image.folder <- "/Users/vonskopnik/Documents/20240127_Baum_Kai_img_seq"
-datetimes <- lubridate::as_datetime(exifr::read_exif(list.files(image.folder, full.names = T), tags = "CreateDate")$CreateDate)
-max(datetimes) - min(datetimes)
+root_path <- "/Volumes/CMS_SSD_2TB/20240127_Baumfaellung"
+mp4_files <- list.files(path = root_path,
+                        pattern = "\\.mp4$",
+                        ignore.case = T,
+                        full.names = T)
 
-#get image info: magick::image_info(img)
+# mtime is modified time (https://www.howtogeek.com/517098/linux-file-timestamps-explained-atime-mtime-and-ctime/)
+# order files by mtime
+mp4_files <- mp4_files[order(file.mtime(mp4_files))]
+
+image_folders <- file.path(root_path, sapply(strsplit(basename(mp4_files), "\\."), "[", 1))
+images <- unlist(lapply(image_folders, list.files, full.names = T))
 
 # select framerate and get length of output video in seconds
-framerate <- 30
-length(datetimes)/framerate
+framerate <- 300
+length(images)/framerate/60 # length in min
+
 
 # optionally: select audio and cut sequence
-audio.in <- "/Users/vonskopnik/Desktop/1 _NSYNC - Bye Bye Bye.mp3"
-audio.out <- "/Users/vonskopnik/Desktop/1 _NSYNC - Bye Bye Bye short.mp3"
-av::av_audio_convert(audio.in, audio.out, start_time = 5, total_time = 5)
+#audio.in <- "/Users/vonskopnik/Desktop/1 _NSYNC - Bye Bye Bye.mp3"
+#audio.out <- "/Users/vonskopnik/Desktop/1 _NSYNC - Bye Bye Bye short.mp3"
+#av::av_audio_convert(audio.in, audio.out, start_time = 5, total_time = 5)
 
-# optionally: add text annotation to images (e.g. CreateDate)
-# caution: this is very slow and may be sped up with mclapply - maybe there is another option to speed it up
-# it was also attempted to not save the new images in between and to use image_write_video from an vector obejct of img, but it did not work
-new.folder <- paste0(image.folder, "/modified")
+
+new.folder <- paste0(root_path, "/modified")
 dir.create(new.folder)
 
-mclapply(list.files(image.folder, full.names = T, pattern = ".jpg"), function(x) {
-  magick::image_write(magick::image_annotate(
-    # optionally rezise images; use quotations marks to define new size
-    # make sure that height (and width?!) is divisible by 2; required for for av::av_encode_video below!!
-    magick::image_resize(magick::image_read(x), "804x"),
-    text = lubridate::as_datetime(exifr::read_exif(x, tags = "CreateDate")$CreateDate),
-    size = 40,
-    color = "white",
-    gravity = "southwest",
-    location = paste0("+50+50"),
-    font = "Courier"),
-    path = file.path(new.folder, basename(x)),
-    format = "png")
-}, mc.cores = 2)
+
+# find time points of tree fell and increase number of frames there
+
 
 # save time lapse video
-av::av_encode_video(input = list.files(new.folder, full.names = T, pattern = ".jpg"), # new.folder
-                    output = paste0(new.folder, "/", "TimeLapse_video.mp4"),
-                    framerate = framerate) #  audio = audio.out)
+av::av_encode_video(input = images[seq(1, length(images), 4)], # new.folder
+                    output = paste0(new.folder, "/", "TimeLapse_video_one_fourth_of_img.mp4"),
+                    framerate = framerate,
+                    verbose = F) #  audio = audio.out)
+
+av::av_video_info("/Volumes/CMS_SSD_2TB/20240127_Baumfaellung/modified/TimeLapse_video.mp4")$video$framerate
 
 
-
-# vectorzied images (~video)
-img <- image_read(list.files(image.folder, pattern = "\\.JPG", full.names = T))
-
-# Customize text
-img <- image_annotate(
-  img,
-  text = lubridate::as_datetime(exifr::read_exif(list.files(image.folder, pattern = "\\.JPG", full.names = T), tags = "CreateDate")$CreateDate),
-  size = 40,
-  color = "white",
-  gravity = "southwest",
-  location = paste0("+50+50"),
-  font = "Courier"
-)
-
-
-image_write(img[3], path = "/Users/vonskopnik/Desktop/img3.png", format = "png")
-
-##### does not work:
-image_write_video(img, path = "/Users/vonskopnik/Desktop/out3.mp4", framerate = framerate)
-
-
+## attention: do not play with QuickTime player. Quicktime decided himself to reduce the playback speed since it thinks it is a slow motion video
+## hence the 1:25 video becomes 8:15 min (or so)

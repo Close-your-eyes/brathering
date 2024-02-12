@@ -50,12 +50,13 @@ dir.create(new.folder)
 
 # find time points of tree fell and increase number of frames there
 
+## add frame number to video
 
 # save time lapse video
-av::av_encode_video(input = images[seq(1, length(images), 4)], # new.folder
-                    output = paste0(new.folder, "/", "TimeLapse_video_one_fourth_of_img.mp4"),
+av::av_encode_video(input = images[seq(1, length(images), 20)], # new.folder
+                    output = paste0(new.folder, "/", "TimeLapse_search_Faellung.mp4"),
                     framerate = framerate,
-                    verbose = F) #  audio = audio.out)
+                    verbose = T) #  audio = audio.out)
 
 av::av_video_info("/Volumes/CMS_SSD_2TB/20240127_Baumfaellung/modified/TimeLapse_video.mp4")$video$framerate
 

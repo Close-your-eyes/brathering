@@ -1,4 +1,3 @@
-
 library(exifr)
 library(av)
 library(gganimate)
@@ -15,6 +14,11 @@ library(parallel) # for mclapply
 
 # magick: https://cran.r-project.org/web/packages/magick/vignettes/intro.html#The_grid_package
 # av: https://www.r-bloggers.com/2020/02/working-with-audio-in-r-using-av/, https://docs.ropensci.org/av/index.html
+
+
+## attention: do not play with QuickTime player. Quicktime decided himself to reduce the playback speed since it thinks it is a slow motion video
+## hence the 1:25 video becomes 8:15 min (or so)
+
 
 formats <- av_encoders()
 unique(formats$type)
@@ -98,7 +102,7 @@ av::av_encode_video(input = c(images_select1, images_select2), # new.folder
                     verbose = T)
 
 
-
+#
 ## slow down video around tree fells
 one_in_20_frames <- c(770, 1500, 3110, 3135)
 original_frames <- one_in_20_frames*20
@@ -132,17 +136,7 @@ av::av_encode_video(input = image_final, # new.folder
                     framerate = framerate,
                     verbose = T)
 
-'## add frame number to video
-av::av_encode_video(input = images[seq(1, length(images), 20)], # new.folder
-                    output = paste0(new.folder, "/", "TimeLapse_search_Faellung.mp4"),
-                    framerate = framerate,
-                    verbose = T) #  audio = audio.out)
 
-av::av_video_info("/Volumes/CMS_SSD_2TB/20240127_Baumfaellung/modified/TimeLapse_video.mp4")$video$framerate
-'
-
-## attention: do not play with QuickTime player. Quicktime decided himself to reduce the playback speed since it thinks it is a slow motion video
-## hence the 1:25 video becomes 8:15 min (or so)
 
 
 

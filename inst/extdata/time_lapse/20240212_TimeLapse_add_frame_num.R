@@ -88,7 +88,7 @@ av::av_video_info("/Volumes/CMS_SSD_2TB/20240127_Baumfaellung/modified/TimeLapse
 # every 20th image until 760, then every 2nd image
 images_select1 <- images[1:(760*20)][seq(1, (760*20), 20)]
 images_select2 <- images[((760*20)+1):((860*20))]
-images_select2 <- images_select2[seq(1, length(images_select2), 2)]
+images_select2 <- images_select2[seq(1, length(images_select2), 1)]
 new.folder <- paste0(root_path, "/modified")
 dir.create(new.folder)
 
@@ -97,6 +97,40 @@ av::av_encode_video(input = c(images_select1, images_select2), # new.folder
                     framerate = 200,
                     verbose = T)
 
+
+
+## slow down video around tree fells
+one_in_20_frames <- c(770, 1500, 3110, 3135)
+original_frames <- one_in_20_frames*20
+slow_range <- 400
+default_image_gap <- 20
+slow_image_gap <- 1
+framerate <- 300
+
+
+images_sub_01 <- images[seq(1,original_frames[1]-slow_range,default_image_gap)]
+images_sub_02 <- images[seq(original_frames[1]-slow_range+1,original_frames[1]+slow_range,slow_image_gap)]
+images_sub_03 <- images[seq(original_frames[1]+slow_range+1,original_frames[2]-slow_range,default_image_gap)]
+images_sub_04 <- images[seq(original_frames[2]-slow_range+1,original_frames[2]+slow_range,slow_image_gap)]
+images_sub_05 <- images[seq(original_frames[2]+slow_range+1,original_frames[3]-slow_range,default_image_gap)]
+images_sub_06 <- images[seq(original_frames[3]-slow_range+1,original_frames[4]+slow_range,slow_image_gap)]
+# tree 3 and 4 are overlapping with slow_range
+#images_sub_07 <- images[seq(original_frames[3]+slow_range+1,original_frames[4]-slow_range,default_image_gap)]
+#images_sub_08 <- images[seq(original_frames[4]-slow_range+1,original_frames[4]+slow_range,slow_image_gap)]
+images_sub_09 <- images[seq(original_frames[4]+slow_range+1,length(images),default_image_gap)]
+
+image_final <- c(images_sub_01,
+                 images_sub_02,
+                 images_sub_03,
+                 images_sub_04,
+                 images_sub_05,
+                 images_sub_06,
+                 images_sub_09)
+
+av::av_encode_video(input = image_final, # new.folder
+                    output = paste0(new.folder, "/", "TimeLapse_all_fell_slowed.mp4"),
+                    framerate = framerate,
+                    verbose = T)
 
 '## add frame number to video
 av::av_encode_video(input = images[seq(1, length(images), 20)], # new.folder

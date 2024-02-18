@@ -15,7 +15,9 @@ bamfile_path <- "/Volumes/CMS_SSD_2TB/R_scRNAseq/2019_SLE_LN/data/Sequencing_dat
 
 start_line_chr11 <- 6379235
 end_line_chr11 <- 8630680
-chr11 <- vroom::vroom_lines("/Volumes/CMS_SSD_2TB/refdata-gex-GRCh38-2020-A_viral_mod/genome.fa", skip = start_line_chr11,
+
+#"/Volumes/CMS_SSD_2TB/refdata-gex-GRCh38-2020-A_viral_mod/genome.fa"
+chr11 <- vroom::vroom_lines("/Volumes/CMS_SSD_2TB/Reference_genomes/refdata-gex-GRCh38-2020-A/genome.fa", skip = start_line_chr11,
                             n_max = end_line_chr11-start_line_chr11+1)
 # final line is chr12: chr11[which(grepl("^>", chr11))]
 chr11 <- chr11[-length(chr11)]
@@ -39,16 +41,17 @@ reads <- scexpr::reads_from_bam(bamfile_path, genomic_ranges = cd81_range, revco
 #reads_sub <- reads %>% dplyr::filter(cigar == "98M") %>% dplyr::slice_sample(n = 20)
 #reads_sub <- reads %>% dplyr::filter(cigar != "98M") %>% dplyr::slice_sample(n = 20)
 reads_sub <- reads %>% dplyr::slice_sample(n = 40)
+reads_sub <- reads_sub %>% dplyr::filter(readName == "NB501243:242:HWJGKBGXC:4:21611:23030:5949")
 
 
-pattern_df <- purrr::pmap_dfr(list(reads_sub$cigar, reads_sub$start, reads_sub$seq, reads_sub$readName), function(x,y,z,a) igsc::cigar_to_position(x,y,z,a, rm_clipped = T))
+pattern_df <- purrr::pmap_dfr(list(reads_sub$cigar, reads_sub$start, reads_sub$seq, reads_sub$readName), function(x,y,z,a) cigar_to_position(x,y,z,a, rm_clipped = T))
 algnmt_df <- data.frame(seq = strsplit(chr11_cd81, "")[[1]], position = 2378344:2391242, seq.name = "chr11")
 algnmt_df <- rbind(algnmt_df, pattern_df)
-plot <- algnmt_plot(algnmt = algnmt_df,
-                    algnmt_type = "NT",
-                    ref = "chr11",
-                    group_on_yaxis = F, # error when TRUE
-                    line = T)
+plot <- igsc::algnmt_plot(algnmt = algnmt_df,
+                          algnmt_type = "NT",
+                          ref = "chr11",
+                          group_on_yaxis = F, # error when TRUE
+                          line = T)
 ggsave(plot, filename = "al_plot.pdf", device = cairo_pdf, path = wd, height = 6, width = 12)
 algnmt_df_compares <- igsc::compare_seq_df_long(algnmt_df %>% dplyr::filter(seq.name == "chr11" | grepl("19542", seq.name)), change_pattern = T, ref = "chr11", seq_original = NULL,
                                                 pattern_mismatch_as = "base") %>%

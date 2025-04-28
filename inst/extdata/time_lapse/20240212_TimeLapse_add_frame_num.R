@@ -140,5 +140,3 @@ av::av_encode_video(input = image_final, # new.folder
 
 
 
-
-

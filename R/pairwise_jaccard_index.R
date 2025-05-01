@@ -14,12 +14,9 @@
 #' jacdata <- pairwise_jaccard_index(x)
 pairwise_jaccard_index <- function(x) {
 
-    if (!is.list(x)) {
-        stop("x must be list.")
-    }
-    if (is.null(names(x))) {
-        stop("x needs names.")
-    }
+    stopifnot("x must be a list" = is.list(x),
+              "x needs names" = !is.null(names(x)))
+
 
     jacinds <- purrr::map(x, function(x1) {
         purrr::map(x, function(x2) {

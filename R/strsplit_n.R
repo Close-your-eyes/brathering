@@ -1,23 +1,32 @@
-strsplit_n <- function(x, n) {
-  # Split the input string into individual characters
-  chars <- strsplit(x, "")[[1]]
+strsplit_n <- function(x, n, attach_last = F,
+                       linebreak = NULL,
+                       ) {
 
-  # Calculate the number of substrings
-  numSubstrings <- ceiling(length(chars) / n)
+    inds <- seq(1,nchar(x),n)
+    chars <- strsplit(x, "")[[1]]
 
-  # Create a matrix to store substrings
-  substrings <- matrix("", nrow = numSubstrings, ncol = n)
+    spl <- split_at(chars, inds)
+    spl <- purrr::map(spl, paste, collapse = "")
 
-  # Populate the matrix with substrings
-  for (i in seq_along(chars)) {
-    substrings[(i - 1) %/% n + 1, i %% n + 1] <- chars[i]
-  }
+    if (attach_last) {
+        if (nchar(spl[length(spl)]) < n) {
+            spl[length(spl)-1] <- paste(spl[length(spl)-1], spl[length(spl)], collapse = "", sep = "")
+            spl <- spl[-length(spl)]
+        }
+    }
 
-  # Convert matrix to a list of strings
-  result <- apply(substrings, 1, paste, collapse = "")
+    spl <- unlist(spl)
+    if (!is.null(linebreak)) {
+        spl <- paste(spl, collapse = linebreak)
+    }
 
-  # Remove empty strings
-  result <- result[result != ""]
-
-  return(result)
+    return(spl)
 }
+#?stringr::str_wrap()
+# thanks_path <- file.path(R.home("doc"), "THANKS")
+# thanks <- str_c(readLines(thanks_path), collapse = "\n")
+# thanks <- word(thanks, 1, 3, fixed("\n\n"))
+# strsplit_n(x = thanks, n = 20, attach_last = T, insert_linebreaks = F)
+
+
+

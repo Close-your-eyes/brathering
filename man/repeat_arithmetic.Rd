@@ -4,7 +4,7 @@
 \alias{repeat_arithmetic}
 \title{Title}
 \usage{
-repeat_arithmetic(x, fun = `/`, value2 = 2, times = 10)
+repeat_arithmetic(x, y = 2, times = 10, fun = `/`)
 }
 \arguments{
 \item{times}{}

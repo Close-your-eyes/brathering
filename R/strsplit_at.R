@@ -3,7 +3,7 @@
 #' @param x a character
 #' @param pos split indices
 #'
-#' @return
+#' @return vector of characters
 #' @export
 #'
 #' @examples

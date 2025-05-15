@@ -51,7 +51,7 @@ list_invert <- function(list,
     list <- list[which(inner_depths > 0)]
 
     all_names <- c(names(list), unique(unlist(purrr::map(list, names))))
-    sep <- find_char_sep(all_names)
+    sep <- find_sep(all_names)
     list_flat <- purrr::list_flatten(list, name_spec = paste0("{outer}", sep, "{inner}"))
     inner_groups <- sapply(strsplit(names(list_flat), split = sep), "[", 2)
     inner_groups_lvl <- unique(inner_groups)

@@ -1,14 +1,18 @@
-#' Title
+#' Find a valid separator which is not present in any provided character
 #'
-#' @param names
-#' @param sep
+#' Sep is repeated until it is unique (not found in any of x).
 #'
-#' @return
+#' @param x character vector
+#' @param sep character
+#'
+#' @return character
 #' @export
 #'
 #' @examples
-find_char_sep <- function(names, sep = "_") {
-    while(any(sep %in% names)) {
+#' x <- c("my_name_is", "coward__harpendale")
+#' find_sep(x = x)
+find_sep <- function(x, sep = "_") {
+    while(any(sep %in% x)) {
         sep <- paste0(sep, sep)
     }
     return(sep)

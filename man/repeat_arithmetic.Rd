@@ -2,13 +2,25 @@
 % Please edit documentation in R/repeat_arithmetic.R
 \name{repeat_arithmetic}
 \alias{repeat_arithmetic}
-\title{Title}
+\title{Repeatedly run arithmetic operation}
 \usage{
 repeat_arithmetic(x, y = 2, times = 10, fun = `/`)
 }
 \arguments{
-\item{times}{}
+\item{x}{argugment 1}
+
+\item{y}{argument 2}
+
+\item{times}{number of repetitions}
+
+\item{fun}{function}
+}
+\value{
+numeric vector
 }
 \description{
-Title
+Have all intermediate results returned.
+}
+\examples{
+repeat_arithmetic(50, 2)
 }

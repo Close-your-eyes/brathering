@@ -8,6 +8,8 @@ list_invert(list, non_inner_list = c("keep", "drop"))
 }
 \arguments{
 \item{list}{a nested list}
+
+\item{non_inner_list}{how to handle non-list elements}
 }
 \value{
 list with outer and first inner layer swapped

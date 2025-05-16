@@ -28,11 +28,16 @@
 #' df_list <- lapply(1:ndf, generate_df)
 #'
 #' # vary chunk size
-#' benchres <- bench::mark(join_chunkwise(df_list = df_list, join_by = "id", chunks = 1),
-#'                         join_chunkwise(df_list = df_list, join_by = "id", chunks = length(df_list)/5),
-#'                         join_chunkwise(df_list = df_list, join_by = "id", chunks = length(df_list)/10),
-#'                         join_chunkwise(df_list = df_list, join_by = "id", chunks = length(df_list)/20),
-#'                         join_chunkwise(df_list = df_list, join_by = "id", chunks = length(df_list)/40))
+#' benchres <- bench::mark(join_chunkwise(df_list = df_list, join_by = "id",
+#'                         chunks = 1),
+#'                         join_chunkwise(df_list = df_list, join_by = "id",
+#'                         chunks = length(df_list)/5),
+#'                         join_chunkwise(df_list = df_list, join_by = "id",
+#'                         chunks = length(df_list)/10),
+#'                         join_chunkwise(df_list = df_list, join_by = "id",
+#'                         chunks = length(df_list)/20),
+#'                         join_chunkwise(df_list = df_list, join_by = "id",
+#'                         chunks = length(df_list)/40))
 
 join_chunkwise <- function(df_list,
                            join_fun = dplyr::full_join,

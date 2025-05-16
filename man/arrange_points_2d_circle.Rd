@@ -14,7 +14,7 @@ arrange_points_2d_circle(
   radius_increment = 0.2,
   center_x = 0,
   center_y = 0,
-  return_polars = F
+  return_polars = FALSE
 )
 }
 \arguments{
@@ -27,7 +27,10 @@ arrange_points_2d_circle(
 \item{n_point_ring1}{only define number of points on first ring; leave
 remaining to internal heuristic}
 
-\item{inner_radius}{radius of fiest ring}
+\item{n_point_increment}{when setting n_point_ring1, increase of point on
+outer rings}
+
+\item{inner_radius}{radius of first ring}
 
 \item{radius_increment}{radius increment per ring}
 
@@ -45,13 +48,21 @@ matrix with 2 or 4 columns (cartesian without or with polar coordinates)
 Evenly arrange n points in 2D space in circular shape
 }
 \examples{
-plot(arrange_points_2d_circle(100)) # number of rings and points per ring are set by own heuristic
-plot(arrange_points_2d_circle(100, n_ring = 1)) # set number of rings
+# number of rings and points per ring are set by own heuristic
+plot(arrange_points_2d_circle(100))
+# set number of rings
+plot(arrange_points_2d_circle(100, n_ring = 1))
 plot(arrange_points_2d_circle(100, n_ring = 10))
-plot(arrange_points_2d_circle(100, n_points_per_ring = c(5,20,40,35))) # set number of points per ring; sum must equal n
-plot(arrange_points_2d_circle(100, n_point_ring1 = 50, n_ring = 6)) # only define points for first ring; n_ring is ignored then
-plot(arrange_points_2d_circle(100, n_point_ring1 = 2, n_point_increment = 40)) # but incrememt per ring can be adjusted
+# set number of points per ring; sum must equal n
+plot(arrange_points_2d_circle(100, n_points_per_ring = c(5,20,40,35)))
+# only define points for first ring; n_ring is ignored then
+plot(arrange_points_2d_circle(100, n_point_ring1 = 50, n_ring = 6))
+# but incrememt per ring can be adjusted
+plot(arrange_points_2d_circle(100, n_point_ring1 = 2, n_point_increment = 40))
 plot(arrange_points_2d_circle(100, center_x = 5)) # shift center
-points(arrange_points_2d_circle(50, center_x = 5, radius_increment = 0.15), col = "red") # ... and decrease radius increment
-arrange_points_2d_circle(100, return_polars = T) # 3rd column: radius, 4th column: angle in radiants
+# ... and decrease radius increment
+points(arrange_points_2d_circle(50, center_x = 5, radius_increment = 0.15),
+       col = "red")
+# 3rd column: radius, 4th column: angle in radiants
+arrange_points_2d_circle(100, return_polars = TRUE)
 }

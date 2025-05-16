@@ -17,7 +17,7 @@ add_jitter(df, col1 = "x", col2 = "y", jitter_fun = arrange_points_2d, ...)
 or any function that returns a matrix or data frame with columns
 1 and 2 containing cartesian coordinates}
 
-\item{...}{}
+\item{...}{arguments to jitter_fun}
 }
 \value{
 df with jittered coordinates

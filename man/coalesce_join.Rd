@@ -20,7 +20,14 @@ coalesce_join(
 
 \item{by}{which column(s) to join by}
 
-\item{...}{}
+\item{suffix}{passed to join function as same argument}
+
+\item{join}{join function}
+
+\item{...}{arguments to join}
+}
+\value{
+data frame
 }
 \description{
 This is a combination of join functions and the coalesce function from dplyr.
@@ -31,4 +38,11 @@ data frame (y).
 }
 \details{
 originally from: https://alistaire.rbind.io/blog/coalescing-joins/
+}
+\examples{
+x <- data.frame(z = c("a", "b", "c"),
+                p = c(1,NA,3))
+y <- data.frame(z = c("a", "b", "c"),
+                p = c(1,2,3))
+coalesce_join(x,y, by = "z")
 }

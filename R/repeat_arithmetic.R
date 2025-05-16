@@ -1,14 +1,17 @@
-#' Title
+#' Repeatedly run arithmetic operation
 #'
-#' @param x
-#' @param fun
-#' @param y
-#' @param times
+#' Have all intermediate results returned.
 #'
-#' @return
+#' @param x argugment 1
+#' @param fun function
+#' @param y argument 2
+#' @param times number of repetitions
+#'
+#' @return numeric vector
 #' @export
 #'
 #' @examples
+#' repeat_arithmetic(50, 2)
 repeat_arithmetic <- function(x,
                               y = 2,
                               times = 10,

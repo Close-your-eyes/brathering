@@ -11,17 +11,26 @@
 #' @param x left-hand data frame
 #' @param y right-hand data frame
 #' @param by which column(s) to join by
-#' @param suffix
-#' @param join
-#' @param ...
+#' @param suffix passed to join function as same argument
+#' @param join join function
+#' @param ... arguments to join
 #'
-#' @return
+#' @return data frame
 #' @export
 #'
 #' @examples
-coalesce_join <- function(x, y,
-                          by = NULL, suffix = c(".x", ".y"),
-                          join = dplyr::left_join, ...) {
+#' x <- data.frame(z = c("a", "b", "c"),
+#'                 p = c(1,NA,3))
+#' y <- data.frame(z = c("a", "b", "c"),
+#'                 p = c(1,2,3))
+#' coalesce_join(x,y, by = "z")
+
+coalesce_join <- function(x,
+                          y,
+                          by = NULL,
+                          suffix = c(".x", ".y"),
+                          join = dplyr::left_join,
+                          ...) {
 
   # copied originally from: https://alistaire.rbind.io/blog/coalescing-joins/
   # ideas:
@@ -57,3 +66,5 @@ coalesce_join <- function(x, y,
   }
 
 }
+
+

@@ -1,11 +1,12 @@
-#' Title
+#' Get levels of nesting
 #'
-#' @param x
+#' @param x a nested list
 #'
-#' @return
+#' @return numeric
 #' @export
 #'
 #' @examples
+#' list_depth(list(z = list(y = list(x = 3))))
 list_depth <- function(x) {
     if (!is.list(x)) {
         return(0)
@@ -15,3 +16,5 @@ list_depth <- function(x) {
         return(1 + max(sapply(x, list_depth)))
     }
 }
+
+

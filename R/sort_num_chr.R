@@ -12,7 +12,7 @@
 #' @examples
 #' sort_num_chr(c("3", "4", "2"))
 #' sort_num_chr(as.factor(c("3", "4", "2")))
-sort_num_chr <- function(x, decreasing = F) {
+sort_num_chr <- function(x, decreasing = FALSE) {
 
   if (anyNA(suppressWarnings(as.numeric(as.character(x))))) {
     stop("Not all values in x are numeric. Please check.")

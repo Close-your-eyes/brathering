@@ -2,13 +2,19 @@
 % Please edit documentation in R/list_depth.R
 \name{list_depth}
 \alias{list_depth}
-\title{Title}
+\title{Get levels of nesting}
 \usage{
 list_depth(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{a nested list}
+}
+\value{
+numeric
 }
 \description{
-Title
+Get levels of nesting
+}
+\examples{
+list_depth(list(z = list(y = list(x = 3))))
 }

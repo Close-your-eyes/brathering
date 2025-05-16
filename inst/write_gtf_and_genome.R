@@ -122,12 +122,10 @@ write_gtf_and_genome_for_cellranger <- function(data,
 
     dir.create(save_path, showWarnings = F, recursive = T)
     feat_select <- unique(c(features_to_become_exon, other_features_to_write))
-    lines_to_genome_and_gtf <- purrr::map(setNames(names(data), names(data)), function(x) {
+    lines_to_genome_and_gtf <- purrr::map(stats::setNames(names(data), names(data)), function(x) {
 
         # allow for other column names, and check above
-        features <-
-            data[[x]][["features"]] %>%
-            dplyr::filter(Feature %in% feat_select)
+        features <- dplyr::filter(data[[x]][["features"]], Feature %in% feat_select)
         features$Feature[which(features$Feature %in% features_to_become_exon)] <- "exon"
 
         # notify when 0 rows remained

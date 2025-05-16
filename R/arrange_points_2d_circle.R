@@ -5,8 +5,9 @@
 #' @param n_points_per_ring number of points per ring; sum must equal n
 #' @param n_point_ring1 only define number of points on first ring; leave
 #' remaining to internal heuristic
-#' @param n_point_increment
-#' @param inner_radius radius of fiest ring
+#' @param n_point_increment when setting n_point_ring1, increase of point on
+#' outer rings
+#' @param inner_radius radius of first ring
 #' @param radius_increment radius increment per ring
 #' @param center_x shift center in x-direction
 #' @param center_y shift center in y-direction
@@ -17,15 +18,23 @@
 #' @export
 #'
 #' @examples
-#' plot(arrange_points_2d_circle(100)) # number of rings and points per ring are set by own heuristic
-#' plot(arrange_points_2d_circle(100, n_ring = 1)) # set number of rings
+#' # number of rings and points per ring are set by own heuristic
+#' plot(arrange_points_2d_circle(100))
+#' # set number of rings
+#' plot(arrange_points_2d_circle(100, n_ring = 1))
 #' plot(arrange_points_2d_circle(100, n_ring = 10))
-#' plot(arrange_points_2d_circle(100, n_points_per_ring = c(5,20,40,35))) # set number of points per ring; sum must equal n
-#' plot(arrange_points_2d_circle(100, n_point_ring1 = 50, n_ring = 6)) # only define points for first ring; n_ring is ignored then
-#' plot(arrange_points_2d_circle(100, n_point_ring1 = 2, n_point_increment = 40)) # but incrememt per ring can be adjusted
+#' # set number of points per ring; sum must equal n
+#' plot(arrange_points_2d_circle(100, n_points_per_ring = c(5,20,40,35)))
+#' # only define points for first ring; n_ring is ignored then
+#' plot(arrange_points_2d_circle(100, n_point_ring1 = 50, n_ring = 6))
+#' # but incrememt per ring can be adjusted
+#' plot(arrange_points_2d_circle(100, n_point_ring1 = 2, n_point_increment = 40))
 #' plot(arrange_points_2d_circle(100, center_x = 5)) # shift center
-#' points(arrange_points_2d_circle(50, center_x = 5, radius_increment = 0.15), col = "red") # ... and decrease radius increment
-#' arrange_points_2d_circle(100, return_polars = T) # 3rd column: radius, 4th column: angle in radiants
+#' # ... and decrease radius increment
+#' points(arrange_points_2d_circle(50, center_x = 5, radius_increment = 0.15),
+#'        col = "red")
+#' # 3rd column: radius, 4th column: angle in radiants
+#' arrange_points_2d_circle(100, return_polars = TRUE)
 arrange_points_2d_circle <- function(n,
                                      n_ring = NULL,
                                      n_points_per_ring = NULL,
@@ -35,7 +44,7 @@ arrange_points_2d_circle <- function(n,
                                      radius_increment = 0.2,
                                      center_x = 0,
                                      center_y = 0,
-                                     return_polars = F) {
+                                     return_polars = FALSE) {
 
     if (is.null(n_ring)) {
         if (!is.null(n_points_per_ring)) {

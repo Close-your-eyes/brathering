@@ -4,7 +4,7 @@
 \alias{sort_num_chr}
 \title{Sort numerical character according to the numbers that the character values represent.}
 \usage{
-sort_num_chr(x, decreasing = F)
+sort_num_chr(x, decreasing = FALSE)
 }
 \arguments{
 \item{x}{vector of character or factor which represent numbers}

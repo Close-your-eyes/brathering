@@ -2,13 +2,28 @@
 % Please edit documentation in R/strsplit_n.R
 \name{strsplit_n}
 \alias{strsplit_n}
-\title{Title}
+\title{Split string into chunks of length n}
 \usage{
-strsplit_n(x, n, attach_last = F, sep = NULL)
+strsplit_n(x, n, attach_last = FALSE, sep = NULL)
 }
 \arguments{
+\item{x}{character}
+
+\item{n}{chunk length}
+
+\item{attach_last}{attach last chunk to second last if it is shorter than n}
+
 \item{sep}{separator for rejoining, e.g. linebreak}
 }
+\value{
+character vector
+}
 \description{
-Title
+Split string into chunks of length n
+}
+\examples{
+thanks_path <- file.path(R.home("doc"), "THANKS")
+thanks <- stringr::str_c(readLines(thanks_path), collapse = "\n")
+thanks <- stringr::word(thanks, 1, 3, stringr::fixed("\n\n"))
+strsplit_n(x = thanks, n = 20, attach_last = TRUE)
 }

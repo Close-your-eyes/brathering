@@ -1,4 +1,4 @@
-#' Title
+#' Pairwise jaccard indices
 #'
 #' @param x named list of vectors
 #'
@@ -39,18 +39,17 @@ pairwise_jaccard_index <- function(x) {
     jacinds4 <- jacinds3[nrow(jacinds3):1, ]
 
     jacplot <-
-        ggplot2::ggplot(jacinds2, ggplot2::aes(xind, yind, fill = jaccard_index)) +
+        ggplot2::ggplot(jacinds2, ggplot2::aes(x = xind, y = yind, fill = jaccard_index)) +
         ggplot2::geom_tile() +
         ggplot2::scale_fill_viridis_c() +
-        ggprism::theme_prism(base_size = 12, base_fontface = NULL, base_line_size = 0.5) +
         ggplot2::theme(legend.title = ggplot2::element_text())
 
+
     jacplot2 <-
-        ggplot2::ggplot(jacinds2, ggplot2::aes(xind, yind, fill = jaccard_index)) +
+        ggplot2::ggplot(jacinds2, ggplot2::aes(x = xind, y = yind, fill = jaccard_index)) +
         ggplot2::geom_tile() +
-        ggprism::theme_prism(base_size = 12, base_fontface = NULL, base_line_size = 0.5) +
         ggplot2::theme(legend.title = ggplot2::element_text()) +
-        ggplot2::scale_fill_stepsn(colors = viridis::viridis(n = 10),
+        ggplot2::scale_fill_stepsn(colors = scales::viridis_pal()(10),
                                    breaks = seq(0,1,0.2),
                                    values = scales::rescale(seq(0, 1, length.out = 5)),
                                    show.limits = T) +
@@ -63,3 +62,4 @@ pairwise_jaccard_index <- function(x) {
                 plot = jacplot))
 }
 
+if(base::getRversion() >= "2.15.1")  utils::globalVariables(c("xind", "yind"))

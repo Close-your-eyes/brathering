@@ -11,6 +11,9 @@ split_at(x, pos)
 
 \item{pos}{vector of split indices}
 }
+\value{
+a list
+}
 \description{
 Split a vector at multiple indices
 }

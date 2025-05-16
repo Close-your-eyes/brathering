@@ -1,6 +1,7 @@
 #' Reorganize a nested list by switching inner and outer layer
 #'
 #' @param list a nested list
+#' @param non_inner_list how to handle non-list elements
 #'
 #' @return list with outer and first inner layer swapped
 #' @export

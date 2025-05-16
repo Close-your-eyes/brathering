@@ -2,7 +2,7 @@
 % Please edit documentation in R/pairwise_jaccard_index.R
 \name{pairwise_jaccard_index}
 \alias{pairwise_jaccard_index}
-\title{Title}
+\title{Pairwise jaccard indices}
 \usage{
 pairwise_jaccard_index(x)
 }
@@ -13,7 +13,7 @@ pairwise_jaccard_index(x)
 list of jaccard index formats and plot
 }
 \description{
-Title
+Pairwise jaccard indices
 }
 \examples{
 a <- letters[1:5]

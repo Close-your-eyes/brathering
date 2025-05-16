@@ -8,9 +8,9 @@ arrange_points_2d(
   n,
   height = 1,
   width = 1,
-  scale = F,
-  center = T,
-  center_incomplete_rows = T
+  scale = FALSE,
+  center = TRUE,
+  center_incomplete_rows = TRUE
 )
 }
 \arguments{
@@ -34,6 +34,6 @@ May be used to add an ordered jitter to overlapping points.
 }
 \examples{
 plot(arrange_points_2d(100))
-plot(arrange_points_2d(100, height = 10, width = 5, center = F))
-plot(arrange_points_2d(195, height = 10, width = 5, center_incomplete_rows = T))
+plot(arrange_points_2d(100, height = 10, width = 5, center = FALSE))
+plot(arrange_points_2d(195, height = 10, width = 5, center_incomplete_rows = TRUE))
 }

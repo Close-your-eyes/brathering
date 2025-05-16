@@ -4,7 +4,7 @@
 \alias{strsplit2}
 \title{Split character at pattern indices}
 \usage{
-strsplit2(x, pattern, inds = 1, SIMPLIFY = F)
+strsplit2(x, pattern, inds = 1, SIMPLIFY = FALSE)
 }
 \arguments{
 \item{x}{character vector}
@@ -15,11 +15,14 @@ strsplit2(x, pattern, inds = 1, SIMPLIFY = F)
 
 \item{SIMPLIFY}{from mapply, try to return matrix? only works with one inds}
 }
+\value{
+a list
+}
 \description{
 Split character at pattern indices
 }
 \examples{
 x <- c("a_b_c_d_e_f", "q_w_e_r_t")
-strsplit2(x, pattern = "_", c(1,2,5), SIMPLIFY = F)
-strsplit2(x, pattern = "_", 2, SIMPLIFY = T)
+strsplit2(x, pattern = "_", c(1,2,5), SIMPLIFY = FALSE)
+strsplit2(x, pattern = "_", 2, SIMPLIFY = TRUE)
 }

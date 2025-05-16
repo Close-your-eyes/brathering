@@ -5,14 +5,14 @@
 #' @param inds indices of pattern found in x to use for splitting
 #' @param SIMPLIFY from mapply, try to return matrix? only works with one inds
 #'
-#' @return
+#' @return a list
 #' @export
 #'
 #' @examples
 #' x <- c("a_b_c_d_e_f", "q_w_e_r_t")
-#' strsplit2(x, pattern = "_", c(1,2,5), SIMPLIFY = F)
-#' strsplit2(x, pattern = "_", 2, SIMPLIFY = T)
-strsplit2 <- function(x, pattern, inds = 1, SIMPLIFY = F) {
+#' strsplit2(x, pattern = "_", c(1,2,5), SIMPLIFY = FALSE)
+#' strsplit2(x, pattern = "_", 2, SIMPLIFY = TRUE)
+strsplit2 <- function(x, pattern, inds = 1, SIMPLIFY = FALSE) {
     mapply(x = x, y = gregexpr(pattern, x), function(x,y) {
 
         if (length(inds) > 1) {

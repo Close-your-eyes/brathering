@@ -4,7 +4,7 @@
 \alias{split_mat}
 \title{Split matrices just like splitting a data frame.}
 \usage{
-split_mat(x, f, byrow = T, ...)
+split_mat(x, f, byrow = TRUE, ...)
 }
 \arguments{
 \item{x}{a matrix}
@@ -25,4 +25,9 @@ only splits along rows. For splitting by column two
 transposations would be needed which is not very elegant
 in case of large matrices. So here you can define if
 you want to split the matrix along its rows or columns.
+}
+\examples{
+m <- matrix(rnorm(20), nrow = 4)
+split_mat(m, c(1,1,2,2,2), byrow = FALSE)
+split_mat(m, c(1,1,2,2), byrow = TRUE)
 }

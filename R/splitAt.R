@@ -3,7 +3,7 @@
 #' @param x vector to split
 #' @param pos vector of split indices
 #'
-#' @return
+#' @return a list
 #' @export
 #'
 #' @examples

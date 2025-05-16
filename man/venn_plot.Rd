@@ -8,10 +8,10 @@ venn_plot(
   data,
   obs_col = "obs",
   cat_col = "cat",
-  make_obs_by_cat_unique = T,
-  limma_plot = F,
-  flip = F,
-  rm_non_intersect = T
+  make_obs_by_cat_unique = TRUE,
+  limma_plot = FALSE,
+  flip = FALSE,
+  rm_non_intersect = TRUE
 )
 }
 \arguments{
@@ -20,6 +20,9 @@ venn_plot(
 \item{obs_col}{name of column with observations}
 
 \item{cat_col}{name of column with categories}
+
+\item{make_obs_by_cat_unique}{make same observations per group unique
+so that they are not collapsed into a single observation by limma}
 
 \item{limma_plot}{return a plot from limma library instead of ggplot
 (required of number of categories > 4)}
@@ -37,27 +40,31 @@ Create venn diagramm from long data frame
 }
 \examples{
 # 2-way venn
-cat <- sample(c("A","B"), 100, replace = T)
-obs <- sample(letters[5:15], 100, replace = T)
+cat <- sample(c("A","B"), 100, replace = TRUE)
+obs <- sample(letters[5:15], 100, replace = TRUE)
 df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = F)
+out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+                 rm_non_intersect = FALSE, limma_plot = FALSE)
 out[["plot"]]
 # 3-way venn
-cat <- sample(c("A","B","C"), 100, replace = T)
-obs <- sample(letters[5:15], 100, replace = T)
+cat <- sample(c("A","B","C"), 100, replace = TRUE)
+obs <- sample(letters[5:15], 100, replace = TRUE)
 df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = F)
+out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+                 rm_non_intersect = FALSE, limma_plot = FALSE)
 out[["plot"]]
 # 4-way venn
-cat <- sample(c("A","B","C","D"), 100, replace = T)
-obs <- sample(letters[5:15], 100, replace = T)
+cat <- sample(c("A","B","C","D"), 100, replace = TRUE)
+obs <- sample(letters[5:15], 100, replace = TRUE)
 df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = F)
+out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+                 rm_non_intersect = FALSE, limma_plot = FALSE)
 out[["plot"]]
 # 5-way venn only with limma
-cat <- sample(c("A","B","C","D","E"), 100, replace = T)
-obs <- sample(letters[5:15], 100, replace = T)
+cat <- sample(c("A","B","C","D","E"), 100, replace = TRUE)
+obs <- sample(letters[5:15], 100, replace = TRUE)
 df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = T)
+out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+                 rm_non_intersect = F, limma_plot = TRUE)
 out[["plot"]]
 }

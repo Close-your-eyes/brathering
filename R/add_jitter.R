@@ -6,10 +6,11 @@
 #' @param jitter_fun arrange_points_2d or arrange_points_2d_circle
 #' or any function that returns a matrix or data frame with columns
 #' 1 and 2 containing cartesian coordinates
-#' @param ...
+#' @param ... arguments to jitter_fun
 #'
 #' @return df with jittered coordinates
 #' @export
+#' @importFrom rlang :=
 #'
 #' @examples
 #' df <- data.frame(x = round(rnorm(10)), y = round(rnorm(10)))
@@ -41,10 +42,9 @@ add_jitter <- function(df,
         df[which(df[,gr] == i),col1] <- df[which(df[,gr] == i),col1] + jitter[,1]
         df[which(df[,gr] == i),col2] <- df[which(df[,gr] == i),col2] + jitter[,2]
     }
-    df <-
-        df |>
-        dplyr::select(-!!rlang::sym(gr))
+    df <- dplyr::select(df, -!!rlang::sym(gr))
     return(df)
 }
 
+if(base::getRversion() >= "2.15.1")  utils::globalVariables(c(":="))
 

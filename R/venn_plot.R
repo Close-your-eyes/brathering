@@ -8,43 +8,48 @@
 #' @param flip flip x and y axes of ggplot
 #' @param rm_non_intersect remove elements that do not intersect with any
 #' category
+#' @param make_obs_by_cat_unique make same observations per group unique
+#' so that they are not collapsed into a single observation by limma
 #'
 #' @return list of processed data frames and plot (limma or ggplot)
 #' @export
 #'
 #' @examples
 #' # 2-way venn
-#' cat <- sample(c("A","B"), 100, replace = T)
-#' obs <- sample(letters[5:15], 100, replace = T)
+#' cat <- sample(c("A","B"), 100, replace = TRUE)
+#' obs <- sample(letters[5:15], 100, replace = TRUE)
 #' df <- data.frame(cat = cat, obs = obs)
-#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = F)
+#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+#'                  rm_non_intersect = FALSE, limma_plot = FALSE)
 #' out[["plot"]]
 #' # 3-way venn
-#' cat <- sample(c("A","B","C"), 100, replace = T)
-#' obs <- sample(letters[5:15], 100, replace = T)
+#' cat <- sample(c("A","B","C"), 100, replace = TRUE)
+#' obs <- sample(letters[5:15], 100, replace = TRUE)
 #' df <- data.frame(cat = cat, obs = obs)
-#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = F)
+#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+#'                  rm_non_intersect = FALSE, limma_plot = FALSE)
 #' out[["plot"]]
 #' # 4-way venn
-#' cat <- sample(c("A","B","C","D"), 100, replace = T)
-#' obs <- sample(letters[5:15], 100, replace = T)
+#' cat <- sample(c("A","B","C","D"), 100, replace = TRUE)
+#' obs <- sample(letters[5:15], 100, replace = TRUE)
 #' df <- data.frame(cat = cat, obs = obs)
-#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = F)
+#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+#'                  rm_non_intersect = FALSE, limma_plot = FALSE)
 #' out[["plot"]]
 #' # 5-way venn only with limma
-#' cat <- sample(c("A","B","C","D","E"), 100, replace = T)
-#' obs <- sample(letters[5:15], 100, replace = T)
+#' cat <- sample(c("A","B","C","D","E"), 100, replace = TRUE)
+#' obs <- sample(letters[5:15], 100, replace = TRUE)
 #' df <- data.frame(cat = cat, obs = obs)
-#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat", rm_non_intersect = F, limma_plot = T)
+#' out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
+#'                  rm_non_intersect = F, limma_plot = TRUE)
 #' out[["plot"]]
-
 venn_plot <- function(data,
                       obs_col = "obs",
                       cat_col = "cat",
-                      make_obs_by_cat_unique = T,
-                      limma_plot = F,
-                      flip = F,
-                      rm_non_intersect = T) {
+                      make_obs_by_cat_unique = TRUE,
+                      limma_plot = FALSE,
+                      flip = FALSE,
+                      rm_non_intersect = TRUE) {
 
     if (missing(data)) {
         stop("Please provide a data frame or tibble as data.")
@@ -121,7 +126,7 @@ venn_plot <- function(data,
 
     if (limma_plot) {
         return(list(data = vc_df,
-                    plot = limma::vennDiagram(vc, circle.col = colrr::col_pal("custom", n = ncol(wide_summ))[-1]))) # c("#ff0000", "#00ff00",  "#0000ff", "#ffff00")
+                    plot = limma::vennDiagram(vc, circle.col = scales::hue_pal()(ncol(wide_summ))))) # c("#ff0000", "#00ff00",  "#0000ff", "#ffff00")
     } else {
 
         if (flip) {
@@ -393,3 +398,5 @@ venn_plot <- function(data,
         return(list(data = vc_df, data_circ = venn.circ, plot = g))
     }
 }
+
+if(base::getRversion() >= "2.15.1")  utils::globalVariables(c("x", "y", "angle", "Counts", "n"))

@@ -16,7 +16,10 @@
 #' @export
 #'
 #' @examples
-split_mat <- function(x, f, byrow = T, ...) {
+#' m <- matrix(rnorm(20), nrow = 4)
+#' split_mat(m, c(1,1,2,2,2), byrow = FALSE)
+#' split_mat(m, c(1,1,2,2), byrow = TRUE)
+split_mat <- function(x, f, byrow = TRUE, ...) {
 
 
   ## https://stackoverflow.com/questions/62161916/is-there-a-function-in-r-that-splits-a-matrix-along-a-margin-using-a-factor-or-c

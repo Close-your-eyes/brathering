@@ -11,8 +11,8 @@
 #' c <- letters[5:10]
 #' d <- letters[2:8]
 #' x <- list(a=a,b=b,c=c,d=d)
-#' jacdata <- pairwise_jaccard_index(x)
-pairwise_jaccard_index <- function(x) {
+#' jacdata <- jaccard_index_pairwise(x)
+jaccard_index_pairwise <- function(x) {
 
     stopifnot("x must be a list" = is.list(x),
               "x needs names" = !is.null(names(x)))

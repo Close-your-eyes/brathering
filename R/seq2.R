@@ -22,7 +22,8 @@ seq2 <- function(from = 1, to = 1, algorithm = c("1","2")) {
     algorithm <- rlang::arg_match(algorithm)
 
     if (algorithm == "1") {
-        x <- seq2_default(from = from, to = to)
+        # seq2_default <- Vectorize(seq.default, vectorize.args = c("from", "to"))
+        x <- Vectorize(seq.default, vectorize.args = c("from", "to"))(from = from, to = to)
 
         # make sure always a list is returned
         if (is.matrix(x)) {
@@ -36,5 +37,5 @@ seq2 <- function(from = 1, to = 1, algorithm = c("1","2")) {
     return(x)
 }
 
-seq2_default <- Vectorize(seq.default, vectorize.args = c("from", "to"))
+
 

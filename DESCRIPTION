@@ -22,7 +22,9 @@ Imports:
     scales,
     tidyr,
     tibble,
-    ggplot2
+    ggplot2,
+    colrr,
+    devtools
 Suggests:
     bench,
     stringr

@@ -2,21 +2,25 @@
 % Please edit documentation in R/is_z_scored.R
 \name{is_z_scored}
 \alias{is_z_scored}
-\title{Test if a vector is z-scored}
+\title{Test if a vector follows a standard normal distribution}
 \usage{
-is_z_scored(x, tol = 0.01)
+is_z_scored(x, tol = 0.1, verbose = T)
 }
 \arguments{
 \item{x}{vector}
 
-\item{tol}{tolerance for mean and sd}
+\item{tol}{accepted deviation for mean and sd from 0 and 1, respectively}
 }
 \value{
 logical
 }
 \description{
-Test if a vector is z-scored
+Mean should roughly zero and standard deviation one. Tolerance (tol)
+should be too low. Even rnorm(100) may have a mean of 0.07 or so.
+With tol = 0.01, is_z_score(rnorm(100)) would return FALSE.
 }
 \examples{
-is_z_score(rnorm(100))
+is_z_scored(runif(100))
+replicate(10, is_z_scored(rnorm(100)))
+is_z_scored(scale(runif(100))[,1])
 }

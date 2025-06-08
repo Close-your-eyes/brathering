@@ -11,6 +11,9 @@
 #' @export
 #'
 #' @examples
+#' df <- expand.grid(rows = letters[1:5], cols = LETTERS[5:1])
+#' df$values <- 1:25
+#' df_long_to_mat(df)
 df_long_to_mat <- function(df,
                            to_rows = "rows",
                            to_cols = "cols",

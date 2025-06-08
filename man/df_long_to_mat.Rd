@@ -21,3 +21,8 @@ a matrix
 \description{
 Just for convenience.
 }
+\examples{
+df <- expand.grid(rows = letters[1:5], cols = LETTERS[5:1])
+df$values <- 1:25
+df_long_to_mat(df)
+}

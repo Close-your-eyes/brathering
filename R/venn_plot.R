@@ -50,7 +50,12 @@ venn_plot <- function(data,
                       limma_plot = FALSE,
                       flip = FALSE,
                       rm_non_intersect = TRUE) {
-
+    if (!requireNamespace("BiocManager", quietly = T)) {
+        utils::install.packages("BiocManager")
+    }
+    if (!requireNamespace("limma", quietly = T)) {
+        BiocManager::install("limma")
+    }
     if (missing(data)) {
         stop("Please provide a data frame or tibble as data.")
     }

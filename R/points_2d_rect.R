@@ -13,15 +13,15 @@
 #' @export
 #'
 #' @examples
-#' plot(arrange_points_2d(100))
-#' plot(arrange_points_2d(100, height = 10, width = 5, center = FALSE))
-#' plot(arrange_points_2d(195, height = 10, width = 5, center_incomplete_rows = TRUE))
-arrange_points_2d <- function(n,
-                              height = 1,
-                              width = 1,
-                              scale = FALSE,
-                              center = TRUE,
-                              center_incomplete_rows = TRUE) {
+#' plot(points_2d_rect(100))
+#' plot(points_2d_rect(100, height = 10, width = 5, center = FALSE))
+#' plot(points_2d_rect(195, height = 10, width = 5, center_incomplete_rows = TRUE))
+points_2d_rect <- function(n,
+                           height = 1,
+                           width = 1,
+                           scale = FALSE,
+                           center = TRUE,
+                           center_incomplete_rows = TRUE) {
 
     if (sqrt(n) %% 1 == 0) {
         rows <- sqrt(n)

@@ -24,10 +24,20 @@ scale2 <- function (x, min = 0, max = 1, margin = 2) {
         } else {
             stop("margin must be 1 or 2 for iteration over rows or columns, respectively.")
         }
-        return(do.call(bindfun, apply(x, margin, scalefun, min = min, max = max, simplify = F)))
+        min1 <- apply(x, margin, min)
+        max1 <- apply(x, margin, max)
+        y <- do.call(bindfun, apply(x, margin, scalefun, min = min, max = max, simplify = F))
+        attr(y, "min") <- min1
+        attr(y, "max") <- max1
+        return(y)
     }
     else {
-        return(scalefun(x, min, max))
+        min1 <- min(x)
+        max1 <- max(x)
+        y <- scalefun(x, min, max)
+        attr(y, "min") <- min1
+        attr(y, "max") <- max1
+        return()
     }
 }
 

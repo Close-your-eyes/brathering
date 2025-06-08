@@ -14,20 +14,20 @@ scale_color_spectral(
 )
 }
 \arguments{
-\item{colors}{see ggplot2::scale_color_gradientn}
+\item{colors}{see ggplot2::scale_color_gradient}
 
-\item{values}{see ggplot2::scale_color_gradientn}
+\item{values}{see ggplot2::scale_color_gradient}
 
-\item{name}{see ggplot2::scale_color_gradientn}
+\item{name}{see ggplot2::scale_color_gradient}
 
-\item{na.value}{see ggplot2::scale_color_gradientn}
+\item{na.value}{see ggplot2::scale_color_gradient}
 
-\item{guide}{see ggplot2::scale_color_gradientn}
+\item{guide}{see ggplot2::scale_color_gradient}
 
-\item{...}{see ggplot2::scale_color_gradientn}
+\item{...}{see ggplot2::scale_color_gradient}
 }
 \value{
-ggplot2::scale_color_gradientn
+ggplot2::scale_color_gradient
 }
 \description{
 Shortcut function to a spectral color scale.

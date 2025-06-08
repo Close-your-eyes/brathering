@@ -16,15 +16,16 @@ Authors@R:
 Imports: 
     dplyr,
     ggforce,
-    limma,
     purrr,
     rlang,
     scales,
     tidyr,
     tibble,
     ggplot2,
-    colrr,
     devtools
 Suggests:
     bench,
-    stringr
+    stringr,
+    limma,
+    colrr,
+    fcexpr

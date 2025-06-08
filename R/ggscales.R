@@ -2,14 +2,14 @@
 #'
 #' Shortcut function to a spectral color scale.
 #'
-#' @param colors see ggplot2::scale_color_gradientn
-#' @param values see ggplot2::scale_color_gradientn
-#' @param name see ggplot2::scale_color_gradientn
-#' @param na.value see ggplot2::scale_color_gradientn
-#' @param guide see ggplot2::scale_color_gradientn
-#' @param ... see ggplot2::scale_color_gradientn
+#' @param colors see ggplot2::scale_color_gradient
+#' @param values see ggplot2::scale_color_gradient
+#' @param name see ggplot2::scale_color_gradient
+#' @param na.value see ggplot2::scale_color_gradient
+#' @param guide see ggplot2::scale_color_gradient
+#' @param ... see ggplot2::scale_color_gradient
 #'
-#' @return ggplot2::scale_color_gradientn
+#' @return ggplot2::scale_color_gradient
 #' @export
 #'
 #' @examples
@@ -25,7 +25,7 @@ scale_color_spectral <- function(colors = colrr::col_pal("RColorBrewer::Spectral
     if (is.null(values)) {
         values <- seq(0, 1, length.out = length(colors))
     }
-    ggplot2::scale_color_gradientn(
+    ggplot2::scale_color_gradient(
         colours = colors,
         values = scales::rescale(values),
         name = name,
@@ -39,14 +39,14 @@ scale_color_spectral <- function(colors = colrr::col_pal("RColorBrewer::Spectral
 #'
 #' Shortcut function to a spectral fill scale.
 #'
-#' @param colors see ggplot2::scale_fill_gradientn
-#' @param values see ggplot2::scale_fill_gradientn
-#' @param name see ggplot2::scale_fill_gradientn
-#' @param na.value see ggplot2::scale_fill_gradientn
-#' @param guide see ggplot2::scale_fill_gradientn
-#' @param ... see ggplot2::scale_fill_gradientn
+#' @param colors see ggplot2::scale_fill_gradient
+#' @param values see ggplot2::scale_fill_gradient
+#' @param name see ggplot2::scale_fill_gradient
+#' @param na.value see ggplot2::scale_fill_gradient
+#' @param guide see ggplot2::scale_fill_gradient
+#' @param ... see ggplot2::scale_fill_gradient
 #'
-#' @return ggplot2::scale_fill_gradientn
+#' @return ggplot2::scale_fill_gradient
 #' @export
 #'
 #' @examples
@@ -62,7 +62,7 @@ scale_fill_spectral <- function(colors = colrr::col_pal("RColorBrewer::Spectral"
     if (is.null(values)) {
         values <- seq(0, 1, length.out = length(colors))
     }
-    ggplot2::scale_fill_gradientn(
+    ggplot2::scale_fill_gradient(
         colours = colors,
         values = scales::rescale(values),
         name = name,

@@ -16,9 +16,9 @@ list of numeric vectors
 Get axis limits of ggplot object
 }
 \examples{
-ggobj <- ggplot2::ggplot(data = data.frame(x = rnorm(100, 20,2),
-                                           y = rnorm(100,10,10)),
-                         ggplot2::aes(x,y)) +
+ggobj <- ggplot2::ggplot(data = data.frame(xx = rnorm(100, 20,2),
+                                           yy = rnorm(100,10,10)),
+                         ggplot2::aes(xx,yy)) +
          ggplot2::geom_point()
 gg_lims(ggobj)
 }

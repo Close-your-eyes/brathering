@@ -1,0 +1,58 @@
+#' Get coordinates of repelled labels from ggrepel
+#'
+#' Adapted from https://github.com/slowkow/ggrepel/issues/24. Labels are
+#' ploted very late in the plotting process, i.e. their positions are not
+#' pre-computed or so. Hence, it is not straight forward to extract their
+#' repelled positions.
+#'
+#' @param ggobj ggplot object
+#' @param width passed to grid::viewport, may be subject to iteration to obtain
+#' optimal repelled coordinates
+#' @param height passed to grid::viewport
+#' @param ... arguments to ggrepel::geom_text_repel
+#'
+#' @return data frame
+#' @export
+#'
+#' @examples
+#' df <- data.frame(x=rnorm(10), y=rnorm(10), z = letters[1:10])
+#' library(ggplot2)
+#' gg <- ggplot(df, aes(x,y)) +
+#'     geom_point()
+#' gg <-
+#'     gg +
+#'     ggrepel::geom_label_repel(aes(label = z)) +
+#'     geom_text(data = dplyr::left_join(df, get_repel_coords(gg)), aes(x = x.repel,y = y.repel, label = z), color = "hotpink")
+#' gg
+
+get_repel_coords <- function(ggobj, width = 2, height = 2, ...) {
+    grid::grid.newpage()
+    grid::pushViewport(grid::viewport(width = width, height = height))
+
+    xvar <- rlang::as_name(rlang::quo_get_expr(ggobj[["mapping"]][["x"]]))
+    yvar <- rlang::as_name(rlang::quo_get_expr(ggobj[["mapping"]][["y"]]))
+
+    g <-
+        ggobj +
+        ggrepel::geom_text_repel(
+            mapping = ggplot2::aes(!!rlang::sym(xvar), !!rlang::sym(yvar)),
+            label = ".",
+            data = ggobj[["data"]],
+            max.overlaps = Inf,
+            ...)
+
+    labelvar <- ggobj[["labels"]][["label"]]
+    plotlims <- brathering::gg_lims(ggobj)
+    tree <- grid::getGrob(gTree = grid::grid.force(x = ggplot2::ggplotGrob(g), draw = F), gPath = "textrepeltree", grep = T)
+    children <- grep(pattern = "textrepelgrob", x = grid::childNames(tree), value = T)
+
+    get_xy <- function(n, tree, plotlims) {
+        grob <- grid::getGrob(tree, n)
+        data.frame(
+            x_repel = plotlims[["x"]][1] + diff(plotlims[["x"]]) * grid::convertX(grob$x, "native", valueOnly = T),
+            y_repel = plotlims[["y"]][1] + diff(plotlims[["y"]]) * grid::convertY(grob$y, "native", valueOnly = T))
+    }
+
+    return(cbind(ggobj[["data"]][,c(xvar, yvar, labelvar)],
+                 purrr::map_dfr(children, get_xy, tree = tree, plotlims = plotlims)))
+}

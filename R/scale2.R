@@ -37,7 +37,7 @@ scale2 <- function (x, min = 0, max = 1, margin = 2) {
         y <- scalefun(x, min, max)
         attr(y, "min") <- min1
         attr(y, "max") <- max1
-        return()
+        return(y)
     }
 }
 

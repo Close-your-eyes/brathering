@@ -3,6 +3,7 @@
 export(add_jitter)
 export(ceiling2)
 export(coalesce_join)
+export(contour_est)
 export(density_est)
 export(df_long_to_mat)
 export(find_sep)

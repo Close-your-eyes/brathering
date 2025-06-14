@@ -3,6 +3,15 @@
 #' For Seurat leverage score is calculated. For mclust cluster identities are
 #' calculated followed by heuristic for outlier decision. Leverage score is
 #' fast but may fail with very few observations.
+#' Returned columns:
+#' hdout: HDoutliers::HDoutliers
+#' db: dbscan::dbsca
+#' lvs: Seurat::LeverageScore
+#' mah: stats::mahalanobis
+#' lof: Rlof::lof
+#' mv: mvoutlier::pcout
+#' rb: robustbase::covMcd
+#' mcl: mclust::Mclust
 #'
 #' @param df data frame or matrix with numeric columns only
 #' @param pca run pca on df?
@@ -12,7 +21,7 @@
 #' algorithm where possible (Seurat, mahalanobis, Rlof, mclust); for mclust
 #' classification
 #'
-#' @return
+#' @return matrix with cols being results from different outlier estimations
 #' @export
 #'
 #' @examples
@@ -37,6 +46,9 @@ outlier <- function(df,
                     pcs = 2,
                     return = c("outlier", "numeric"),
                     methods = c("HDoutliers", "dbscan", "Seurat", "mahalanobis", "Rlof", "mvoutlier", "robustbase", "mclust")) {
+
+    return <- rlang::arg_match(return)
+    methods <- rlang::arg_match(methods, multiple = T)
 
     to_install <- intersect(c("HDoutliers", "dbscan", "Seurat", "Rlof", "mvoutlier", "robustbase", "mclust"), methods)
     for (i in to_install) {
@@ -81,7 +93,7 @@ outlier <- function(df,
     if ("mahalanobis" %in% methods) {
         mah <- stats::mahalanobis(df, colMeans(df), stats::cov(df))
         if (return == "outlier") {
-            mah <- as.numeric(d >= qchisq(0.99, df = 2))
+            mah <- as.numeric(mah >= qchisq(0.99, df = 2))
         }
     }
 
@@ -114,7 +126,7 @@ outlier <- function(df,
 
     ## 9
     mcl <- NULL
-    if (mclust %in% methods) {
+    if ("mclust" %in% methods) {
         dtach <- !"mclust" %in% .packages()
         library(mclust)
         mcl <- mclust::Mclust(df)
@@ -142,8 +154,6 @@ outlier <- function(df,
             detach("package:mclust", unload = T)
         }
     }
-
-
 
     return(cbind(hdout, db, lvs, mah, lof, mv, rb, mcl))
 }

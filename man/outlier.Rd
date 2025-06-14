@@ -26,10 +26,22 @@ classification}
 
 \item{methods}{methods for outlier detection}
 }
+\value{
+matrix with cols being results from different outlier estimations
+}
 \description{
 For Seurat leverage score is calculated. For mclust cluster identities are
 calculated followed by heuristic for outlier decision. Leverage score is
 fast but may fail with very few observations.
+Returned columns:
+hdout: HDoutliers::HDoutliers
+db: dbscan::dbsca
+lvs: Seurat::LeverageScore
+mah: stats::mahalanobis
+lof: Rlof::lof
+mv: mvoutlier::pcout
+rb: robustbase::covMcd
+mcl: mclust::Mclust
 }
 \examples{
 library(ggplot2)

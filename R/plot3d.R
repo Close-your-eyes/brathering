@@ -11,6 +11,8 @@
 #' @param size size of points
 #' @param type scatter or surface plot, only for plotly backend
 #' @param backend plotly or rgl plot
+#' @param transform transform data before plotting, provide function as character,
+#' e.g. "log" or "log10" or "sqrt"
 #' @param ... arguments to plotly::plot_ly or rgl::plot3d
 #'
 #' @return nothing but a plot plotted
@@ -46,6 +48,7 @@ plot3d <- function(object,
                    colortype = c("d", "c", "discrete", "continuous"),
                    legend = T,
                    size = 2,
+                   transform = NULL,
                    type = c("scatter3d", "mesh3d"),
                    backend = c("plotly", "rgl"),
                    ...) {
@@ -65,6 +68,20 @@ plot3d <- function(object,
     }
 
     object <- as.data.frame(object)
+
+
+    if (!is.null(transform)) {
+        trans <- match.fun(transform)
+        for (i in c(x,y,z)) {
+            if (is.numeric(object[,i])) {
+                object[,i] <- trans(object[,i])
+            }
+        }
+    }
+
+    filterNAcols <- c(colnames(object)[1],colnames(object)[2],colnames(object)[3],color)
+    filterNAcols <- filterNAcols[which(filterNAcols %in% colnames(object))]
+    object <- tidyr::drop_na(object[,filterNAcols])
 
     if (!is.null(color)) {
         if (!color %in% c(".density_r", ".density_s") && !color %in% colnames(object)) {
@@ -106,18 +123,25 @@ plot3d <- function(object,
             }
         }
 
-        plotly::plot_ly(data = object,
-                        x = object[,x],
-                        y = object[,y],
-                        z = object[,z],
-                        color = color_arg,
-                        type = type,
-                        mode = "markers",
-                        size = size,
-                        colors = colors,
-                        marker = marker,
-                        showlegend = legend,
-                        ...)
+        p <- plotly::plot_ly(data = object,
+                             x = object[,x],
+                             y = object[,y],
+                             z = object[,z],
+                             color = color_arg,
+                             type = type,
+                             mode = "markers",
+                             size = size,
+                             colors = colors,
+                             marker = marker,
+                             showlegend = legend,
+                             ...)
+        p <- plotly::layout(p,
+                            scene = list(
+                                xaxis = list(title = x, range = rev(range(object[,x], na.rm = T))),
+                                yaxis = list(title = y, range = rev(range(object[,y], na.rm = T))),
+                                zaxis = list(title = z)
+                            ))
+        return(p)
     } else if (backend == "rgl") {
 
         if (is.null(color)) {

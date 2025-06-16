@@ -14,6 +14,7 @@ plot3d(
   colortype = c("d", "c", "discrete", "continuous"),
   legend = T,
   size = 2,
+  transform = NULL,
   type = c("scatter3d", "mesh3d"),
   backend = c("plotly", "rgl"),
   ...
@@ -37,6 +38,9 @@ plot3d(
 \item{legend}{plot legend?}
 
 \item{size}{size of points}
+
+\item{transform}{transform data before plotting, provide function as character,
+e.g. "log" or "log10" or "sqrt"}
 
 \item{type}{scatter or surface plot, only for plotly backend}
 

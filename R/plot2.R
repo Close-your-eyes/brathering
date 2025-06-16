@@ -1,14 +1,17 @@
 #' Plot data quickly with scattermore
 #'
-#' A convenient wrapper to have easy color scale and legend.
+#' A convenient wrapper around scattermore::scattermoreplot to have easy
+#' color scale and legend.
 #'
 #' @param x matrix or data frame, col1 becomes x, col2 becomes y
 #' @param color name of column for color or .density_r or .density_s for
 #' coloring according to point density
 #' @param palette color palette
 #' @param colortype type of color scale
-#' @param legend plot legend?
+#' @param legend where to plot legend, NULL for no legend
 #' @param ... arguments to scattermore::scattermoreplot
+#' @param transform transform data before plotting, provide function as character,
+#' e.g. "log" or "log10" or "sqrt"
 #'
 #' @return nothing, scattermore plot is plotted
 #' @export
@@ -19,14 +22,24 @@ plot2 <- function(x,
                   color = NULL,
                   palette = NULL,
                   colortype = c("d", "c", "discrete", "continuous"),
-                  legend = T,
+                  legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right", "center"),
+                  transform = NULL,
                   ...) {
 
     colortype <- rlang::arg_match(colortype)
     col <- grDevices::rgb(0, 0, 0, 1)
 
+    if (!is.null(legend)) {
+        legend <- rlang::arg_match(legend)
+    }
+
     xaxt <- NULL
     yaxt <- NULL
+
+    # if (tibble::is_tibble(x)) {
+    #     x <- as.data.frame(x)
+    # }
+    x <- as.data.frame(x)
 
     if (is.data.frame(x)) {
         if (!is.numeric(x[,1])) {
@@ -84,12 +97,38 @@ plot2 <- function(x,
                 col <- unname(col_vec[col_num])
             }
         }
+        x[["color"]] <- col
     }
 
-    scattermore::scattermoreplot(x[,1], x[,2], col = col, xaxt = xaxt, yaxt = yaxt, ...)
+    if (!is.null(transform)) {
+        trans <- match.fun(transform)
+        for (i in c(1,2)) {
+            if (is.numeric(x[,i])) {
+                x[,i] <- trans(x[,i])
+            }
+        }
+    }
 
-    if (!is.null(color) && colortype %in% c("d", "discrete") && legend) {
-        legend("topleft", legend = names(col_vec), fill = col_vec, cex = 0.8)
+    filterNAcols <- c(colnames(x)[1],colnames(x)[2],"color")
+    filterNAcols <- filterNAcols[which(filterNAcols %in% colnames(x))]
+    x <- tidyr::drop_na(x[,filterNAcols])
+    if ("color" %in% colnames(x)) {
+        col <- x[["color"]]
+    }
+
+    scattermore::scattermoreplot(
+      x[,1],
+      x[,2],
+      col = col,
+      xaxt = xaxt,
+      yaxt = yaxt,
+      xlab = colnames(x)[1],
+      ylab = colnames(x)[2],
+      ...
+    )
+
+    if (!is.null(color) && colortype %in% c("d", "discrete") && !is.null(legend)) {
+        legend(x = legend, legend = names(col_vec), fill = col_vec, cex = 0.8)
     }
 
     if (!is.null(xaxt)) {

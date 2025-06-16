@@ -9,7 +9,9 @@ plot2(
   color = NULL,
   palette = NULL,
   colortype = c("d", "c", "discrete", "continuous"),
-  legend = T,
+  legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright",
+    "right", "center"),
+  transform = NULL,
   ...
 )
 }
@@ -23,7 +25,10 @@ coloring according to point density}
 
 \item{colortype}{type of color scale}
 
-\item{legend}{plot legend?}
+\item{legend}{where to plot legend, NULL for no legend}
+
+\item{transform}{transform data before plotting, provide function as character,
+e.g. "log" or "log10" or "sqrt"}
 
 \item{...}{arguments to scattermore::scattermoreplot}
 }
@@ -31,7 +36,8 @@ coloring according to point density}
 nothing, scattermore plot is plotted
 }
 \description{
-A convenient wrapper to have easy color scale and legend.
+A convenient wrapper around scattermore::scattermoreplot to have easy
+color scale and legend.
 }
 \examples{
 brathering::plot2(brathering::points_2d_circ(100))

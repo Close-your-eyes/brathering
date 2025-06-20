@@ -23,6 +23,6 @@ Split character at pattern indices
 }
 \examples{
 x <- c("a_b_c_d_e_f", "q_w_e_r_t")
-strsplit2(x, pattern = "_", c(1,2,5), SIMPLIFY = FALSE)
-strsplit2(x, pattern = "_", 2, SIMPLIFY = TRUE)
+strsplit2(x, pattern = "_", inds = c(1,2,5), SIMPLIFY = FALSE)
+strsplit2(x, pattern = "_", inds = 2, SIMPLIFY = TRUE)
 }

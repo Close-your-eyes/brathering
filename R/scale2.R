@@ -42,5 +42,8 @@ scale2 <- function (x, min = 0, max = 1, margin = 2) {
 }
 
 scalefun <- function(x, min, max) {
+    if (dplyr::near(min(x), max(x))) {
+        return(x)
+    }
     min + ((x - min(x)) * (max - min)/(max(x) - min(x)))
 }

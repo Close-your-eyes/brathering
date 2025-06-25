@@ -171,5 +171,4 @@ random_sum <- function(n, m) {
 }
 
 
-plot2(points_2d_circ(100, per_ring_algo = "random2"), cex = 5)
 

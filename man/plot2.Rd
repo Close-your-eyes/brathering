@@ -7,11 +7,13 @@
 plot2(
   x,
   color = NULL,
+  size = 8,
   palette = NULL,
   colortype = c("d", "c", "discrete", "continuous"),
   legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright",
     "right", "center"),
   transform = NULL,
+  least_freq_col_top = TRUE,
   ...
 )
 }
@@ -19,7 +21,7 @@ plot2(
 \item{x}{matrix or data frame, col1 becomes x, col2 becomes y}
 
 \item{color}{name of column for color or .density_r or .density_s for
-coloring according to point density}
+coloring according to point density raw or scaled between 0 and 1}
 
 \item{palette}{color palette}
 
@@ -29,6 +31,9 @@ coloring according to point density}
 
 \item{transform}{transform data before plotting, provide function as character,
 e.g. "log" or "log10" or "sqrt"}
+
+\item{least_freq_col_top}{plot the color groups in ascending order of
+frequency to avoid burying low frequent groups}
 
 \item{...}{arguments to scattermore::scattermoreplot}
 }

@@ -26,6 +26,5 @@ under same name but with new file extension.
 \examples{
 \dontrun{
 image_convert(path/to/image.heic, format = "png")
-
 }
 }

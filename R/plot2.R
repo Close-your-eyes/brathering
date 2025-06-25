@@ -5,13 +5,15 @@
 #'
 #' @param x matrix or data frame, col1 becomes x, col2 becomes y
 #' @param color name of column for color or .density_r or .density_s for
-#' coloring according to point density
+#' coloring according to point density raw or scaled between 0 and 1
 #' @param palette color palette
 #' @param colortype type of color scale
 #' @param legend where to plot legend, NULL for no legend
 #' @param ... arguments to scattermore::scattermoreplot
 #' @param transform transform data before plotting, provide function as character,
 #' e.g. "log" or "log10" or "sqrt"
+#' @param least_freq_col_top plot the color groups in ascending order of
+#' frequency to avoid burying low frequent groups
 #'
 #' @return nothing, scattermore plot is plotted
 #' @export
@@ -20,16 +22,26 @@
 #' brathering::plot2(brathering::points_2d_circ(100))
 plot2 <- function(x,
                   color = NULL,
+                  size = 8,
                   palette = NULL,
                   colortype = c("d", "c", "discrete", "continuous"),
                   legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right", "center"),
                   transform = NULL,
+                  least_freq_col_top = TRUE,
                   ...) {
+
+    if (missing(x) || is.null(x)) {
+        stop("x missing.")
+    }
+
+    if (!is.data.frame(x) && !is.matrix(x)) {
+        x <- data.frame(index = seq_along(x), y = x)
+    }
 
     colortype <- rlang::arg_match(colortype)
     col <- grDevices::rgb(0, 0, 0, 1)
 
-    if (!is.null(legend)) {
+    if (!is.null(legend) && !is.logical(legend)) {
         legend <- rlang::arg_match(legend)
     }
 
@@ -98,6 +110,18 @@ plot2 <- function(x,
             }
         }
         x[["color"]] <- col
+
+        if (least_freq_col_top && length(unique(col)) > 1) {
+            # issue https://github.com/exaexa/scattermore/issues/25
+            # dirty solution: replicate
+            colfreqs <- table(x[["color"]])
+            colfreqs <- sort(colfreqs, decreasing = T)
+            x <- split(x, x[["color"]])
+            for (i in 2:length(x)) {
+                x[[i]] <- dplyr::bind_rows(replicate(20, x[[i]], simplify = FALSE))
+            }
+            x <- dplyr::bind_rows(x[names(colfreqs)])
+        }
     }
 
     if (!is.null(transform)) {
@@ -115,10 +139,15 @@ plot2 <- function(x,
     if ("color" %in% colnames(x)) {
         col <- x[["color"]]
     }
+    if (nrow(x) == 0) {
+        message("all lines of x contained NA.")
+        return(NULL)
+    }
 
     scattermore::scattermoreplot(
       x[,1],
       x[,2],
+      cex = size,
       col = col,
       xaxt = xaxt,
       yaxt = yaxt,
@@ -127,7 +156,7 @@ plot2 <- function(x,
       ...
     )
 
-    if (!is.null(color) && colortype %in% c("d", "discrete") && !is.null(legend)) {
+    if (!is.null(color) && colortype %in% c("d", "discrete") && !is.null(legend) && !is.logical(legend)) {
         legend(x = legend, legend = names(col_vec), fill = col_vec, cex = 0.8)
     }
 

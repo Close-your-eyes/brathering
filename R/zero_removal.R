@@ -1,30 +1,47 @@
-#' Title
+#' Count number of leading elements of one kind
 #'
-#' @param vec
-#' @param what
+#' Use it to count number of leading zero in a time series, e.g. To count
+#' trailing use rev(vec).
 #'
-#' @return
+#' @param x vector of whatever
+#' @param what element to count
+#'
+#' @return integer of count of leading occurrences of what
 #' @export
 #'
 #' @examples
-leading_zeros_count <- function(vec, what = 0) {
+#' lead_count(c(0,0,1,2,3,4,5))
+#' lead_count(c("r","r","r","s","t","u","d","i","o"), "r")
+#' lead_count(rev(c(1,2,3,4,0,0,0,0)))
+#' lead_count(strsplit("111110001110011001","")[[1]],"1")
+#' lead_count(c(NA, NA, NA, 0,0,1,1,2,"a"), NA_character_)
+lead_count <- function(x, what = 0) {
     stopifnot("what has to have length 1" = length(what) == 1)
+    comparefun <- ifelse(is.numeric(x), dplyr::near, Vectorize(identical, "x"))
     # NA in between handled
-    # NA at beginning avoid counting zeros
-    return(sum(na.omit(cumprod(vec == what))))
+    # NA at beginning avoid counting
+    return(as.integer(sum(na.omit(cumprod(comparefun(x, what))))))
 }
 
-#' Title
+#' Get indices of leading elements of one kind
 #'
-#' @param vec
-#' @param what
+#' Trivial but included as analogy to trail_inds. Originally intended to
+#' count zeros. So, what = 0 by default.
 #'
-#' @return
+#' @param x vector of whatever
+#' @param what element to count
+#'
+#' @return vector of indices starting at 1
 #' @export
 #'
 #' @examples
-leading_zero_inds <- function(vec, what = 0) {
-    ind <- leading_zeros_count(vec, what = what)
+#' lead_inds(c(0,0,1,2,3,4,5))
+#' lead_inds(c("r","r","r","s","t","u","d","i","o"), "r")
+#' lead_inds(rev(c(1,2,3,4,0,0,0,0)))
+#' lead_inds(strsplit("111110001110011001","")[[1]],"1")
+#' lead_inds(c(NA, NA, NA, 0,0,1,1,2,"a"), NA_character_)
+lead_inds <- function(x, what = 0) {
+    ind <- lead_count(x, what = what)
     if (ind>0) {
         return(1:ind)
     } else {
@@ -32,18 +49,25 @@ leading_zero_inds <- function(vec, what = 0) {
     }
 }
 
-#' Title
+#' Get indices of trailing elements of one kind
 #'
-#' @param vec
-#' @param what
+#' Originally intended to count zeros. So, what = 0 by default.
 #'
-#' @return
+#' @param x vector of whatever
+#' @param what element to count
+#'
+#' @return vector of indices
 #' @export
 #'
 #' @examples
-trailing_zero_inds <- function(vec, what = 0) {
-    len <- length(vec)
-    ind <- leading_zero_inds(vec = rev(vec), what = what)
+#' trail_inds(rev(c(0,0,1,2,3,4,5)))
+#' trail_inds(rev(c("r","r","r","s","t","u","d","i","o")), "r")
+#' trail_inds(c(1,2,3,4,0,0,0,0))
+#' trail_inds(rev(strsplit("111110001110011001","")[[1]]),"1")
+#' trail_inds(rev(c(NA, NA, NA, 0,0,1,1,2,"a")), NA_character_)
+trail_inds <- function(x, what = 0) {
+    len <- length(x)
+    ind <- lead_inds(x = rev(x), what = what)
     if (!is.null(ind)) {
         return(len-ind+1)
     } else {
@@ -51,23 +75,30 @@ trailing_zero_inds <- function(vec, what = 0) {
     }
 }
 
-#' Title
+#' Trim anything from a vector
 #'
-#' @param x
+#' Leading and trailing 'what' is removed from x. Respective counts are
+#' recorded as attributes lead_rm and trail_rm.
 #'
-#' @return
+#' @param x vector of whatever
+#'
+#' @return trimmed vector with attributes
 #' @export
 #'
 #' @examples
-trim_zeros <- function(x) {
-    lead <- leading_zero_inds(x)
-    trail <- trailing_zero_inds(x)
-    trail <- setdiff(trail, lead)
+#' trim_any(c(1,1,1,1,1,1,1), what = 1)
+#' trim_any(c(0,0,0,1,2,3,0,0,0,4,5,0,0))
+#' trim_any(c(NA,NA,NA,1,1,1,NA,NA,2,2,2,"a"), what = NA_character_)
+#' trim_any(as.integer(c(NA,NA,NA,1,1,1,NA,NA,2,2,2)), what = NA_integer_) # not working
+trim_any <- function(x, what = 0) {
+    lead <- lead_inds(x, what = what)
+    trail <- trail_inds(x, what = what)
+    trail <- setdiff(trail, lead) # when x is what only
     if (length(c(lead,trail))) {
         x <- x[-c(lead,trail)]
     }
-    attr(x, "lead0") <- length(lead)
-    attr(x, "trail0") <- length(trail)
+    attr(x, "lead_rm") <- length(lead)
+    attr(x, "trail_rm") <- length(trail)
     return(x)
 }
 
@@ -100,10 +131,10 @@ trim_zeros_df_cols <- function(df, cols, which = list(c("lead", "trail"))) {
         rminds2 <- NULL
         x <- tidyr::drop_na(x, value)
         if ("lead" %in% y) {
-            rminds1 <- leading_zero_inds(x[["value"]])
+            rminds1 <- lead_inds(x[["value"]])
         }
         if ("trail" %in% y) {
-            rminds2 <- trailing_zero_inds(x[["value"]])
+            rminds2 <- trail_inds(x[["value"]])
         }
         rminds <- unique(c(rminds1, rminds2))
         if (is.null(rminds)) {

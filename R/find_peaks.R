@@ -1,35 +1,45 @@
-#' Find extrema by numerical procedure
+#' Find extrema or peaks in a time series by numerical procedure
 #'
-#' A number of parameters are needed to finetune extrema detection to the
+#' A number of parameters are needed to finetune extrema/peak detection to the
 #' desired needs. See examples. To make this completely unsupervised and
 #' automatically meet your interpretation of what is a valid local maximum
-#' may not be possible. Selecting a proper windowsize is crucial. The function
+#' is not possible. Selecting a proper windowsize is crucial. The function
 #' works with indices of x (no continuous xy-pairs). With respect to min_gap this
 #' assumes that x values are roughly equally spaced (in case x came from
-#' xy-paired values)
+#' xy-paired values).
 #'
 #'
-#' See gcplyr::find_local_extrema or pracma::findpeaks.
+#' See gcplyr::find_local_extrema or pracma::findpeaks. Also,
+#' brathering:::estimate_peak_position may be a quicker alternative for simple
+#' parabolic peaks.
 #'
 #' @param x numeric vector
 #' @param threshold min or max x value for calling an extreme, depending on type
 #' @param min_gap minimum number of indices of x to call two separate
-#' extrema, min_gap>windowsize makes no sense
+#' extrema, min_gap>windowsize makes no sense. If NULL, defaults to
+#' max(ceiling(length(x)/40), ceiling(min(wid)/5)) where wid is the width of
+#' peaks as quantified by FWHM.
 #' @param type find maxima or minima
 #' @param min_mono_width minimum number of (strictly) monotonous indices
 #' left and right of window, either a vector of length 2 for different
-#' left and right or one value for both
+#' left and right or one value for both; If NULL, defaults to 3 if data
+#' appears smoothed or 1 if it does not.
 #' @param windowsizes windowsize(s) used for iteration over x. when there is a
 #' plateau of n extreme values, a windowsize of min n is required to detect them
 #' as extrema; for very sharp peaks with steep slopes, an appropriate
-#' windowsize is smaller as for wider peaks.
+#' windowsize is smaller as for wider peaks. If NULL, it is determined by
+#' peak widths which in turned are qunatified by full width at half maximum
+#' (FWHM).
 #' @param strictly_mono should slopes left and right of window of width
 #' min_mono_width be strictly monotonous? forced to TRUE for now.
 #' @param type2 any one or multiple of "global_fallback", "local", "global";
 #' global_fallback means that if no local extrema were found a global extreme
 #' is returned in any case
 #' @param stepsize step width to shift windows at; intended to speed the thing
-#' up for very long x
+#' up for very long x. If NULL, defaults to ceiling(windowsizes/10)
+#' @param smooth have x smoothed with stats::loess or stats::smooth.spline if
+#' the initial fails
+#' @param verbose write messages?
 #'
 #' @return data frame with extrema
 #' @export
@@ -40,45 +50,45 @@
 #' # not every peak detected due to windowsize
 #' res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # now all peaks but also neighbouring maxima
 #' res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # use min_gap to filter consecutive extrema
 #' res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' res <- find_extrema(x = x, min_gap = 2, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # set a min x value: threshold
 #' res <- find_extrema(x = x, min_gap = 1, threshold = 5,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # minimum steps of monotony to call an extreme
 #' res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
 #'                     min_mono_width = 4,windowsizes = c(1,3))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # different mono left an right
 #' res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
 #'                     min_mono_width = c(4,1), windowsizes = c(1,3))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # global only
 #' res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
 #'                     type2 = "global")
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # threshold only applies to local extrema
 #' res <- find_extrema(x = x, min_gap = 0, threshold = 7,
 #'                     type2 = "global")
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # NULL returned when nothing was found based on parameters
 #' res <- find_extrema(x = x, min_gap = 0, threshold = 7,
 #'                     type2 = "local")
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # minima
 #' res <- find_extrema(x = x, type = "min", windowsizes = 4, min_gap = 0)
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
+#' plot2(res, color = "extrm", legend = NULL)
 #' # add more values
 #' x2 <- interpolate_vec(x, 600)
 #' res <- find_extrema(x = x2,
@@ -86,18 +96,29 @@
 #'                     threshold = -Inf,
 #'                     min_mono_width = 1,
 #'                     windowsizes = c(1))
-#' plot2(res, color = "extrm", cex = 10, legend = NULL)
-find_extrema <- function(x,
-                         min_gap = NULL,
-                         threshold = max(x)/10,
-                         type = c("max", "min"),
-                         min_mono_width = NULL,
-                         windowsizes = NULL,
-                         stepsize = NULL,
-                         strictly_mono = TRUE,
-                         type2 = "global_fallback",
-                         smooth = F,
-                         verbose = TRUE) {
+#' plot2(res, color = "extrm", legend = NULL)
+#' # artificial data with noise
+#' x <- generate_synthetic_ts(length = 2000)
+#' # use smoothing reduce the noise - otherwise there is no monotonic stretch
+#' y <- find_extrema(x = x, smooth = TRUE)
+#' plot2(y, color = "extrm", legend = FALSE)
+#' # a quick and simple alternative; smoothing required!
+#' brathering:::estimate_peak_position(stats::loess(
+#'   x ~ index,
+#'   data = data.frame(index = seq_along(x), x = x),
+#'   span = 0.05
+#' )$fitted, min_gap = 30)
+find_peaks <- function(x,
+                       min_gap = NULL,
+                       threshold = max(x)/10,
+                       type = c("max", "min"),
+                       min_mono_width = NULL,
+                       windowsizes = NULL,
+                       stepsize = NULL,
+                       strictly_mono = TRUE,
+                       type2 = "global_fallback",
+                       smooth = FALSE,
+                       verbose = TRUE) {
 
     type <- rlang::arg_match(type)
     type2 <- rlang::arg_match(type2, values = c("global_fallback", "local", "global"), multiple = T)
@@ -121,25 +142,18 @@ find_extrema <- function(x,
     xna <- brathering::na_rm(x)
     x <- xna[["x"]]
 
-    x <- trim_zeros(x)
-    lead0 <- attr(x, "lead0")
-    trail0 <- attr(x, "trail0")
+    x <- trim_any(x)
+    lead0 <- attr(x, "lead_rm")
+    trail0 <- attr(x, "trail_rm")
 
-
-    # calculate loess anyway as it may be used multiple time below
-    # x_loess <- NaN
-    # span <- 0.05
-    # while(all(is.na(x_loess))) {
-    #     x_loess <- stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted
-    #     span <- span + 0.05
-    # }
     if (!verbose) {
         suppressWarnings(x_loess <- stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted)
     } else {
         x_loess <- stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted
     }
 
-    if(all(is.na(x_loess))) {
+    if (all(is.na(x_loess))) {
+        # sometime loess fails
         splm <- stats::smooth.spline(x = seq_along(x), y = x)
         x_loess <- stats::predict(splm, seq_along(x))$y
     }
@@ -153,9 +167,12 @@ find_extrema <- function(x,
         #splm <- smooth.spline(x = seq_along(x), y = x)
         #x <- predict(splm, seq_along(x))$y
         # 3)
+        if (verbose) {
+            plot(x, type = "l")
+        }
         x <- x_loess
         if (verbose) {
-            plot2(x)
+            lines(x, col = "red")
         }
     }
 
@@ -208,6 +225,7 @@ find_extrema <- function(x,
         message("stepsize: ", paste(stepsize, collapse = ", "))
         message("min_mono_width: ", paste(min_mono_width, collapse = ", "))
         message("min_gap: ", min_gap)
+        message("threshold: ", round(threshold, 2))
     }
 
     ## local extrema

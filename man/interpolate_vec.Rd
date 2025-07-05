@@ -2,13 +2,26 @@
 % Please edit documentation in R/interpolate_vec.R
 \name{interpolate_vec}
 \alias{interpolate_vec}
-\title{Title}
+\title{Interpolate a vector (time series)}
 \usage{
-interpolate_vec(x, len_out)
+interpolate_vec(y, x = NULL, len_out = NULL, x_out = NULL)
 }
 \arguments{
-\item{len_out}{}
+\item{y}{numeric vector of y values}
+
+\item{x}{optionally x values to y}
+
+\item{len_out}{output length}
+
+\item{x_out}{sequence of x to interpolate at, if NULL step of 1 between
+min(x) and max(x) are chosen}
+}
+\value{
+numeric vector
 }
 \description{
-Title
+Either provide y and len_out or y and x with x_out optional.
+}
+\examples{
+interpolate_vec(y = seq(1,10), len_out = 20)
 }

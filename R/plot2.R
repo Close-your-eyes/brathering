@@ -31,7 +31,8 @@ plot2 <- function(x,
                   ...) {
 
     if (missing(x) || is.null(x)) {
-        stop("x missing.")
+        message("plot2: x missing.")
+        return(NULL)
     }
 
     if (!is.data.frame(x) && !is.matrix(x)) {

@@ -30,9 +30,8 @@ split_mat <- function(x, f, byrow = TRUE, ...) {
     stop("byrow should be logical, TRUE or FALSE.")
   }
 
-  if (!is.matrix(x)) {
-    stop("x should be a matrix.")
-    # sparse?
+  if (!is.matrix(x) && !methods::is(x, "sparseMatrix")) {
+    stop("x should be a (sparse) matrix.")
   }
 
   if (byrow) {

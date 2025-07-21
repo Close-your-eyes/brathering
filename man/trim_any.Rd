@@ -8,6 +8,8 @@ trim_any(x, what = 0)
 }
 \arguments{
 \item{x}{vector of whatever}
+
+\item{what}{what to trim}
 }
 \value{
 trimmed vector with attributes

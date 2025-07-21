@@ -81,6 +81,7 @@ trail_inds <- function(x, what = 0) {
 #' recorded as attributes lead_rm and trail_rm.
 #'
 #' @param x vector of whatever
+#' @param what what to trim
 #'
 #' @return trimmed vector with attributes
 #' @export

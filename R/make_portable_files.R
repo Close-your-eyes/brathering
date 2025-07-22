@@ -68,7 +68,6 @@ make_regex_pattern <- function(x = c(".", "-")) {
 }
 
 
-
 make_portable <- function(x,
                           pattern = "[^[:alnum:]]",
                           repl = "_",
@@ -87,8 +86,10 @@ make_portable <- function(x,
     file_names <- stringi::stri_trans_general(file_names, "Latin-ASCII")
     # replace runs of pattern with one repl
     file_names <- gsub(pattern, repl, file_names)
+    # replace stretches of punctuation
+    file_names <- gsub("[[:punct:]]{2,}", repl, file_names)
     # collapse multiple repls and trim
-    file_names <- gsub(paste0(repl, "{2,}"), repl, file_names)
-    file_names <- sub(paste0("^", repl, "+|", repl, "+$"), "", file_names)
+    #file_names <- gsub(paste0(repl, "{2,}"), repl, file_names)
+    file_names <- gsub(paste0("^[[:punct:]]+|[[:punct:]]+$"), "", file_names)
     return(paste0(file_names, file_exts))
 }

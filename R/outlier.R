@@ -31,8 +31,10 @@
 #' pc <- fcexpr::ff_calc_pca(exprs = as.matrix(df))[["x"]][,c(1,2)]
 #' outmat <- brathering::outlier(df)
 #'
-#' dfres <- dplyr::bind_cols(as.data.frame(um), as.data.frame(pc), as.data.frame(outmat))
-#' dfres <- tidyr::pivot_longer(dfres, -c(UMAP_1, UMAP_2, PC1, PC2), names_to = "method", values_to = "outlier")
+#' dfres <- dplyr::bind_cols(as.data.frame(um), as.data.frame(pc),
+#' as.data.frame(outmat))
+#' dfres <- tidyr::pivot_longer(dfres, -c(UMAP_1, UMAP_2, PC1, PC2),
+#' names_to = "method", values_to = "outlier")
 #'
 #' ggplot(dfres, aes(UMAP_1, UMAP_2)) +
 #'     geom_point(aes(color = as.factor(outlier))) +
@@ -93,7 +95,7 @@ outlier <- function(df,
     if ("mahalanobis" %in% methods) {
         mah <- stats::mahalanobis(df, colMeans(df), stats::cov(df))
         if (return == "outlier") {
-            mah <- as.numeric(mah >= qchisq(0.99, df = 2))
+            mah <- as.numeric(mah >= stats::qchisq(0.99, df = 2))
         }
     }
 
@@ -127,8 +129,8 @@ outlier <- function(df,
     ## 9
     mcl <- NULL
     if ("mclust" %in% methods) {
-        dtach <- !"mclust" %in% .packages()
-        library(mclust)
+        #dtach <- !"mclust" %in% .packages()
+        requireNamespace("mclust")
         mcl <- mclust::Mclust(df)
         mclt <- table(mcl[["classification"]])
         if (return == "outlier") {
@@ -150,9 +152,9 @@ outlier <- function(df,
         } else {
             mcl <- mcl[["classification"]]
         }
-        if (dtach) {
-            detach("package:mclust", unload = T)
-        }
+        # if (dtach) {
+        #     detach("package:mclust", unload = T)
+        # }
     }
 
     return(cbind(hdout, db, lvs, mah, lof, mv, rb, mcl))
@@ -201,8 +203,8 @@ IQRout <- function(x, fact = 1.5) {
 }
 
 hampel <- function(x, fact = 3) {
-    lb <- median(x) - fact * mad(x, constant = 1)
-    ub <- median(x) + fact * mad(x, constant = 1)
+    lb <- stats::median(x) - fact * stats::mad(x, constant = 1)
+    ub <- stats::median(x) + fact * stats::mad(x, constant = 1)
     outlier <- as.numeric(x < lb | x > ub)
     return(outlier)
 }
@@ -225,7 +227,7 @@ generate_datasets <- function(row_powers = c(2,4,6),
             df_name <- paste0("df_r", n_rows, "_c", n_cols)
 
             # Generate normal data
-            df <- matrix(rnorm(n_rows * n_cols), nrow = n_rows, ncol = n_cols)
+            df <- matrix(stats::rnorm(n_rows * n_cols), nrow = n_rows, ncol = n_cols)
 
             # Inject outliers
             n_outliers <- ceiling(outlier_frac * n_rows)
@@ -233,7 +235,7 @@ generate_datasets <- function(row_powers = c(2,4,6),
                 for (i in 1:n_outliers) {
                     row_idx <- sample(1:n_rows, 1)
                     col_idx <- sample(1:n_cols, 1)
-                    df[row_idx, col_idx] <- df[row_idx, col_idx] + rnorm(1, mean = 10, sd = 5)  # Large shift
+                    df[row_idx, col_idx] <- df[row_idx, col_idx] + stats::rnorm(1, mean = 10, sd = 5)  # Large shift
                 }
             }
 

@@ -66,9 +66,9 @@ kde3d <- function (x, y, z, h, n = 100, lims = c(range(x), range(y), range(z))) 
     gx <- seq(lims[1], lims[2], length = n[1])
     gy <- seq(lims[3], lims[4], length = n[2])
     gz <- seq(lims[5], lims[6], length = n[3])
-    mx <- matrix(outer(gx, x, dnorm, h[1]), n[1], nx)
-    my <- matrix(outer(gy, y, dnorm, h[2]), n[2], nx)
-    mz <- matrix(outer(gz, z, dnorm, h[3]), n[3], nx)
+    mx <- matrix(outer(gx, x, stats::dnorm, h[1]), n[1], nx)
+    my <- matrix(outer(gy, y, stats::dnorm, h[2]), n[2], nx)
+    mz <- matrix(outer(gz, z, stats::dnorm, h[3]), n[3], nx)
     v <- array(0, n)
     tmy.nx <- t(my)/nx
     for (k in 1:n[3]) {

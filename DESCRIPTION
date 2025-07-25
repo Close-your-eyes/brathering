@@ -15,6 +15,8 @@ Authors@R:
            comment = c(ORCID = "0000-0002-6089-4769"))
 Imports: 
     dplyr,
+    stringr,
+    stringi,
     ggforce,
     purrr,
     rlang,
@@ -22,10 +24,27 @@ Imports:
     tidyr,
     tibble,
     ggplot2,
-    devtools
+    devtools,
+    ggrepel,
+    rgl,
+    plotly,
+    scattermore,
+    BiocManager,
+    MASS,
+    Matrix,
+    methods,
+    fs
 Suggests:
     bench,
-    stringr,
     limma,
     colrr,
-    fcexpr
+    fcexpr,
+    HDoutliers,
+    dbscan,
+    Seurat,
+    Rlof,
+    mvoutlier,
+    robustbase,
+    mclust,
+    hdos,
+    magick

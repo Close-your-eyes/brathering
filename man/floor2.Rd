@@ -11,7 +11,7 @@ floor2(x, accuracy = 0.1, fun = base::floor)
 
 \item{accuracy}{decimal accuracy}
 
-\item{f}{function}
+\item{fun}{function}
 }
 \value{
 numeric vector

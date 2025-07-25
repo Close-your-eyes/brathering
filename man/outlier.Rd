@@ -50,8 +50,10 @@ um <- fcexpr::ff_calc_umap_tsne(exprs = as.matrix(df))
 pc <- fcexpr::ff_calc_pca(exprs = as.matrix(df))[["x"]][,c(1,2)]
 outmat <- brathering::outlier(df)
 
-dfres <- dplyr::bind_cols(as.data.frame(um), as.data.frame(pc), as.data.frame(outmat))
-dfres <- tidyr::pivot_longer(dfres, -c(UMAP_1, UMAP_2, PC1, PC2), names_to = "method", values_to = "outlier")
+dfres <- dplyr::bind_cols(as.data.frame(um), as.data.frame(pc),
+as.data.frame(outmat))
+dfres <- tidyr::pivot_longer(dfres, -c(UMAP_1, UMAP_2, PC1, PC2),
+names_to = "method", values_to = "outlier")
 
 ggplot(dfres, aes(UMAP_1, UMAP_2)) +
     geom_point(aes(color = as.factor(outlier))) +

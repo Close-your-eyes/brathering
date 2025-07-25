@@ -46,52 +46,53 @@
 #'
 #' @examples
 #' library(brathering)
-#' x <- c(1,2,3,4,5,4,3,2,1,1,1,1,2,3,4,5,5,5,4,3,2,1,1,1,1,1,2,3,4,5,4,5,4,3,2,1,1,1,2,3,4,3,2,1,1,1,2,3,4,5,6,6,3,2,1,1,1,5,4,1)
+#' x <- c(1,2,3,4,5,4,3,2,1,1,1,1,2,3,4,5,5,5,4,3,2,1,1,1,1,1,2,3,4,5,4,5,4,3,2,
+#'        1,1,1,2,3,4,3,2,1,1,1,2,3,4,5,6,6,3,2,1,1,1,5,4,1)
 #' # not every peak detected due to windowsize
-#' res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 0, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1))
 #' plot2(res, color = "extrm", legend = NULL)
 #' # now all peaks but also neighbouring maxima
-#' res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 0, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
 #' plot2(res, color = "extrm", legend = NULL)
 #' # use min_gap to filter consecutive extrema
-#' res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 1, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
 #' plot2(res, color = "extrm", legend = NULL)
-#' res <- find_extrema(x = x, min_gap = 2, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 2, threshold = -Inf,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
 #' plot2(res, color = "extrm", legend = NULL)
 #' # set a min x value: threshold
-#' res <- find_extrema(x = x, min_gap = 1, threshold = 5,
+#' res <- find_peaks(x = x, min_gap = 1, threshold = 5,
 #'                     min_mono_width = 1,windowsizes = c(1,3))
 #' plot2(res, color = "extrm", legend = NULL)
 #' # minimum steps of monotony to call an extreme
-#' res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 1, threshold = -Inf,
 #'                     min_mono_width = 4,windowsizes = c(1,3))
 #' plot2(res, color = "extrm", legend = NULL)
 #' # different mono left an right
-#' res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 1, threshold = -Inf,
 #'                     min_mono_width = c(4,1), windowsizes = c(1,3))
 #' plot2(res, color = "extrm", legend = NULL)
 #' # global only
-#' res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
+#' res <- find_peaks(x = x, min_gap = 0, threshold = -Inf,
 #'                     type2 = "global")
 #' plot2(res, color = "extrm", legend = NULL)
 #' # threshold only applies to local extrema
-#' res <- find_extrema(x = x, min_gap = 0, threshold = 7,
+#' res <- find_peaks(x = x, min_gap = 0, threshold = 7,
 #'                     type2 = "global")
 #' plot2(res, color = "extrm", legend = NULL)
 #' # NULL returned when nothing was found based on parameters
-#' res <- find_extrema(x = x, min_gap = 0, threshold = 7,
+#' res <- find_peaks(x = x, min_gap = 0, threshold = 7,
 #'                     type2 = "local")
 #' plot2(res, color = "extrm", legend = NULL)
 #' # minima
-#' res <- find_extrema(x = x, type = "min", windowsizes = 4, min_gap = 0)
+#' res <- find_peaks(x = x, type = "min", windowsizes = 4, min_gap = 0)
 #' plot2(res, color = "extrm", legend = NULL)
 #' # add more values
-#' x2 <- interpolate_vec(x, 600)
-#' res <- find_extrema(x = x2,
+#' x2 <- interpolate_vec(x, len_out = 600)
+#' res <- find_peaks(x = x2,
 #'                     min_gap = 0,
 #'                     threshold = -Inf,
 #'                     min_mono_width = 1,
@@ -100,7 +101,7 @@
 #' # artificial data with noise
 #' x <- generate_synthetic_ts(length = 2000)
 #' # use smoothing reduce the noise - otherwise there is no monotonic stretch
-#' y <- find_extrema(x = x, smooth = TRUE)
+#' y <- find_peaks(x = x, smooth = TRUE)
 #' plot2(y, color = "extrm", legend = FALSE)
 #' # a quick and simple alternative; smoothing required!
 #' brathering:::estimate_peak_position(stats::loess(
@@ -146,18 +147,23 @@ find_peaks <- function(x,
     lead0 <- attr(x, "lead_rm")
     trail0 <- attr(x, "trail_rm")
 
-    if (!verbose) {
-        suppressWarnings(x_loess <- stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted)
-    } else {
-        x_loess <- stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted
-    }
-
-    if (all(is.na(x_loess))) {
+    x_loess <- tryCatch(expr = {
+        if (!verbose) {
+            suppressWarnings(stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted)
+        } else {
+            stats::loess(x ~ index, data = data.frame(index = seq_along(x), x = x), span = 0.05)$fitted
+        }
+    },
+    error = function(e) {
         # sometime loess fails
         splm <- stats::smooth.spline(x = seq_along(x), y = x)
-        x_loess <- stats::predict(splm, seq_along(x))$y
-    }
-
+        stats::predict(splm, seq_along(x))$y
+    },
+    warning = function(w) {
+        # sometime loess fails
+        splm <- stats::smooth.spline(x = seq_along(x), y = x)
+        stats::predict(splm, seq_along(x))$y
+    })
 
     if (smooth) {
         # smoothing ?
@@ -172,7 +178,7 @@ find_peaks <- function(x,
         }
         x <- x_loess
         if (verbose) {
-            lines(x, col = "red")
+            graphics::lines(x, col = "red")
         }
     }
 
@@ -181,7 +187,7 @@ find_peaks <- function(x,
     # small sd: smooth curve, large sd: noisy data
     if (is.null(min_mono_width)) {
         # if smooth = T, sdresid is 0
-        sdresid <- sd(x - x_loess)
+        sdresid <- stats::sd(x - x_loess)
         if (sdresid < 0.3) {
             min_mono_width <- 3
         } else {
@@ -447,13 +453,13 @@ estimate_peak_position <- function(x_loess, min_gap) {
         #plot2(df, color = "group_id")
         purrr::map_int(unique(df$group_id), function(id) {
             df <- dplyr::filter(df, group_id == id)
-            linear_model <- lm(x ~ index, data = df)
-            quadratic_model <- lm(x ~ index + I(index^2), data = df)
+            linear_model <- stats::lm(x ~ index, data = df)
+            quadratic_model <- stats::lm(x ~ index + I(index^2), data = df)
             suppressWarnings(linadjr <- summary(linear_model)$adj.r.squared)
             suppressWarnings(quadadjr <- summary(quadratic_model)$adj.r.squared)
-            if (!is.na(linadjr) && !is.na(quadadjr) && linadjr<0.3 && quadadjr>0.8 && coefficients(quadratic_model)[3]<0) {
+            if (!is.na(linadjr) && !is.na(quadadjr) && linadjr<0.3 && quadadjr>0.8 && stats::coefficients(quadratic_model)[3]<0) {
                 # valid peak
-                return(round(median(df$index)))
+                return(round(stats::median(df$index)))
             } else {
                 return(NA)
             }
@@ -584,9 +590,9 @@ generate_synthetic_ts <- function(length = 1000, n_peaks = 10, noise_sd = 0.05,
     # Generate peaks
     for (i in seq_len(n_peaks)) {
         type <- sample(peak_types, 1)
-        center <- runif(1, min = 5, max = 95)
-        height <- runif(1, min = 0.5, max = 1.5)
-        width <- runif(1, min = 1, max = 5)
+        center <- stats::runif(1, min = 5, max = 95)
+        height <- stats::runif(1, min = 0.5, max = 1.5)
+        width <- stats::runif(1, min = 1, max = 5)
 
         if (type == "gaussian") {
             y <- y + gaussian(x, center, height, width)
@@ -594,28 +600,28 @@ generate_synthetic_ts <- function(length = 1000, n_peaks = 10, noise_sd = 0.05,
             y <- y + lorentzian(x, center, height, width)
         } else if (type == "shoulder") {
             y <- y + gaussian(x, center, height, width)
-            y <- y + gaussian(x, center + runif(1, 1.5, 3), height * runif(1, 0.3, 0.7), width * 0.8)
+            y <- y + gaussian(x, center + stats::runif(1, 1.5, 3), height * stats::runif(1, 0.3, 0.7), width * 0.8)
         } else if (type == "merged") {
             y <- y + gaussian(x, center - width/2, height, width)
-            y <- y + gaussian(x, center + width/2, height * runif(1, 0.7, 1), width)
+            y <- y + gaussian(x, center + width/2, height * stats::runif(1, 0.7, 1), width)
         }
     }
 
     # Add baseline drift
     if (include_baseline) {
-        drift <- approx(x = c(0, 100), y = runif(2, -0.2, 0.2), xout = x)$y
+        drift <- stats::approx(x = c(0, 100), y = stats::runif(2, -0.2, 0.2), xout = x)$y
         y <- y + drift
     }
 
     # Add periodic component
     if (include_periodic) {
-        freq <- runif(1, 0.05, 0.2)
-        amp <- runif(1, 0.05, 0.2)
+        freq <- stats::runif(1, 0.05, 0.2)
+        amp <- stats::runif(1, 0.05, 0.2)
         y <- y + amp * sin(2 * pi * freq * x)
     }
 
     # Add noise
-    y <- y + rnorm(length(x), sd = noise_sd)
+    y <- y + stats::rnorm(length(x), sd = noise_sd)
 
     # Return data.frame for easy plotting
     #return(data.frame(time = x, signal = y))
@@ -641,7 +647,7 @@ check_loc_xtrm <- function(leftvec,
 
 get_median_val <- function(y) {
     y <- as.numeric(y)
-    mid <- round(median(y))
+    mid <- round(stats::median(y))
     val <- y[which.min(abs(mid-y))]
     return(val)
 }

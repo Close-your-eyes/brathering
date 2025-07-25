@@ -10,6 +10,8 @@ is_z_scored(x, tol = 0.1, verbose = T)
 \item{x}{vector}
 
 \item{tol}{accepted deviation for mean and sd from 0 and 1, respectively}
+
+\item{verbose}{print message if not z-scored?}
 }
 \value{
 logical

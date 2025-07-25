@@ -33,6 +33,7 @@ gg <- ggplot(df, aes(x,y)) +
 gg <-
     gg +
     ggrepel::geom_label_repel(aes(label = z)) +
-    geom_text(data = dplyr::left_join(df, get_repel_coords(gg)), aes(x = x.repel,y = y.repel, label = z), color = "hotpink")
+    geom_text(data = dplyr::left_join(df, get_repel_coords(gg)),
+              aes(x = x.repel,y = y.repel, label = z), color = "hotpink")
 gg
 }

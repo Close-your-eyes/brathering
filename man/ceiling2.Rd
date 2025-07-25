@@ -11,7 +11,7 @@ ceiling2(x, accuracy = 0.1, fun = base::ceiling)
 
 \item{accuracy}{decimal accuracy}
 
-\item{f}{function}
+\item{fun}{function}
 }
 \value{
 numeric vector

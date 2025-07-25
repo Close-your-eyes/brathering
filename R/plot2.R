@@ -14,6 +14,7 @@
 #' e.g. "log" or "log10" or "sqrt"
 #' @param least_freq_col_top plot the color groups in ascending order of
 #' frequency to avoid burying low frequent groups
+#' @param size dot size
 #'
 #' @return nothing, scattermore plot is plotted
 #' @export
@@ -29,6 +30,10 @@ plot2 <- function(x,
                   transform = NULL,
                   least_freq_col_top = TRUE,
                   ...) {
+
+    if (!requireNamespace("colrr", quietly = T)) {
+        devtools::install_github("Close-your-eyes/colrr")
+    }
 
     if (missing(x) || is.null(x)) {
         message("plot2: x missing.")
@@ -162,9 +167,9 @@ plot2 <- function(x,
     }
 
     if (!is.null(xaxt)) {
-        axis(1, at = lvlsnumx, labels = lvlsx)
+        graphics::axis(1, at = lvlsnumx, labels = lvlsx)
     }
     if (!is.null(yaxt)) {
-        axis(2, at = lvlsnumy, labels = lvlsy)
+        graphics::axis(2, at = lvlsnumy, labels = lvlsy)
     }
 }

@@ -29,7 +29,7 @@ interpolate_vec <- function(y,
             message("x_out is NULL. interpoating to steps of 1.")
             x_out <- seq(min(x), max(x), 1)
         }
-        y <- approx(x, y, xout = x_out)$y
+        y <- stats::approx(x, y, xout = x_out)$y
     } else {
         message("Either provide (i) y and len_out or (ii) y and x with x_out optionally.")
     }

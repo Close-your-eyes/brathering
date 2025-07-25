@@ -2,7 +2,7 @@
 #'
 #' @param x numeric vector
 #' @param accuracy decimal accuracy
-#' @param f function
+#' @param fun function
 #'
 #' @return numeric vector
 #' @export
@@ -10,8 +10,8 @@
 #' @examples
 #' floor2(rnorm(20))
 floor2 <- function(x,
-                      accuracy = 0.1,
-                      fun = base::floor) {
+                   accuracy = 0.1,
+                   fun = base::floor) {
     fun(x/ accuracy) * accuracy
 }
 
@@ -19,7 +19,7 @@ floor2 <- function(x,
 #'
 #' @param x numeric vector
 #' @param accuracy decimal accuracy
-#' @param f function
+#' @param fun function
 #'
 #' @return numeric vector
 #' @export

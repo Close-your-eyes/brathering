@@ -76,52 +76,53 @@ parabolic peaks.
 }
 \examples{
 library(brathering)
-x <- c(1,2,3,4,5,4,3,2,1,1,1,1,2,3,4,5,5,5,4,3,2,1,1,1,1,1,2,3,4,5,4,5,4,3,2,1,1,1,2,3,4,3,2,1,1,1,2,3,4,5,6,6,3,2,1,1,1,5,4,1)
+x <- c(1,2,3,4,5,4,3,2,1,1,1,1,2,3,4,5,5,5,4,3,2,1,1,1,1,1,2,3,4,5,4,5,4,3,2,
+       1,1,1,2,3,4,3,2,1,1,1,2,3,4,5,6,6,3,2,1,1,1,5,4,1)
 # not every peak detected due to windowsize
-res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 0, threshold = -Inf,
                     min_mono_width = 1,windowsizes = c(1))
 plot2(res, color = "extrm", legend = NULL)
 # now all peaks but also neighbouring maxima
-res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 0, threshold = -Inf,
                     min_mono_width = 1,windowsizes = c(1,3))
 plot2(res, color = "extrm", legend = NULL)
 # use min_gap to filter consecutive extrema
-res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 1, threshold = -Inf,
                     min_mono_width = 1,windowsizes = c(1,3))
 plot2(res, color = "extrm", legend = NULL)
-res <- find_extrema(x = x, min_gap = 2, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 2, threshold = -Inf,
                     min_mono_width = 1,windowsizes = c(1,3))
 plot2(res, color = "extrm", legend = NULL)
 # set a min x value: threshold
-res <- find_extrema(x = x, min_gap = 1, threshold = 5,
+res <- find_peaks(x = x, min_gap = 1, threshold = 5,
                     min_mono_width = 1,windowsizes = c(1,3))
 plot2(res, color = "extrm", legend = NULL)
 # minimum steps of monotony to call an extreme
-res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 1, threshold = -Inf,
                     min_mono_width = 4,windowsizes = c(1,3))
 plot2(res, color = "extrm", legend = NULL)
 # different mono left an right
-res <- find_extrema(x = x, min_gap = 1, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 1, threshold = -Inf,
                     min_mono_width = c(4,1), windowsizes = c(1,3))
 plot2(res, color = "extrm", legend = NULL)
 # global only
-res <- find_extrema(x = x, min_gap = 0, threshold = -Inf,
+res <- find_peaks(x = x, min_gap = 0, threshold = -Inf,
                     type2 = "global")
 plot2(res, color = "extrm", legend = NULL)
 # threshold only applies to local extrema
-res <- find_extrema(x = x, min_gap = 0, threshold = 7,
+res <- find_peaks(x = x, min_gap = 0, threshold = 7,
                     type2 = "global")
 plot2(res, color = "extrm", legend = NULL)
 # NULL returned when nothing was found based on parameters
-res <- find_extrema(x = x, min_gap = 0, threshold = 7,
+res <- find_peaks(x = x, min_gap = 0, threshold = 7,
                     type2 = "local")
 plot2(res, color = "extrm", legend = NULL)
 # minima
-res <- find_extrema(x = x, type = "min", windowsizes = 4, min_gap = 0)
+res <- find_peaks(x = x, type = "min", windowsizes = 4, min_gap = 0)
 plot2(res, color = "extrm", legend = NULL)
 # add more values
-x2 <- interpolate_vec(x, 600)
-res <- find_extrema(x = x2,
+x2 <- interpolate_vec(x, len_out = 600)
+res <- find_peaks(x = x2,
                     min_gap = 0,
                     threshold = -Inf,
                     min_mono_width = 1,
@@ -130,7 +131,7 @@ plot2(res, color = "extrm", legend = NULL)
 # artificial data with noise
 x <- generate_synthetic_ts(length = 2000)
 # use smoothing reduce the noise - otherwise there is no monotonic stretch
-y <- find_extrema(x = x, smooth = TRUE)
+y <- find_peaks(x = x, smooth = TRUE)
 plot2(y, color = "extrm", legend = FALSE)
 # a quick and simple alternative; smoothing required!
 brathering:::estimate_peak_position(stats::loess(

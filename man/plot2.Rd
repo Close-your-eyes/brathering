@@ -23,6 +23,8 @@ plot2(
 \item{color}{name of column for color or .density_r or .density_s for
 coloring according to point density raw or scaled between 0 and 1}
 
+\item{size}{dot size}
+
 \item{palette}{color palette}
 
 \item{colortype}{type of color scale}

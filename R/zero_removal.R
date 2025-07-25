@@ -20,7 +20,7 @@ lead_count <- function(x, what = 0) {
     comparefun <- ifelse(is.numeric(x), dplyr::near, Vectorize(identical, "x"))
     # NA in between handled
     # NA at beginning avoid counting
-    return(as.integer(sum(na.omit(cumprod(comparefun(x, what))))))
+    return(as.integer(sum(stats::na.omit(cumprod(comparefun(x, what))))))
 }
 
 #' Get indices of leading elements of one kind

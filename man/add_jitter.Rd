@@ -4,7 +4,7 @@
 \alias{add_jitter}
 \title{Add jitter to any points that are overlapping at same xy-coordinates}
 \usage{
-add_jitter(df, col1 = "x", col2 = "y", jitter_fun = arrange_points_2d, ...)
+add_jitter(df, col1 = "x", col2 = "y", jitter_fun = points_2d_rect, ...)
 }
 \arguments{
 \item{df}{data frame with points to hard-add jitter to}
@@ -13,7 +13,7 @@ add_jitter(df, col1 = "x", col2 = "y", jitter_fun = arrange_points_2d, ...)
 
 \item{col2}{column name of y-coord}
 
-\item{jitter_fun}{arrange_points_2d or arrange_points_2d_circle
+\item{jitter_fun}{points_2d_rect or points_2d_circ
 or any function that returns a matrix or data frame with columns
 1 and 2 containing cartesian coordinates}
 
@@ -32,6 +32,6 @@ df2 <- do.call(rbind, replicate(n, df, simplify = FALSE))
 ggplot2::ggplot(df2, ggplot2::aes(x,y)) + ggplot2::geom_point()
 df3 <- add_jitter(df2)
 ggplot2::ggplot(df3, ggplot2::aes(x,y)) + ggplot2::geom_point()
-df4 <- add_jitter(df2, jitter_fun = arrange_points_2d_circle)
+df4 <- add_jitter(df2, jitter_fun = points_2d_circ)
 ggplot2::ggplot(df4, ggplot2::aes(x,y)) + ggplot2::geom_point()
 }

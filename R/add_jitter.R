@@ -3,7 +3,7 @@
 #' @param df data frame with points to hard-add jitter to
 #' @param col1 column name of x-coord
 #' @param col2 column name of y-coord
-#' @param jitter_fun arrange_points_2d or arrange_points_2d_circle
+#' @param jitter_fun points_2d_rect or points_2d_circ
 #' or any function that returns a matrix or data frame with columns
 #' 1 and 2 containing cartesian coordinates
 #' @param ... arguments to jitter_fun
@@ -19,12 +19,12 @@
 #' ggplot2::ggplot(df2, ggplot2::aes(x,y)) + ggplot2::geom_point()
 #' df3 <- add_jitter(df2)
 #' ggplot2::ggplot(df3, ggplot2::aes(x,y)) + ggplot2::geom_point()
-#' df4 <- add_jitter(df2, jitter_fun = arrange_points_2d_circle)
+#' df4 <- add_jitter(df2, jitter_fun = points_2d_circ)
 #' ggplot2::ggplot(df4, ggplot2::aes(x,y)) + ggplot2::geom_point()
 add_jitter <- function(df,
                        col1 = "x",
                        col2 = "y",
-                       jitter_fun = arrange_points_2d,
+                       jitter_fun = points_2d_rect,
                        ...) {
 
     jitter_fun <- match.fun(jitter_fun)

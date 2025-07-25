@@ -83,7 +83,7 @@ sample_leverage <- function(x,
         prob <- prob/sum(prob)
         # add a little variation to probs
         set.seed(seed)
-        prob_var <- mapply(rnorm, n = ccount, mean = prob, sd = prob/10, SIMPLIFY = F)
+        prob_var <- mapply(stats::rnorm, n = ccount, mean = prob, sd = prob/10, SIMPLIFY = F)
         prob <- prob[cluster]
         for (i in names(prob_var)) {
             prob[which(names(prob) == i)] <- prob_var[[i]]

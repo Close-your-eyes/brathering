@@ -6,6 +6,7 @@
 #'
 #' @param x vector
 #' @param tol accepted deviation for mean and sd from 0 and 1, respectively
+#' @param verbose print message if not z-scored?
 #'
 #' @return logical
 #' @export
@@ -28,7 +29,7 @@ is_z_scored <- function(x,
         tol <- 0
     }
     m <- mean(x, na.rm = TRUE)
-    s <- sd(x, na.rm = TRUE)
+    s <- stats::sd(x, na.rm = TRUE)
     is_z <- (abs(m) < tol && (s - 1) < tol)
     if (!is_z && verbose) {
         message("mean: ", round(m, get_decimal_places(tol)+1), ", sd: ", round(s, get_decimal_places(tol)+1))

@@ -14,31 +14,31 @@
 #' @export
 #'
 #' @examples
-#' # Generate a list of n data frames
-#' ndf <- 200
-#' nrows <- 10000
-#' shared_id <- data.frame(id = 1:nrows)
-#' generate_df <- function(i) {
-#'     n_extra_cols <- sample(2:5, 1)  # Random number of extra columns (2 to 5)
-#'     extra_cols <- replicate(n_extra_cols, rnorm(nrows), simplify = FALSE)
-#'     names(extra_cols) <- paste0("var", i, "_", seq_len(n_extra_cols))
-#'     df <- data.frame(id = shared_id$id, extra_cols)
-#'     return(df)
-#' }
-#' df_list <- lapply(1:ndf, generate_df)
-#'
-#' # vary chunk size
-#' benchres <- bench::mark(join_chunkwise(df_list = df_list, join_by = "id",
-#'                         chunks = 1),
-#'                         join_chunkwise(df_list = df_list, join_by = "id",
-#'                         chunks = length(df_list)/5),
-#'                         join_chunkwise(df_list = df_list, join_by = "id",
-#'                         chunks = length(df_list)/10),
-#'                         join_chunkwise(df_list = df_list, join_by = "id",
-#'                         chunks = length(df_list)/20),
-#'                         join_chunkwise(df_list = df_list, join_by = "id",
-#'                         chunks = length(df_list)/40))
-
+# Generate a list of n data frames
+# install.packages("bench")
+# ndf <- 200
+# nrows <- 1000
+# shared_id <- data.frame(id = 1:nrows)
+# generate_df <- function(i) {
+#     n_extra_cols <- sample(2:5, 1)  # Random number of extra columns (2 to 5)
+#     extra_cols <- replicate(n_extra_cols, rnorm(nrows), simplify = FALSE)
+#     names(extra_cols) <- paste0("var", i, "_", seq_len(n_extra_cols))
+#     df <- data.frame(id = shared_id$id, extra_cols)
+#     return(df)
+# }
+# df_list <- lapply(1:ndf, generate_df)
+#
+# # vary chunk size
+# benchres <- bench::mark(c1 = join_chunkwise(df_list = df_list, join_by = "id",
+#                                             chunks = 1),
+#                         c5 = join_chunkwise(df_list = df_list, join_by = "id",
+#                                             chunks = length(df_list)/5),
+#                         c10 = join_chunkwise(df_list = df_list, join_by = "id",
+#                                              chunks = length(df_list)/10),
+#                         c20 = join_chunkwise(df_list = df_list, join_by = "id",
+#                                              chunks = length(df_list)/20),
+#                         c40 = join_chunkwise(df_list = df_list, join_by = "id",
+#                                              chunks = length(df_list)/40))
 join_chunkwise <- function(df_list,
                            join_fun = dplyr::full_join,
                            join_by,

@@ -44,6 +44,7 @@ rb: robustbase::covMcd
 mcl: mclust::Mclust
 }
 \examples{
+\dontrun{
 library(ggplot2)
 df <- brathering:::generate_datasets(row_powers = 4, col_seq = 10)[[1]]
 um <- fcexpr::ff_calc_umap_tsne(exprs = as.matrix(df))
@@ -62,4 +63,5 @@ ggplot(dfres, aes(UMAP_1, UMAP_2)) +
 ggplot(dfres, aes(PC1, PC2)) +
     geom_point(aes(color = as.factor(outlier))) +
     facet_wrap(vars(method))
+    }
 }

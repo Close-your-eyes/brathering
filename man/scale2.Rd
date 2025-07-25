@@ -22,5 +22,5 @@ numeric vector or matrix
 Scale vector of matrix from min to max value
 }
 \examples{
-scale_min_max(rnorm(100), -1, 1)
+scale2(rnorm(100), -1, 1)
 }

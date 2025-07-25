@@ -1,5 +1,7 @@
 #' Scale vector of matrix from min to max value
 #'
+#' Checkout scales::rescale().
+#'
 #' @param x numeric vector or matrix
 #' @param min min value
 #' @param max max value
@@ -9,7 +11,7 @@
 #' @export
 #'
 #' @examples
-#' scale_min_max(rnorm(100), -1, 1)
+#' scale2(rnorm(100), -1, 1)
 scale2 <- function (x, min = 0, max = 1, margin = 2) {
     if (is.matrix(x) || is.data.frame(x)) {
         if (is.data.frame(x)) {

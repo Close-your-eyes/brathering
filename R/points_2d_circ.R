@@ -83,7 +83,7 @@ points_2d_circ <- function(n,
         }
     }
 
-    radii <- c(r_inner, r_inner + purrr::accumulate(rep(r_incr, n_ring-1), `+`))
+    radii <- c(r_inner, r_inner + purrr::accumulate(.x = rep(r_incr, n_ring-1), .f = `+`, .init = 0))[1:n_ring]
     circ <- 2*pi*radii
 
     if (is.null(per_ring)) {

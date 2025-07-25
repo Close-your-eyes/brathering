@@ -25,6 +25,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' library(ggplot2)
 #' df <- brathering:::generate_datasets(row_powers = 4, col_seq = 10)[[1]]
 #' um <- fcexpr::ff_calc_umap_tsne(exprs = as.matrix(df))
@@ -43,6 +44,7 @@
 #' ggplot(dfres, aes(PC1, PC2)) +
 #'     geom_point(aes(color = as.factor(outlier))) +
 #'     facet_wrap(vars(method))
+#'     }
 outlier <- function(df,
                     pca = T,
                     pcs = 2,
@@ -129,8 +131,8 @@ outlier <- function(df,
     ## 9
     mcl <- NULL
     if ("mclust" %in% methods) {
-        #dtach <- !"mclust" %in% .packages()
-        requireNamespace("mclust")
+        dtach <- !"mclust" %in% .packages()
+        require("mclust")
         mcl <- mclust::Mclust(df)
         mclt <- table(mcl[["classification"]])
         if (return == "outlier") {
@@ -152,9 +154,9 @@ outlier <- function(df,
         } else {
             mcl <- mcl[["classification"]]
         }
-        # if (dtach) {
-        #     detach("package:mclust", unload = T)
-        # }
+        if (dtach) {
+            detach("package:mclust", unload = T)
+        }
     }
 
     return(cbind(hdout, db, lvs, mah, lof, mv, rb, mcl))

@@ -23,22 +23,25 @@
 #' x = rnorm(1000),
 #' y = rnorm(1000),
 #' z = rnorm(1000),
-#' col1 = sample(letters[1:5], 1000, replace = T),
-#' col2 = sample(c(1:10), 1000, replace = T))
+#' col1 = sample(letters[1:5], 1000, replace = TRUE),
+#' col2 = sample(c(1:10), 1000, replace = TRUE))
 #' plot3d(df, color = ".density_s", colortype = "c", backend = "plotly")
 #' plot3d(df, color = ".density_s", colortype = "c", backend = "rgl")
 #' plot3d(df, color = "col1", colortype = "d", backend = "rgl")
-#'
-#' rspheres <- replicate(5, hdos:::random_sphere(), simplify = F)
-#' rtorus <- replicate(5, hdos:::random_torus(), simplify = F)
-#' rcuboid <- replicate(5, hdos:::random_cuboid(), simplify = F)
-#' landscape <- hdos::bind_objects(c(rspheres, rtorus, rcuboid), missing_dim_fill = "runif")
+#' rspheres <- replicate(5, hdos:::random_sphere(), simplify = FALSE)
+#' rtorus <- replicate(5, hdos:::random_torus(), simplify = FALSE)
+#' rcuboid <- replicate(5, hdos:::random_cuboid(), simplify = FALSE)
+#' landscape <- hdos::bind_objects(c(rspheres, rtorus, rcuboid),
+#'                                 missing_dim_fill = "runif")
 #' landscape <- hdos::add_noise_points(landscape, density = 0.005)
 #'
-#' plot3d(dplyr::bind_cols(landscape), color = "name", legend = F)
-#' plot3d(dplyr::bind_cols(landscape), x = "x2", y = "x3", z = "x4", color = "name", legend = F)
-#' plot3d(dplyr::bind_cols(landscape), x = "x3", y = "x4", z = "x5", color = "name", legend = F)
-#' plot3d(dplyr::bind_cols(landscape), x = "x4", y = "x5", z = "x6", color = "name", legend = F)
+#' plot3d(dplyr::bind_cols(landscape), color = "name", legend = FALSE)
+#' plot3d(dplyr::bind_cols(landscape), x = "x2", y = "x3", z = "x4",
+#'        color = "name", legend = FALSE)
+#' plot3d(dplyr::bind_cols(landscape), x = "x3", y = "x4", z = "x5",
+#'        color = "name", legend = FALSE)
+#' plot3d(dplyr::bind_cols(landscape), x = "x4", y = "x5", z = "x6",
+#'        color = "name", legend = FALSE)
 plot3d <- function(object,
                    x,
                    y,
@@ -81,7 +84,7 @@ plot3d <- function(object,
         }
     }
 
-    filterNAcols <- c(colnames(object)[1],colnames(object)[2],colnames(object)[3],color)
+    filterNAcols <- c(x,y,z,color)
     filterNAcols <- filterNAcols[which(filterNAcols %in% colnames(object))]
     object <- tidyr::drop_na(object[,filterNAcols])
 

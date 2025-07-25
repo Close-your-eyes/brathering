@@ -47,4 +47,6 @@ Suggests:
     robustbase,
     mclust,
     hdos,
-    magick
+    magick,
+    foreign,
+    rpart

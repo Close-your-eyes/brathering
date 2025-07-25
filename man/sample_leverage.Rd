@@ -42,6 +42,7 @@ Sample rows from a numeric matrix with leverage scores as probabilities.
 This more like avoids that rare communities are lost due to sampling.
 }
 \examples{
+\dontrun{
 # create clearly separated communities of different sizes
 comm1 <- data.frame(x=rnorm(10000, mean=10), y=rnorm(10000, mean=10), z=rnorm(10000, mean=10))
 comm2 <- data.frame(x=rnorm(1000, mean=20), y=rnorm(1000, mean=10), z=rnorm(1000, mean=0))
@@ -62,7 +63,7 @@ mean(levscore[11101:11110])
 # compare sampling
 inds <- sample_leverage(x = as.matrix(all_comm[,1:3]), 100)
 table(comm_ident[inds]) # sampled communities are similar in size
-inds2 <- inds <- sample_leverage(as.matrix(all_comm[,1:3]), 100, leverage = F)
+inds2 <- inds <- sample_leverage(as.matrix(all_comm[,1:3]), 100, leverage = FALSE)
 table(comm_ident[inds2]) # community D is lost and A dominates
 
 # compute cluster before
@@ -72,4 +73,5 @@ rle(clst[,2]) # k = 8
 table(clst[,2])
 inds3 <- sample_leverage(x = as.matrix(all_comm[,1:3]), 100, cluster = clst[,2])
 table(comm_ident[inds3]) # wrong cluster number also yields appropriate results
+}
 }

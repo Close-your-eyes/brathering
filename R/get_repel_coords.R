@@ -15,17 +15,16 @@
 #' @export
 #'
 #' @examples
-#' df <- data.frame(x=rnorm(10), y=rnorm(10), z = letters[1:10])
 #' library(ggplot2)
+#' df <- data.frame(x=rnorm(10), y=rnorm(10), z = letters[1:10])
 #' gg <- ggplot(df, aes(x,y)) +
 #'     geom_point()
 #' gg <-
 #'     gg +
 #'     ggrepel::geom_label_repel(aes(label = z)) +
 #'     geom_text(data = dplyr::left_join(df, get_repel_coords(gg)),
-#'               aes(x = x.repel,y = y.repel, label = z), color = "hotpink")
+#'               aes(x = x_repel,y = y_repel, label = z), color = "hotpink")
 #' gg
-
 get_repel_coords <- function(ggobj, width = 2, height = 2, ...) {
     grid::grid.newpage()
     grid::pushViewport(grid::viewport(width = width, height = height))

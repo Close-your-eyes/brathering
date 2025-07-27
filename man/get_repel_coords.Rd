@@ -4,15 +4,18 @@
 \alias{get_repel_coords}
 \title{Get coordinates of repelled labels from ggrepel}
 \usage{
-get_repel_coords(obj, width = 2, height = 2, ...)
+get_repel_coords(obj, width = 1, height = 1, max.overlaps = Inf, ...)
 }
 \arguments{
-\item{obj}{ggplot object or data frame with first columns being xy-coords}
+\item{obj}{data frame with first columns being xy-coords and third column
+labels}
 
 \item{width}{passed to grid::viewport, may be subject to iteration to obtain
 optimal repelled coordinates}
 
 \item{height}{passed to grid::viewport}
+
+\item{max.overlaps}{ggrepel::geom_text_repel argument}
 
 \item{...}{arguments to ggrepel::geom_text_repel}
 }
@@ -28,12 +31,10 @@ repelled positions.
 \examples{
 library(ggplot2)
 df <- data.frame(x=rnorm(10), y=rnorm(10), z = letters[1:10])
-gg <- ggplot(df, aes(x,y)) +
-    geom_point()
 gg <-
-    gg +
-    ggrepel::geom_label_repel(aes(label = z)) +
-    geom_text(data = dplyr::left_join(df, get_repel_coords(gg)),
-              aes(x = x_repel,y = y_repel, label = z), color = "hotpink")
+    ggplot(df, aes(x = x, y = y, label = z)) +
+    geom_point() +
+    ggrepel::geom_label_repel() +
+    geom_text(data = get_repel_coords(obj = df), color = "hotpink")
 gg
 }

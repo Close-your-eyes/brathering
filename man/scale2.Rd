@@ -19,7 +19,7 @@ scale2(x, min = 0, max = 1, margin = 2)
 numeric vector or matrix
 }
 \description{
-Scale vector of matrix from min to max value
+Checkout scales::rescale().
 }
 \examples{
 scale2(rnorm(100), -1, 1)

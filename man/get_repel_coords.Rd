@@ -4,10 +4,10 @@
 \alias{get_repel_coords}
 \title{Get coordinates of repelled labels from ggrepel}
 \usage{
-get_repel_coords(ggobj, width = 2, height = 2, ...)
+get_repel_coords(obj, width = 2, height = 2, ...)
 }
 \arguments{
-\item{ggobj}{ggplot object}
+\item{obj}{ggplot object or data frame with first columns being xy-coords}
 
 \item{width}{passed to grid::viewport, may be subject to iteration to obtain
 optimal repelled coordinates}

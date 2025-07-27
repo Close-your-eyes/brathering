@@ -132,8 +132,8 @@ outlier <- function(df,
     mcl <- NULL
     if ("mclust" %in% methods) {
         dtach <- !"mclust" %in% .packages()
-        require("mclust")
-        mcl <- mclust::Mclust(df)
+        library("mclust")
+        mcl <- mclust::Mclust(df, verbose = F)
         mclt <- table(mcl[["classification"]])
         if (return == "outlier") {
             fractions <- mclt/nrow(df)

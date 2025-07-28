@@ -7,15 +7,33 @@
 make_portable_filename(x, allow = c("-", "."), repl = "_", urldecode = T)
 }
 \arguments{
-\item{x}{vector of file paths}
+\item{x}{character vector of file names}
 
 \item{allow}{values to allow besides alnum}
 
 \item{repl}{replacement for all not permitted values}
 
-\item{urldecode}{also decode URL encoding}
+\item{urldecode}{also decode URL encoding - the will replace %num
+with respective chars}
+}
+\value{
+character vector of modified names
 }
 \description{
 That means to make them compatible with many systems by replacing
 special non-numeric and non-character values.
+}
+\examples{
+make_portable_filename(x = c(
+  "näme1",
+  "næme2",
+  "name~3!",
+  "name!!4",
+  "...name§5___",
+  "name/\\\\6",
+  "name_βγ7",
+  "name{(8)}",
+  "name_9\%"))
+make_portable_filename(x = c("name\%20_\%9"))
+make_portable_filename(x = c("name\%20_\%9"), urldecode = F)
 }

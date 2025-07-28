@@ -4,20 +4,27 @@
 \alias{get_repel_coords}
 \title{Get coordinates of repelled labels from ggrepel}
 \usage{
-get_repel_coords(obj, width = 1, height = 1, max.overlaps = Inf, ...)
+get_repel_coords(
+  obj,
+  width = 1,
+  height = 1,
+  repel_fun_args = list(max.overlaps = Inf, max.time = 1, max.iter = 20000),
+  fun = ggrepel::geom_label_repel
+)
 }
 \arguments{
-\item{obj}{data frame with first columns being xy-coords and third column
-labels}
+\item{obj}{data frame with first columns being xy-coords and optionally
+third column with labels and optionally fourth columns with groups
+(see example)}
 
 \item{width}{passed to grid::viewport, may be subject to iteration to obtain
 optimal repelled coordinates}
 
 \item{height}{passed to grid::viewport}
 
-\item{max.overlaps}{ggrepel::geom_text_repel argument}
+\item{repel_fun_args}{arguments to fun}
 
-\item{...}{arguments to ggrepel::geom_text_repel}
+\item{fun}{repel function from ggrepel package: label or text}
 }
 \value{
 data frame
@@ -28,13 +35,44 @@ ploted very late in the plotting process, i.e. their positions are not
 pre-computed or so. Hence, it is not straight forward to extract their
 repelled positions.
 }
+\details{
+Based on https://github.com/slowkow/ggrepel/issues/250 and
+https://github.com/slowkow/ggrepel/issues/24
+}
 \examples{
 library(ggplot2)
-df <- data.frame(x=rnorm(10), y=rnorm(10), z = letters[1:10])
-gg <-
-    ggplot(df, aes(x = x, y = y, label = z)) +
+# 10 overlapping label positions
+# first two columns are xy, third is optionally the label column
+x <- rnorm(10)
+y <- rnorm(10)
+label <- letters[1:10]
+df <- data.frame(x = c(x,x), y = c(y,y), z = c(label, label))
+# repel on the usual way
+ggplot(df, aes(x = x, y = y, label = z)) +
     geom_point() +
-    ggrepel::geom_label_repel() +
-    geom_text(data = get_repel_coords(obj = df), color = "hotpink")
-gg
+    ggrepel::geom_label_repel()
+
+# hard code the repel
+df2 <- get_repel_coords(obj = df)
+ggplot(df2, aes(x = x, y = y, label = z)) +
+    geom_point(data = df) +
+    geom_label()
+
+# repel coords with xy-columns only
+get_repel_coords(df[,c(1,2)])
+
+# when overlapping label are not exactly at same positions but close
+# provide a group column to indicate which labels are expected to overlap
+# their positions are aligned by averaging
+# this will produce a better repelling
+# so, optionally the fourth column: a grouping column
+df[1:10,1] <- df[1:10,1] + 0.5
+df$group <- rep(1:10, 2)
+get_repel_coords(obj = df)
+
+# when there is not label column but a group column
+# create a dummy label column at third position
+df3 <- df[,-3]
+df3$dummylabel <- "."
+df3 <- df3[,c(1,2,4,3)]
 }

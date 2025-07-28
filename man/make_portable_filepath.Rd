@@ -7,7 +7,7 @@
 make_portable_filepath(x, allow = c("-", "."), repl = "_", urldecode = T)
 }
 \arguments{
-\item{x}{vector of file paths}
+\item{x}{character vector of file paths}
 
 \item{allow}{values to allow besides alnum}
 
@@ -16,9 +16,23 @@ make_portable_filepath(x, allow = c("-", "."), repl = "_", urldecode = T)
 \item{urldecode}{also decode URL encoding}
 }
 \value{
-vector of modified paths
+character vector of modified paths
 }
 \description{
-This a wrapper around make_portable_filename. Dirname(x) and basename(x)
-are treated separately. Dirnames may be subject to url decoding only.
+This a wrapper around make_portable_filename. dirname(x) and basename(x)
+are treated separately. dirnames may be subject to url decoding only.
+}
+\examples{
+make_portable_filepath(x = file.path("my", "file", "path",
+                                     c("näme1",
+                                       "næme2",
+                                       "name~3!",
+                                       "name!!4",
+                                       "...name§5___",
+                                       "name/\\\\6",
+                                       "name_βγ7",
+                                       "name{(8)}",
+                                       "name_9\%")))
+make_portable_filepath("path\%20withspace/file!!1")
+make_portable_filepath("path\%20withspace/file!!1", urldecode = F)
 }

@@ -1,26 +1,38 @@
 #' Make file paths portable
 #'
-#' This a wrapper around make_portable_filename. Dirname(x) and basename(x)
-#' are treated separately. Dirnames may be subject to url decoding only.
+#' This a wrapper around make_portable_filename. dirname(x) and basename(x)
+#' are treated separately. dirnames may be subject to url decoding only.
 #'
-#' @param x vector of file paths
+#' @param x character vector of file paths
 #' @param allow values to allow besides alnum
 #' @param repl replacement for all not permitted values
 #' @param urldecode also decode URL encoding
 #'
-#' @return vector of modified paths
+#' @return character vector of modified paths
 #' @export
 #'
 #' @examples
+#' make_portable_filepath(x = file.path("my", "file", "path",
+#'                                      c("näme1",
+#'                                        "næme2",
+#'                                        "name~3!",
+#'                                        "name!!4",
+#'                                        "...name§5___",
+#'                                        "name/\\6",
+#'                                        "name_βγ7",
+#'                                        "name{(8)}",
+#'                                        "name_9%")))
+#' make_portable_filepath("path%20withspace/file!!1")
+#' make_portable_filepath("path%20withspace/file!!1", urldecode = F)
 make_portable_filepath <- function(x,
                                    allow = c("-", "."),
                                    repl = "_",
                                    urldecode = T) {
     file_names <- basename(x)
     file_paths <- dirname(x)
-    # file path: only remove urldecoding
+    # file path: only remove url decoding
     if (urldecode) {
-        file_paths <- utils::URLdecode(file_paths)
+        file_paths <- suppressWarnings(utils::URLdecode(file_paths))
     }
     file_names <- make_portable_filename(file_names)
     return(file.path(file_paths, file_names))
@@ -31,25 +43,38 @@ make_portable_filepath <- function(x,
 #' That means to make them compatible with many systems by replacing
 #' special non-numeric and non-character values.
 #'
-#' @param x vector of file paths
+#' @param x character vector of file names
 #' @param allow values to allow besides alnum
 #' @param repl replacement for all not permitted values
-#' @param urldecode also decode URL encoding
+#' @param urldecode also decode URL encoding - the will replace %num
+#' with respective chars
 #'
-#' @return
+#' @return character vector of modified names
 #' @export
 #'
 #' @examples
+#' make_portable_filename(x = c(
+#'   "näme1",
+#'   "næme2",
+#'   "name~3!",
+#'   "name!!4",
+#'   "...name§5___",
+#'   "name/\\6",
+#'   "name_βγ7",
+#'   "name{(8)}",
+#'   "name_9%"))
+#' make_portable_filename(x = c("name%20_%9"))
+#' make_portable_filename(x = c("name%20_%9"), urldecode = F)
 make_portable_filename <- function(x,
                                    allow = c("-", "."),
                                    repl = "_",
                                    urldecode = T) {
     pattern <- make_regex_pattern(x = allow)
     x <- make_portable(
-      x,
-      pattern = pattern,
-      repl = repl,
-      urldecode = urldecode
+        x,
+        pattern = pattern,
+        repl = repl,
+        urldecode = urldecode
     )
     return(x)
 }
@@ -74,7 +99,7 @@ make_portable <- function(x,
                           urldecode = T) {
 
     if (urldecode) {
-        x <- utils::URLdecode(x)
+        x <- suppressWarnings(utils::URLdecode(x))
     }
 
     file_names <- tools::file_path_sans_ext(x, compression = T)
@@ -83,6 +108,8 @@ make_portable <- function(x,
 
     file_names <- fs::path_sanitize(file_names, replacement = repl)
     # turn everything into plain ASCII
+    #file_names <- stringi::stri_trans_general(file_names, "Greek-Latin")
+    file_names <- stringi::stri_trans_general(file_names, "Any-Latin")
     file_names <- stringi::stri_trans_general(file_names, "Latin-ASCII")
     # replace runs of pattern with one repl
     file_names <- gsub(pattern, repl, file_names)

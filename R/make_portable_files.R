@@ -27,14 +27,23 @@
 make_portable_filepath <- function(x,
                                    allow = c("-", "."),
                                    repl = "_",
-                                   urldecode = T) {
+                                   urldecode = T,
+                                   make_unique = F,
+                                   repl_empty = "x",
+                                   try_deunicode = F) {
     file_names <- basename(x)
     file_paths <- dirname(x)
     # file path: only remove url decoding
     if (urldecode) {
         file_paths <- suppressWarnings(utils::URLdecode(file_paths))
     }
-    file_names <- make_portable_filename(file_names)
+    file_names <- make_portable_filename(x = file_names,
+                                         pattern = pattern,
+                                         repl = repl,
+                                         urldecode = urldecode,
+                                         make_unique = make_unique,
+                                         repl_empty = repl_empty,
+                                         try_deunicode = try_deunicode)
     return(file.path(file_paths, file_names))
 }
 
@@ -62,26 +71,38 @@ make_portable_filepath <- function(x,
 #'   "name/\\6",
 #'   "name_βγ7",
 #'   "name{(8)}",
-#'   "name_9%"))
+#'   "name_9%",
+#'   "",
+#'   "",
+#'   NA))
 #' make_portable_filename(x = c("name%20_%9"))
 #' make_portable_filename(x = c("name%20_%9"), urldecode = F)
+#' # not everything works
+#' make_portable_filename(x = c("北亰","げんまい茶","🦄☣","…","ᔕᓇᓇ"))
+#' # but with deunicode it does
+#' make_portable_filename(x = c("北亰","げんまい茶","🦄☣","…","ᔕᓇᓇ"), try_deunicode = T)
 make_portable_filename <- function(x,
                                    allow = c("-", "."),
                                    repl = "_",
-                                   urldecode = T) {
+                                   urldecode = T,
+                                   make_unique = F,
+                                   repl_empty = "x",
+                                   try_deunicode = F) {
     pattern <- make_regex_pattern(x = allow)
     x <- make_portable(
-        x,
+        x = x,
         pattern = pattern,
         repl = repl,
-        urldecode = urldecode
+        urldecode = urldecode,
+        make_unique = make_unique,
+        repl_empty = repl_empty,
+        try_deunicode = try_deunicode
     )
     return(x)
 }
 
 
 make_regex_pattern <- function(x = c(".", "-")) {
-    # de‑duplicate and coerce to character
     x <- unique(as.character(x))
     # if hyphen is one of them, pull it out to the end
     if ("-" %in% x) {
@@ -96,13 +117,31 @@ make_regex_pattern <- function(x = c(".", "-")) {
 make_portable <- function(x,
                           pattern = "[^[:alnum:]]",
                           repl = "_",
-                          urldecode = T) {
+                          urldecode = T,
+                          make_unique = F,
+                          repl_empty = "x",
+                          try_deunicode = F) {
+
+    if (try_deunicode) {
+        check_and_prompt_rust()
+        rust_path <- Sys.which("rustc")
+        if (nzchar(rust_path)) {
+            if (!requireNamespace("deunicode", quietly = T)) {
+                devtools::install_github("Close-your-eyes/deunicode")
+            }
+        } else {
+            message("deunicode not available.")
+            try_deunicode <- F
+        }
+    }
 
     if (urldecode) {
         x <- suppressWarnings(utils::URLdecode(x))
     }
 
     file_names <- tools::file_path_sans_ext(x, compression = T)
+    file_names[which(file_names == "")] <- repl_empty
+
     file_exts <- stringi::stri_replace_all_fixed(x, file_names, "")
     file_exts <- gsub("[^[:alnum:].]", "", file_exts) # allow all numeric and char and dot
 
@@ -111,6 +150,9 @@ make_portable <- function(x,
     #file_names <- stringi::stri_trans_general(file_names, "Greek-Latin")
     file_names <- stringi::stri_trans_general(file_names, "Any-Latin")
     file_names <- stringi::stri_trans_general(file_names, "Latin-ASCII")
+    if (try_deunicode) {
+        file_names <- deunicode:::deunicode(file_names)
+    }
     # replace runs of pattern with one repl
     file_names <- gsub(pattern, repl, file_names)
     # replace stretches of punctuation
@@ -118,5 +160,47 @@ make_portable <- function(x,
     # collapse multiple repls and trim
     #file_names <- gsub(paste0(repl, "{2,}"), repl, file_names)
     file_names <- gsub(paste0("^[[:punct:]]+|[[:punct:]]+$"), "", file_names)
+
+    if (make_unique) {
+        file_names <- make.unique(file_names)
+        file_names <- gsub(pattern, repl, file_names)
+    }
     return(paste0(file_names, file_exts))
 }
+
+
+check_and_prompt_rust <- function() {
+    rust_path <- Sys.which("rustc")
+
+    if (!nzchar(rust_path)) {
+        message("Rust compiler not found.")
+        ans <- tolower(readline("Would you like to install Rust now? [y/N]: "))
+        if (ans %in% c("y", "yes")) {
+            install_rust(os = Sys.info()[["sysname"]])
+        } else {
+            message("Okay, Rust will not be installed.")
+        }
+    }
+}
+
+install_rust <- function(os) {
+    message("Installing Rust for ", os, "…")
+
+    if (os %in% c("Darwin", "Linux")) {
+        # macOS and Linux: use rustup installer script
+        cmd <- "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+        system(cmd)
+    } else if (os == "Windows") {
+        # Windows: download rustup-init.exe and run it
+        tmp <- tempfile(fileext = ".exe")
+        download.file("https://win.rustup.rs/", tmp, mode = "wb")
+        # -y = default installation options
+        shell(sprintf('"%s" -y', tmp), wait = TRUE)
+    } else {
+        stop("Unsupported OS: ", os)
+    }
+
+    message("Installation complete. You may need to restart your R session.")
+}
+
+

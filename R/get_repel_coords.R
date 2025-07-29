@@ -99,6 +99,7 @@ get_repel_coords <- function(obj,
     } else {
         repel_fun_args <- c(list(label = "."), repel_fun_args)
     }
+    set.seed(42)
     g <- g + Gmisc::fastDoCall(what = fun, args = repel_fun_args)
 
     plotlims <- brathering::gg_lims(g)

@@ -4,7 +4,15 @@
 \alias{make_portable_filepath}
 \title{Make file paths portable}
 \usage{
-make_portable_filepath(x, allow = c("-", "."), repl = "_", urldecode = T)
+make_portable_filepath(
+  x,
+  allow = c("-", "."),
+  repl = "_",
+  urldecode = T,
+  make_unique = F,
+  repl_empty = "x",
+  try_deunicode = F
+)
 }
 \arguments{
 \item{x}{character vector of file paths}

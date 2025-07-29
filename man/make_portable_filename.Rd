@@ -4,7 +4,15 @@
 \alias{make_portable_filename}
 \title{Make file names portable}
 \usage{
-make_portable_filename(x, allow = c("-", "."), repl = "_", urldecode = T)
+make_portable_filename(
+  x,
+  allow = c("-", "."),
+  repl = "_",
+  urldecode = T,
+  make_unique = F,
+  repl_empty = "x",
+  try_deunicode = F
+)
 }
 \arguments{
 \item{x}{character vector of file names}
@@ -33,7 +41,14 @@ make_portable_filename(x = c(
   "name/\\\\6",
   "name_βγ7",
   "name{(8)}",
-  "name_9\%"))
+  "name_9\%",
+  "",
+  "",
+  NA))
 make_portable_filename(x = c("name\%20_\%9"))
 make_portable_filename(x = c("name\%20_\%9"), urldecode = F)
+# not everything works
+make_portable_filename(x = c("北亰","げんまい茶","🦄☣","…","ᔕᓇᓇ"))
+# but with deunicode it does
+make_portable_filename(x = c("北亰","げんまい茶","🦄☣","…","ᔕᓇᓇ"), try_deunicode = T)
 }

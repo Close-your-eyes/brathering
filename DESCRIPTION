@@ -50,4 +50,5 @@ Suggests:
     magick,
     foreign,
     rpart,
-    Gmisc
+    Gmisc,
+    deunicode

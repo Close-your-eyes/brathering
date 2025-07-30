@@ -132,7 +132,7 @@ outlier <- function(df,
     mcl <- NULL
     if ("mclust" %in% methods) {
         dtach <- !"mclust" %in% .packages()
-        library("mclust")
+        null <- capture.output(library(mclust))
         mcl <- mclust::Mclust(df, verbose = F)
         mclt <- table(mcl[["classification"]])
         if (return == "outlier") {

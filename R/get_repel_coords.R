@@ -51,7 +51,7 @@
 #' df$group <- rep(1:10, 2)
 #' get_repel_coords(obj = df)
 #'
-#' # when there is not label column but a group column
+#' # when there is no label column but a group column
 #' # create a dummy label column at third position
 #' df3 <- df[,-3]
 #' df3$dummylabel <- "."
@@ -61,7 +61,8 @@ get_repel_coords <- function(obj,
                              height = 1,
                              repel_fun_args = list(max.overlaps = Inf,
                                                    max.time = 1,
-                                                   max.iter = 2e4),
+                                                   max.iter = 2e4,
+                                                   seed = 42),
                              fun = ggrepel::geom_label_repel) {
 
     if (!requireNamespace("Gmisc", quietly = T)) {
@@ -78,7 +79,11 @@ get_repel_coords <- function(obj,
     lvar <- NULL
     if (ncol(obj) > 2) {
         lvar <- names(obj)[3] # label
+        repel_fun_args <- c(list(mapping = ggplot2::aes(label = !!rlang::sym(lvar))), repel_fun_args)
+    } else {
+        repel_fun_args <- c(list(label = "."), repel_fun_args)
     }
+
 
     if (ncol(obj) > 3) {
         # group column there
@@ -91,16 +96,8 @@ get_repel_coords <- function(obj,
     g <- ggplot2::ggplot(obj, ggplot2::aes(
         x = !!rlang::sym(xvar),
         y = !!rlang::sym(yvar))) +
-        geom_point()
-
-
-    if (ncol(obj) > 2) {
-        repel_fun_args <- c(list(mapping = ggplot2::aes(label = !!rlang::sym(lvar))), repel_fun_args)
-    } else {
-        repel_fun_args <- c(list(label = "."), repel_fun_args)
-    }
-    set.seed(42)
-    g <- g + Gmisc::fastDoCall(what = fun, args = repel_fun_args)
+        geom_point() +
+        Gmisc::fastDoCall(what = fun, args = repel_fun_args)
 
     plotlims <- brathering::gg_lims(g)
     tree <- get_tree(gPath = "labelrepeltree", plot = g)

@@ -8,7 +8,7 @@ get_repel_coords(
   obj,
   width = 1,
   height = 1,
-  repel_fun_args = list(max.overlaps = Inf, max.time = 1, max.iter = 20000),
+  repel_fun_args = list(max.overlaps = Inf, max.time = 1, max.iter = 20000, seed = 42),
   fun = ggrepel::geom_label_repel
 )
 }
@@ -70,7 +70,7 @@ df[1:10,1] <- df[1:10,1] + 0.5
 df$group <- rep(1:10, 2)
 get_repel_coords(obj = df)
 
-# when there is not label column but a group column
+# when there is no label column but a group column
 # create a dummy label column at third position
 df3 <- df[,-3]
 df3$dummylabel <- "."

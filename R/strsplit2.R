@@ -2,7 +2,8 @@
 #'
 #' @param x character vector
 #' @param pattern split pattern in x
-#' @param inds indices of pattern found in x to use for splitting
+#' @param inds indices of pattern found in x to use for splitting;
+#' provide "last" to split at last occurence
 #' @param SIMPLIFY from mapply, try to return matrix? only works with one inds
 #'
 #' @return a list

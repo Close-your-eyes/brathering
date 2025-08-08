@@ -23,6 +23,14 @@ make_portable_filename(
 
 \item{urldecode}{also decode URL encoding - the will replace %num
 with respective chars}
+
+\item{make_unique}{make filnames unique?}
+
+\item{repl_empty}{replacement for elements that become empty strings during
+the procedure}
+
+\item{try_deunicode}{try the deunicode crate from Rust which handles
+more characters}
 }
 \value{
 character vector of modified names

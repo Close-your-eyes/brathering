@@ -11,7 +11,8 @@ strsplit2(x, pattern, inds = 1, SIMPLIFY = FALSE)
 
 \item{pattern}{split pattern in x}
 
-\item{inds}{indices of pattern found in x to use for splitting}
+\item{inds}{indices of pattern found in x to use for splitting;
+provide "last" to split at last occurence}
 
 \item{SIMPLIFY}{from mapply, try to return matrix? only works with one inds}
 }

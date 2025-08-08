@@ -1,12 +1,19 @@
 #' Make file paths portable
 #'
 #' This a wrapper around make_portable_filename. dirname(x) and basename(x)
-#' are treated separately. dirnames may be subject to url decoding only.
+#' are treated separately.
 #'
 #' @param x character vector of file paths
 #' @param allow values to allow besides alnum
 #' @param repl replacement for all not permitted values
 #' @param urldecode also decode URL encoding
+#' @param make_unique make filnames unique?
+#' @param repl_empty replacement for elements that become empty strings during
+#' the procedure
+#' @param try_deunicode try the deunicode crate from Rust which handles
+#' more characters
+#' @param make_path_portable if FALSE only basename(x) is treated; if TRUE
+#' also dirname(x) is treated
 #'
 #' @return character vector of modified paths
 #' @export
@@ -30,20 +37,45 @@ make_portable_filepath <- function(x,
                                    urldecode = T,
                                    make_unique = F,
                                    repl_empty = "x",
-                                   try_deunicode = F) {
+                                   try_deunicode = F,
+                                   make_path_portable = F) {
+
     file_names <- basename(x)
     file_paths <- dirname(x)
-    # file path: only remove url decoding
-    if (urldecode) {
-        file_paths <- suppressWarnings(utils::URLdecode(file_paths))
-    }
     file_names <- make_portable_filename(x = file_names,
-                                         pattern = pattern,
+                                         allow = allow,
                                          repl = repl,
                                          urldecode = urldecode,
                                          make_unique = make_unique,
                                          repl_empty = repl_empty,
                                          try_deunicode = try_deunicode)
+
+    if (make_path_portable) {
+        # treat every folder separately
+        file_paths <- purrr::map_chr(file_paths, function(y) {
+            y <- gsub("^'", "", y)
+            y <- gsub("'$", "", y)
+            add_slash <- F
+            if (grepl("^/", y)) {
+                y <- sub("^/", "", y)
+                add_slash <- T
+            }
+            z <- strsplit(y, "/", fixed = T)[[1]]
+            z <- make_portable_filename(x = z,
+                                        allow = allow,
+                                        repl = repl,
+                                        urldecode = urldecode,
+                                        make_unique = F,
+                                        repl_empty = repl_empty,
+                                        try_deunicode = try_deunicode)
+            z <- paste(z, collapse = "/")
+            if (add_slash) {
+                z <- paste0("/", z)
+            }
+            return(z)
+        })
+    }
+
     return(file.path(file_paths, file_names))
 }
 
@@ -57,6 +89,11 @@ make_portable_filepath <- function(x,
 #' @param repl replacement for all not permitted values
 #' @param urldecode also decode URL encoding - the will replace %num
 #' with respective chars
+#' @param make_unique make filnames unique?
+#' @param repl_empty replacement for elements that become empty strings during
+#' the procedure
+#' @param try_deunicode try the deunicode crate from Rust which handles
+#' more characters
 #'
 #' @return character vector of modified names
 #' @export
@@ -88,6 +125,7 @@ make_portable_filename <- function(x,
                                    make_unique = F,
                                    repl_empty = "x",
                                    try_deunicode = F) {
+
     pattern <- make_regex_pattern(x = allow)
     x <- make_portable(
         x = x,
@@ -139,6 +177,10 @@ make_portable <- function(x,
         x <- suppressWarnings(utils::URLdecode(x))
     }
 
+
+    # rm shQuote which would disturb file_path_sans_ext detection
+    x <- gsub("'$", "", x)
+
     file_names <- tools::file_path_sans_ext(x, compression = T)
     file_names[which(file_names == "")] <- repl_empty
 
@@ -153,6 +195,7 @@ make_portable <- function(x,
     if (try_deunicode) {
         file_names <- deunicode:::deunicode(file_names)
     }
+
     # replace runs of pattern with one repl
     file_names <- gsub(pattern, repl, file_names)
     # replace stretches of punctuation
@@ -165,6 +208,7 @@ make_portable <- function(x,
         file_names <- make.unique(file_names)
         file_names <- gsub(pattern, repl, file_names)
     }
+
     return(paste0(file_names, file_exts))
 }
 

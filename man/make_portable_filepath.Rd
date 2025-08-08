@@ -11,7 +11,8 @@ make_portable_filepath(
   urldecode = T,
   make_unique = F,
   repl_empty = "x",
-  try_deunicode = F
+  try_deunicode = F,
+  make_path_portable = F
 )
 }
 \arguments{
@@ -22,13 +23,24 @@ make_portable_filepath(
 \item{repl}{replacement for all not permitted values}
 
 \item{urldecode}{also decode URL encoding}
+
+\item{make_unique}{make filnames unique?}
+
+\item{repl_empty}{replacement for elements that become empty strings during
+the procedure}
+
+\item{try_deunicode}{try the deunicode crate from Rust which handles
+more characters}
+
+\item{make_path_portable}{if FALSE only basename(x) is treated; if TRUE
+also dirname(x) is treated}
 }
 \value{
 character vector of modified paths
 }
 \description{
 This a wrapper around make_portable_filename. dirname(x) and basename(x)
-are treated separately. dirnames may be subject to url decoding only.
+are treated separately.
 }
 \examples{
 make_portable_filepath(x = file.path("my", "file", "path",

@@ -12,7 +12,7 @@ strsplit2(x, pattern, inds = 1, SIMPLIFY = FALSE)
 \item{pattern}{split pattern in x}
 
 \item{inds}{indices of pattern found in x to use for splitting;
-provide "last" to split at last occurence}
+use negative indices to indicate index from end}
 
 \item{SIMPLIFY}{from mapply, try to return matrix? only works with one inds}
 }
@@ -24,6 +24,6 @@ Split character at pattern indices
 }
 \examples{
 x <- c("a_b_c_d_e_f", "q_w_e_r_t")
-strsplit2(x, pattern = "_", inds = c(1,2,5), SIMPLIFY = FALSE)
+strsplit2(x, pattern = "_", inds = c(1,2,-1), SIMPLIFY = FALSE)
 strsplit2(x, pattern = "_", inds = 2, SIMPLIFY = TRUE)
 }

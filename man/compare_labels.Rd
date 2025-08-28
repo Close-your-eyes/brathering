@@ -4,12 +4,14 @@
 \alias{compare_labels}
 \title{Compare two vectors of labels for overlap/correspondence/similarity}
 \usage{
-compare_labels(x, y)
+compare_labels(x, y, return = c("matrix", "table"))
 }
 \arguments{
 \item{x}{vector 1 or data frame; if df then col1 and col2 become x and y}
 
 \item{y}{vector 2}
+
+\item{return}{return tables as matrices or 2D-tables}
 }
 \value{
 list

@@ -10,6 +10,7 @@
 #'
 #' @param x vector 1 or data frame; if df then col1 and col2 become x and y
 #' @param y vector 2
+#' @param return return tables as matrices or 2D-tables
 #'
 #' @returns list
 #' @export
@@ -20,10 +21,14 @@
 #'     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")
 #' )
 #' compare_labels(x = x)
-compare_labels <- function(x, y) {
+compare_labels <- function(x,
+                           y,
+                           return = c("matrix", "table")) {
 
     # https://github.com/lazappi/clustree
     # https://github.com/crazyhottommy/scclusteval
+
+    return <- rlang::arg_match(return)
 
     if (is.data.frame(x)) {
         y <- x[,2,drop=T]
@@ -67,6 +72,29 @@ compare_labels <- function(x, y) {
         print(col_tie)
     }
 
+    # make matrices from tables
+    if (return == "matrix") {
+        tab <- matrix(
+          data = as.vector(tab),
+          nrow = nrow(tab),
+          ncol = ncol(tab),
+          dimnames = list(rownames(tab), colnames(tab)))
+        row_props <- matrix(
+            data = as.vector(row_props),
+            nrow = nrow(row_props),
+            ncol = ncol(row_props),
+            dimnames = list(rownames(row_props), colnames(row_props)))
+        col_props <- matrix(
+            data = as.vector(col_props),
+            nrow = nrow(col_props),
+            ncol = ncol(col_props),
+            dimnames = list(rownames(col_props), colnames(col_props)))
+        jaccard <- matrix(
+            data = as.vector(jaccard),
+            nrow = nrow(jaccard),
+            ncol = ncol(jaccard),
+            dimnames = list(rownames(jaccard), colnames(jaccard)))
+    }
 
     return(list(raw = tab,
                 row_props = row_props,

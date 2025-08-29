@@ -8,6 +8,7 @@ piechart(
   x,
   order = T,
   fill = colrr::col_pal("custom"),
+  fill_na = "grey50",
   color = "white",
   radius_inside = 0.3,
   label_outside = c("none", "abs", "rel"),
@@ -25,7 +26,8 @@ piechart(
   legend_title = NULL,
   theme_args = list(panel.grid = ggplot2::element_blank(), axis.title =
     ggplot2::element_blank(), axis.text = ggplot2::element_blank(), axis.ticks =
-    ggplot2::element_blank())
+    ggplot2::element_blank()),
+  col_pal_args = list(missing_fct_to_na = T)
 )
 }
 \arguments{
@@ -69,6 +71,8 @@ gets recycled}
 \item{legend_title}{legend title}
 
 \item{theme_args}{arguments to ggplot2::theme()}
+
+\item{col_pal_args}{}
 }
 \value{
 list of plot and data frame

@@ -10,7 +10,6 @@
 #'
 #' @param x vector 1 or data frame; if df then col1 and col2 become x and y
 #' @param y vector 2
-#' @param return return tables as matrices or 2D-tables
 #'
 #' @returns list
 #' @export
@@ -22,13 +21,10 @@
 #' )
 #' compare_labels(x = x)
 compare_labels <- function(x,
-                           y,
-                           return = c("matrix", "table")) {
+                           y) {
 
     # https://github.com/lazappi/clustree
     # https://github.com/crazyhottommy/scclusteval
-
-    return <- rlang::arg_match(return)
 
     if (is.data.frame(x)) {
         y <- x[,2,drop=T]
@@ -51,8 +47,8 @@ compare_labels <- function(x,
     n_i <- rowSums(tab)
     m_j <- colSums(tab)
     den <- outer(n_i, m_j, "+") - tab
-    jaccard_mat <- tab / den
-    jaccard_mat[is.na(jaccard_mat)] <- 0  # just in case of zeros
+    jaccard <- tab / den
+    jaccard[is.na(jaccard)] <- 0  # just in case of zeros
 
     # correspondence: top shared label
     # can be used to transfer labels
@@ -73,34 +69,51 @@ compare_labels <- function(x,
     }
 
     # make matrices from tables
-    if (return == "matrix") {
-        tab <- matrix(
-          data = as.vector(tab),
-          nrow = nrow(tab),
-          ncol = ncol(tab),
-          dimnames = list(rownames(tab), colnames(tab)))
-        row_props <- matrix(
-            data = as.vector(row_props),
-            nrow = nrow(row_props),
-            ncol = ncol(row_props),
-            dimnames = list(rownames(row_props), colnames(row_props)))
-        col_props <- matrix(
-            data = as.vector(col_props),
-            nrow = nrow(col_props),
-            ncol = ncol(col_props),
-            dimnames = list(rownames(col_props), colnames(col_props)))
-        jaccard <- matrix(
-            data = as.vector(jaccard),
-            nrow = nrow(jaccard),
-            ncol = ncol(jaccard),
-            dimnames = list(rownames(jaccard), colnames(jaccard)))
-    }
+    tab <- make_matrix(tab)
+    row_props <- make_matrix(row_props)
+    col_props <- make_matrix(col_props)
+    jaccard <- make_matrix(jaccard)
+
+    col_props <- adjust_order_make_df(col_props, legend_name = "x in y")
+    row_props <- adjust_order_make_df(row_props, legend_name = "y in x")
+    tab <- adjust_order_make_df(tab, legend_name = "shared (n)")
+    jaccard <- adjust_order_make_df(jaccard, legend_name = "jaccard\nindex")
 
     return(list(raw = tab,
                 row_props = row_props,
                 col_props = col_props,
-                jaccard = jaccard_mat,
+                jaccard = jaccard,
                 row_corres = row_corres,
                 col_corres = col_corres))
 }
 
+make_matrix <- function(m) {
+    m <- matrix(
+        data = as.vector(m),
+        nrow = nrow(m),
+        ncol = ncol(m),
+        dimnames = dimnames(m))
+    return(m)
+}
+
+adjust_order_make_df <- function(mat, legend_name) {
+    df <- brathering::mat_to_df_long(x = mat,
+                                     rownames_to = "y",
+                                     colnames_to = "x")
+    df <- fcexpr::heatmap_ordering(
+        df = df,
+        features = "x",
+        groups = "y",
+        values = "value",
+        feature_order = "custom",
+        group_order = "hclust")
+    mat <- mat[rev(levels(df[["y"]])), levels(df[["x"]])]
+
+    plot <- ggplot2::ggplot(df, ggplot2::aes(x, y)) +
+        ggplot2::geom_tile(ggplot2::aes(fill = value), color = "black") +
+        colrr::scale_fill_spectral() +
+        ggplot2::labs(fill = legend_name) +
+        ggplot2::geom_text(data = dplyr::filter(df, value >= 0.05), ggplot2::aes(label = round(value, 2)))
+
+    return(list(mat = mat, df = df, plot = plot))
+}

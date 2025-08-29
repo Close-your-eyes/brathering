@@ -22,6 +22,8 @@
 #' @param label_rel_dec decimal places of relative labels
 #' @param legend_title legend title
 #' @param theme_args arguments to ggplot2::theme()
+#' @param fill_na
+#' @param col_pal_args
 #'
 #' @returns list of plot and data frame
 #' @export
@@ -36,6 +38,7 @@
 piechart <- function(x,
                      order = T,
                      fill = colrr::col_pal("custom"),
+                     fill_na = "grey50",
                      color = "white",
                      radius_inside = 0.3,
                      label_outside = c("none", "abs", "rel"),
@@ -54,7 +57,8 @@ piechart <- function(x,
                      theme_args = list(panel.grid = ggplot2::element_blank(),
                                        axis.title = ggplot2::element_blank(),
                                        axis.text = ggplot2::element_blank(),
-                                       axis.ticks = ggplot2::element_blank())) {
+                                       axis.ticks = ggplot2::element_blank()),
+                     col_pal_args = list(missing_fct_to_na = T)) {
 
     ## geom_textpath for labels?
 
@@ -90,7 +94,12 @@ piechart <- function(x,
                                        label_radius_inside = label_radius_inside,
                                        label_overlap = label_overlap)
     # adds group_cols
-    tab <- check_and_add_col_pal(tab = tab, col_pal = fill)
+    # tab <- check_and_add_col_pal(tab = tab, col_pal = fill)
+    col_pal <- colrr::make_col_pal(col_vec = fill,
+                                   fct_lvls = tab$group,
+                                   missing_fct_to_na = ifelse("missing_fct_to_na" %in% names(col_pal_args), col_pal_args[["missing_fct_to_na"]], T),
+                                   col_pal_args = col_pal_args[-which(names(col_pal_args) %in% c("name", "missing_fct_to_na"))])
+    tab$group_cols <- col_pal[as.character(tab$group)]
 
     # add text colors
     for (i in c("text_color_inside", "text_color_outside")) {
@@ -134,7 +143,8 @@ piechart <- function(x,
         )) +
         ggforce::geom_arc_bar(colour = color) +
         ggplot2::labs(fill = legend_title) +
-        ggplot2::scale_fill_manual(values = stats::setNames(tab$group_cols, tab$group)) +
+        ggplot2::scale_fill_manual(values = stats::setNames(tab$group_cols, tab$group),
+                                   na.value = fill_na) +
         ggplot2::coord_fixed(ratio = 1) +
         Gmisc::fastDoCall(ggplot2::theme, args = theme_args)
 

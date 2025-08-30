@@ -62,8 +62,9 @@ transfer_labels <- function(df1,
     compared <- brathering::compare_labels(joined[[labelcol1]], joined[[labelcol2]])
 
     # new columns with corresponding labels
-    df1[[labelcol2]] <- compared[["row_corres"]][df1[[labelcol1]]]
-    df2[[labelcol1]] <- compared[["col_corres"]][df2[[labelcol2]]]
+    # as char: important to avoid errors with numeric or factor
+    df1[[labelcol2]] <- compared[["row_corres"]][as.character(df1[[labelcol1]])]
+    df2[[labelcol1]] <- compared[["col_corres"]][as.character(df2[[labelcol2]])]
 
     return(list(compared = compared,
                 df1 = df1,

@@ -95,8 +95,9 @@ piechart <- function(x,
                                        label_overlap = label_overlap)
     # adds group_cols
     # tab <- check_and_add_col_pal(tab = tab, col_pal = fill)
+
     col_pal <- colrr::make_col_pal(col_vec = fill,
-                                   fct_lvls = tab$group,
+                                   fct_lvls = levels(tab$group), # levels or as.character?
                                    missing_fct_to_na = ifelse("missing_fct_to_na" %in% names(col_pal_args), col_pal_args[["missing_fct_to_na"]], T),
                                    col_pal_args = col_pal_args[-which(names(col_pal_args) %in% c("name", "missing_fct_to_na"))])
     tab$group_cols <- col_pal[as.character(tab$group)]

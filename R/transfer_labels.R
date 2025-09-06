@@ -59,7 +59,7 @@ transfer_labels <- function(df1,
         stop("no joined rows.")
     }
     message("nrow(df1): ", nrow(df1), ", nrow(df2): ", nrow(df2), ", nrow(joined): ", nrow(joined))
-    compared <- brathering::compare_labels(joined[[labelcol1]], joined[[labelcol2]])
+    compared <- compare_labels(joined[[labelcol1]], joined[[labelcol2]])
 
     # new columns with corresponding labels
     # as char: important to avoid errors with numeric or factor

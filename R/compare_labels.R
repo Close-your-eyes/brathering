@@ -52,18 +52,31 @@ compare_labels <- function(x,
 
     # correspondence: top shared label
     # can be used to transfer labels
-    row_corres <- stats::setNames(colnames(row_props)[apply(row_props, 1, which.max)], rownames(row_props))
-    col_corres <- stats::setNames(rownames(col_props)[apply(col_props, 2, which.max)], colnames(col_props))
+
+    #purrr::map_int(apply(row_props, 1, c, simplify = F), which.max)
+    #purrr::map_int(apply(col_props, 2, c, simplify = F), which.max)
+
+    # catch error when one cluster does not have any match in other labels
+    row_maxes <- apply(row_props, 1, which.max)
+    row_maxes[which(lengths(row_maxes) == 0)] <- NA
+    row_maxes <- stats::setNames(unlist(row_maxes), names(row_maxes))
+
+    col_maxes <- apply(col_props, 2, which.max)
+    col_maxes[which(lengths(col_maxes) == 0)] <- NA
+    col_maxes <- stats::setNames(unlist(col_maxes), names(col_maxes))
+
+    row_corres <- stats::setNames(colnames(row_props)[row_maxes], rownames(row_props))
+    col_corres <- stats::setNames(rownames(col_props)[col_maxes], colnames(col_props))
 
     # check for ties of max
     # these would question label correspondence; first max is returned
     row_tie <- apply(row_props, 1, function(x) sum(x == max(x)) > 1)
     col_tie <- apply(col_props, 2, function(x) sum(x == max(x)) > 1)
-    if (any(row_tie)) {
+    if (any(row_tie, na.rm = T)) {
         message(sum(row_tie), " rowwise max values of row_props are ties.")
         print(row_tie)
     }
-    if (any(col_tie)) {
+    if (any(col_tie, na.rm = T)) {
         message(sum(col_tie), " colwise max values of col_props are ties.")
         print(col_tie)
     }
@@ -93,6 +106,7 @@ make_matrix <- function(m) {
         nrow = nrow(m),
         ncol = ncol(m),
         dimnames = dimnames(m))
+    m[which(is.na(m))] <- 0
     return(m)
 }
 
@@ -100,6 +114,7 @@ adjust_order_make_df <- function(mat, legend_name) {
     df <- brathering::mat_to_df_long(x = mat,
                                      rownames_to = "y",
                                      colnames_to = "x")
+
     df <- fcexpr::heatmap_ordering(
         df = df,
         features = "x",

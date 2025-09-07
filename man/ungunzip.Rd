@@ -4,20 +4,22 @@
 \alias{ungunzip}
 \title{Unzip gunzip archive on disk}
 \usage{
-ungunzip(path)
+ungunzip(file, out_path = NULL)
 }
 \arguments{
-\item{path}{path to .gz file}
+\item{file}{.gz file}
+
+\item{out_path}{optional output path}
 }
 \value{
 nothing, unpacked files on disk
 }
 \description{
 Simply calls gunzip system command. May only work on unix system.
-Unpacked archives appear in same folder.
+Unpacked archives appear in same folder by default.
 }
 \examples{
 \dontrun{
-ungunzip(path/to/gunzip/file.gz)
+ungunzip(file/to/gunzip/file.gz)
 }
 }

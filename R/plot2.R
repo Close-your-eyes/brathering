@@ -15,6 +15,8 @@
 #' @param least_freq_col_top plot the color groups in ascending order of
 #' frequency to avoid burying low frequent groups
 #' @param size dot size
+#' @param color_text_pos NULL or c("tl", "tr", "bl", "br"); if NULL not plotted
+#' @param color_text which string to plot, if NULL color is chosen
 #'
 #' @return nothing, scattermore plot is plotted
 #' @export
@@ -23,12 +25,30 @@
 #' brathering::plot2(brathering::points_2d_circ(100))
 plot2 <- function(x,
                   color = NULL,
-                  size = 8,
+                  size = 4,
                   palette = NULL,
-                  colortype = c("d", "c", "discrete", "continuous"),
-                  legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right", "center"),
+                  colortype = c(
+                    "d",
+                    "c",
+                    "discrete",
+                    "continuous"
+                  ),
+                  legend = c(
+                    "bottomright",
+                    "bottom",
+                    "bottomleft",
+                    "left",
+                    "topleft",
+                    "top",
+                    "topright",
+                    "right",
+                    "center"
+                  ),
                   transform = NULL,
                   least_freq_col_top = TRUE,
+                  color_text_pos = "tl",
+                  color_text = NULL,
+                  discrete_lvls = 8,
                   ...) {
 
     if (!requireNamespace("colrr", quietly = T)) {
@@ -98,16 +118,34 @@ plot2 <- function(x,
                     palette <- palette[round(seq(1, length(palette), length.out = 100))]
                 }
             }
-            col <- palette[1+99*x[,color]]
+
+            col <- as.character(palette[scales::rescale(x[,color], to = c(1, 100))])
         }
 
         if (colortype %in% c("d", "discrete")) {
-            col_fac <- as.factor(x[,color])
-            col_lvl <- sort(levels(col_fac))
+
+            if (is.numeric(x[,color])) {
+                # make numeric to discrete levels
+                x[,color] <- cut(x[,color], discrete_lvls)
+                if (is.null(palette)) {
+                    palette <- colrr::col_pal("Spectral", n = 100, direction = -1)
+                    palette <- grDevices::colorRampPalette(palette)(discrete_lvls)
+                }
+            }
+            if (!is.factor(x[,color])) {
+                col_fac <- as.factor(x[,color])
+                col_lvl <- sort(levels(col_fac))
+            } else {
+                col_fac <- x[,color]
+                col_lvl <- levels(col_fac)
+            }
+
             col_num <- as.numeric(col_fac)
+
             if (is.null(palette)) {
                 palette <- colrr::col_pal("custom", n = nlevels(col_fac))
             }
+
             if (length(palette) < length(unique(col_num))) {
                 message("palette has insufficient values.")
             } else {
@@ -151,16 +189,24 @@ plot2 <- function(x,
     }
 
     scattermore::scattermoreplot(
-      x[,1],
-      x[,2],
-      cex = size,
-      col = col,
-      xaxt = xaxt,
-      yaxt = yaxt,
-      xlab = colnames(x)[1],
-      ylab = colnames(x)[2],
-      ...
+        x[,1],
+        x[,2],
+        cex = size,
+        col = col,
+        xaxt = xaxt,
+        yaxt = yaxt,
+        xlab = colnames(x)[1],
+        ylab = colnames(x)[2],
+        ...
     )
+
+    if (!is.null(color_text_pos) && !is.null(color)) {
+        if (is.null(color_text)) {
+            color_text <- color
+        }
+        add_color_text(txt = color_text, pos = color_text_pos)
+    }
+
 
     if (!is.null(color) && colortype %in% c("d", "discrete") && !is.null(legend) && !is.logical(legend)) {
         legend(x = legend, legend = names(col_vec), fill = col_vec, cex = 0.8)
@@ -171,5 +217,24 @@ plot2 <- function(x,
     }
     if (!is.null(yaxt)) {
         graphics::axis(2, at = lvlsnumy, labels = lvlsy)
+    }
+}
+
+add_color_text <- function(txt, pos = c("tl", "tr", "bl", "br")) {
+    pos <- rlang::arg_match(pos)
+    u <- par("usr")  # (x1, x2, y1, y2)
+
+    if (pos == "tl") {
+        # Top-left
+        text(u[1]*0.98, u[4]*0.98, txt, adj=c(0,1))
+    } else if (pos == "tr") {
+        # Top-right
+        text(u[2]*0.98, u[4]*0.98, txt, adj=c(1,1))
+    } else if (pos == "bl") {
+        # Bottom-left
+        text(u[1]*0.98, u[3]*0.98, txt, adj=c(0,0))
+    } else if (pos == "br") {
+        # Bottom-right
+        text(u[2]*0.98, u[3]*0.98, txt, adj=c(1,0))
     }
 }

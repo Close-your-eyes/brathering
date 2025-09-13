@@ -30,3 +30,40 @@ quantile_filter <- function(df,
                       right = quantile(!!rlang::sym(valuecol), max(quantiles))),
                   .by = groupcol)
 }
+
+
+#' Filter for quantiles across columns
+#'
+#' works with matrix and multiple columns simultaneously.
+#'
+#' @param x data frame or matrix
+#' @param columns columns in x to quantile filter
+#' @param quantiles lower and upper quantile for filtering
+#' @param columns_select return only columns used for filtering
+#'
+#' @returns data frame or matrix
+#' @export
+#'
+#' @examples
+quantile_filter2 <- function(x,
+                             columns,
+                             columns_select = F,
+                             quantiles = c(0,1)) {
+
+    zz <- purrr::map(columns, function(y) {
+        dplyr::between(x = x[,y],
+                       left = quantile(x[,y], min(quantiles)),
+                       right = quantile(x[,y], max(quantiles)))
+    })
+
+    # all TRUE? --> keep row
+    keep_row <- apply(do.call(cbind, zz), 1, all)
+
+    if (columns_select) {
+        columns_select <- columns
+    } else {
+        columns_select <- colnames(x)
+    }
+
+    return(x[which(keep_row),columns_select,drop=F])
+}

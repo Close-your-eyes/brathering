@@ -200,7 +200,7 @@ outlier1d <- function(x, return = c("vec", "mat"), minsum = 3) {
 IQRout <- function(x, fact = 1.5) {
     iqr <- stats::IQR(x)
     quants <- stats::quantile(x, c(0.25, 0.75))
-    outlier <- as.numeric(x < (quants[1] - 1.5*iqr) | x > (quants[2] + 1.5*iqr))
+    outlier <- as.numeric(x < (quants[1] - fact*iqr) | x > (quants[2] + fact*iqr))
     return(outlier)
 }
 

@@ -7,13 +7,16 @@
 plot2(
   x,
   color = NULL,
-  size = 8,
+  size = 4,
   palette = NULL,
   colortype = c("d", "c", "discrete", "continuous"),
   legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright",
     "right", "center"),
   transform = NULL,
   least_freq_col_top = TRUE,
+  color_text_pos = "tl",
+  color_text = NULL,
+  discrete_lvls = 8,
   ...
 )
 }
@@ -36,6 +39,10 @@ e.g. "log" or "log10" or "sqrt"}
 
 \item{least_freq_col_top}{plot the color groups in ascending order of
 frequency to avoid burying low frequent groups}
+
+\item{color_text_pos}{NULL or c("tl", "tr", "bl", "br"); if NULL not plotted}
+
+\item{color_text}{which string to plot, if NULL color is chosen}
 
 \item{...}{arguments to scattermore::scattermoreplot}
 }

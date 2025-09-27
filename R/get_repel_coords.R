@@ -96,7 +96,7 @@ get_repel_coords <- function(obj,
     g <- ggplot2::ggplot(obj, ggplot2::aes(
         x = !!rlang::sym(xvar),
         y = !!rlang::sym(yvar))) +
-        geom_point() +
+        ggplot2::geom_point() +
         Gmisc::fastDoCall(what = fun, args = repel_fun_args)
 
     plotlims <- brathering::gg_lims(g)

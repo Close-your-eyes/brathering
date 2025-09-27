@@ -3,10 +3,10 @@ library(magrittr)
 library(ggplot2)
 wd <- dirname(rstudioapi::getActiveDocumentContext()$path)
 
-HHV_ref_genome <- igsc::read_fasta("/Volumes/CMS_SSD_2TB/HHV_ref/genome.fa")
-HHV_gtf <- vroom::vroom_lines("/Volumes/CMS_SSD_2TB/HHV_ref/genes.gtf", skip = 5)
+HHV_ref_genome <- igsc::read_fasta("/Volumes/CMS_SSD_2TB/reference_genomes/GRCh38_2020_A_HHV1to5_appended/genome.fa")
+HHV_gtf <- vroom::vroom_lines("/Volumes/CMS_SSD_2TB/reference_genomes/GRCh38_2020_A_HHV1to5_appended/genes.gtf", skip = 5)
 
-bam_path <- "/Volumes/4TB_Backup_Geraet/EBV_ctrl_HHV_virus_ref_only/outs/possorted_genome_bam.bam"
+bam_path <- "/Volumes/CMS_SSD_2TB/EBV_ctrl_HHV_virus_ref_only/outs/possorted_genome_bam.bam"
 
 nchar(HHV_ref_genome)
 
@@ -14,7 +14,7 @@ NC_007605_range <- GenomicRanges::GRanges(seqnames = "NC_007605.1", strand = "+"
 
 NC_007605_read_df <- scexpr::reads_from_bam(file_path = bam_path, genomic_ranges = NC_007605_range)
 
-
+names(HHV_ref_genome)
 algnmnt <- MultiplePairwiseAlignmentsToOneSubject(subject = HHV_ref_genome[["NC_007605.1"]],
                                                   patterns = NC_007605_read_df[1,"seq"],
                                                   type = "global-local",

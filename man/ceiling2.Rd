@@ -4,12 +4,13 @@
 \alias{ceiling2}
 \title{Ceiling to a given decimal place}
 \usage{
-ceiling2(x, accuracy = 0.1, fun = base::ceiling)
+ceiling2(x, accuracy = 1, fun = base::ceiling)
 }
 \arguments{
 \item{x}{numeric vector}
 
-\item{accuracy}{decimal accuracy}
+\item{accuracy}{decimal accuracy; as decimal like 0.1 or 0.01 or as digits
+like 1, 2 as in base::round()}
 
 \item{fun}{function}
 }

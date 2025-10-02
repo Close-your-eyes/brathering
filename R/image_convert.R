@@ -28,5 +28,6 @@ image_convert <- function(path, format = "jpeg", path_save = NULL, ...) {
     } else {
         pathnew <- file.path(path_save, tools::file_path_sans_ext(basename(path), compression = T))
     }
+    pathnew <- paste0(pathnew, ".", gsub("jpeg", "jpg", format))
     magick::image_write(magick::image_read(path), path = pathnew, format = format, ...)
 }

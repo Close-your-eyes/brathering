@@ -14,13 +14,17 @@ floor2 <- function(x,
                    accuracy = 1,
                    fun = base::floor) {
 
-    if (accuracy > 0) {
-        accuracy <- 10^-accuracy
+    if (dplyr::near(accuracy, 0)) {
+        return(fun(x))
+    } else {
+        if (accuracy > 0) {
+            accuracy <- 10^-accuracy
+        }
+        return(fun(x/accuracy) * accuracy)
     }
 
-    fun(x/ accuracy) * accuracy
-}
 
+}
 #' Ceiling to a given decimal place
 #'
 #' @param x numeric vector
@@ -37,10 +41,14 @@ ceiling2 <- function(x,
                      accuracy = 1,
                      fun = base::ceiling) {
 
-    if (accuracy > 0) {
-        accuracy <- 10^-accuracy
+    if (dplyr::near(accuracy, 0)) {
+        return(fun(x))
+    } else {
+        if (accuracy > 0) {
+            accuracy <- 10^-accuracy
+        }
+        return(fun(x/accuracy) * accuracy)
     }
-    fun(x/ accuracy) * accuracy
 }
 
 
@@ -105,7 +113,9 @@ meaningful_decimals <- function(x, max_decimals = 15) {
 
     if (length(unique(x)) <= 1) return(0)  # all same
 
+    x <- pretty(range(x), n = 5)#optional
     for (d in 0:max_decimals) {
+        # or when 80 % is reached or so
         if (length(unique(round(x, d))) == length(unique(x))) {
             return(d)
         }

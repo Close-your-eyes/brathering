@@ -17,6 +17,7 @@
 #' fits      : TRUE if gap_len >= label_frac_x * (x-range)
 #' band_n    : number of points inside the band along the full ray
 #' @export
+#' @importFrom zeallot %<-%
 #'
 #' @examples
 corner_scores <- function(x,

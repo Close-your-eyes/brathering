@@ -38,6 +38,9 @@ list_invert <- function(list,
 
     stopifnot("list must be a list" = is.list(list))
 
+    if (is.null(names(list))) {
+        names(list) <- as.character(seq_along(list))
+    }
     non_inner_list <- rlang::arg_match(non_inner_list)
 
     depth <- list_depth(list)

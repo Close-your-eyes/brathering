@@ -1,7 +1,8 @@
 #' Make pie or donut chart
 #'
 #' @param x unnamed vector or named numeric vector (= already summarized)
-#' @param order sort summarized/tabulated groups of x
+#' @param order sort summarized/tabulated groups of x; NULL for no sorting;
+#' TRUE for decreasing, FALSE for increasing
 #' @param fill color palette to fill pie pieces, can be named by groups in x
 #' @param color border color of pie pieces
 #' @param radius_inside inner radius where pieces are cut. outer radius is fixed
@@ -77,7 +78,7 @@ piechart <- function(x,
     }
 
     ## ... make that a list and check for default elements (see below)
-    ## them call theme with Gmisc::fastDoCall
+    ## then call theme with Gmisc::fastDoCall
 
     label_overlap <- rlang::arg_match(label_overlap)
     label_outside <- rlang::arg_match(label_outside)
@@ -132,6 +133,7 @@ piechart <- function(x,
         tab$label_text_outside <- tab[,"abs"]
     }
 
+
     plot <-
         ggplot2::ggplot(tab, ggplot2::aes(
             x0 = 0,
@@ -140,8 +142,7 @@ piechart <- function(x,
             r = 1,
             start = start_angle,
             end = end_angle,
-            fill = group
-        )) +
+            fill = group)) +
         ggforce::geom_arc_bar(colour = color) +
         ggplot2::labs(fill = legend_title) +
         ggplot2::scale_fill_manual(values = stats::setNames(tab$group_cols, tab$group),
@@ -221,7 +222,7 @@ make_rel_labels <- function(which = c("label_text_inside", "label_text_outside")
         temp_labels <- round2(tab$rel*100, label_rel_dec)
         temp_labels[which(temp_labels == 0 & tab$rel > 0)] <- "< 1"
         tab[[which]] <- temp_labels
-        if (any(tab$rel < label_rel_cutoff)) {
+        if (any(tab$rel <= label_rel_cutoff)) {
             tab[[which]][which(tab$rel < label_rel_cutoff)] <- ""
         }
         if (print_pct_sign) {
@@ -244,6 +245,9 @@ make_rel_labels <- function(which = c("label_text_inside", "label_text_outside")
         }
     } else {
         tab[[which]] <- format(round2(tab$rel, label_rel_dec), nsmall = label_rel_dec)
+        if (any(tab$rel < label_rel_cutoff)) {
+            tab[[which]][which(tab$rel <= label_rel_cutoff)] <- ""
+        }
     }
     return(tab)
 }
@@ -253,17 +257,26 @@ make_pie_basis <- function(x, order) {
     if (is.null(names(x))) {
         tab <- table(as.character(x), exclude = c())
         tab <- stats::setNames(as.numeric(tab), names(tab)) # to ordinary named numeric vector
+        if (!is.null(order)) {
+            tab <- tab[order(tab, decreasing = order)]
+        } else if (is.factor(x)) {
+            tab <- tab[levels(x)]
+        }
     } else if (is.numeric(x) && !is.null(names(x))) {
         tab <- x
+        if (!is.null(order)) {
+            tab <- tab[order(tab, decreasing = order)]
+        }
     } else {
         stop("x must be numeric with names (=summarized data) or unnamed.")
     }
     tab <- data.frame(abs = unname(tab),
                       rel = as.numeric(tab/sum(tab)),
                       group = factor(names(tab), levels = names(tab)))
-    if (!is.null(order)) {
-        tab <- tab[order(tab$rel, decreasing = order), ]
-    }
+
+    # if (!is.null(order)) {
+    #     tab <- tab[order(tab$rel, decreasing = order), ]
+    # }
     tab$start_angle <- c(0,cumsum(tab$rel))[-(length(tab$rel) + 1)]*pi*2
     tab$end_angle <- c(cumsum(tab$rel))*pi*2
     tab$mid_angle <-  0.5*(tab$start_angle + tab$end_angle)

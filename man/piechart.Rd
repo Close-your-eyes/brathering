@@ -33,7 +33,8 @@ piechart(
 \arguments{
 \item{x}{unnamed vector or named numeric vector (= already summarized)}
 
-\item{order}{sort summarized/tabulated groups of x}
+\item{order}{sort summarized/tabulated groups of x; NULL for no sorting;
+TRUE for decreasing, FALSE for increasing}
 
 \item{fill}{color palette to fill pie pieces, can be named by groups in x}
 

@@ -12,7 +12,7 @@
 #' x <- c("my_name_is", "coward__harpendale")
 #' find_sep(x = x)
 find_sep <- function(x, sep = "_") {
-    while(any(sep %in% x)) {
+    while(any(grepl(sep, x))) {
         sep <- paste0(sep, sep)
     }
     return(sep)

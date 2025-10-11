@@ -4,15 +4,17 @@
 \alias{ungunzip}
 \title{Unzip gunzip archive on disk}
 \usage{
-ungunzip(file, out_path = NULL)
+ungunzip(file, out_file = NULL, out_dir = NULL)
 }
 \arguments{
 \item{file}{.gz file}
 
-\item{out_path}{optional output path}
+\item{out_file}{optional output file name}
+
+\item{out_dir}{optional output directory (folder)}
 }
 \value{
-nothing, unpacked files on disk
+output file path
 }
 \description{
 Simply calls gunzip system command. May only work on unix system.

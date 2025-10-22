@@ -4,7 +4,7 @@
 \alias{split_mat}
 \title{Split matrices just like splitting a data frame.}
 \usage{
-split_mat(x, f, byrow = TRUE, ...)
+split_mat(x, f = NULL, byrow = TRUE, ...)
 }
 \arguments{
 \item{x}{a matrix}

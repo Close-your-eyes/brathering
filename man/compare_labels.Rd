@@ -4,12 +4,20 @@
 \alias{compare_labels}
 \title{Compare two vectors of labels for overlap/correspondence/similarity}
 \usage{
-compare_labels(x, y)
+compare_labels(
+  x,
+  y,
+  freq_label_cutoff = 0,
+  join_label_sep = "_",
+  join_label_tresh = 0.05
+)
 }
 \arguments{
 \item{x}{vector 1 or data frame; if df then col1 and col2 become x and y}
 
 \item{y}{vector 2}
+
+\item{join_label_tresh}{}
 }
 \value{
 list

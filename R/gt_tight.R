@@ -18,14 +18,16 @@ gt_tight <- function(df,
             data_row.padding = gt::px(0),
             column_labels.padding = gt::px(0),
             table.border.top.width = gt::px(0),
-            table.border.bottom.width = gt::px(0),
-            heading.border.bottom.width = gt::px(0),
-            row_group.border.top.width = gt::px(0),
-            row_group.border.bottom.width = gt::px(0),
+            #table.border.bottom.width = gt::px(0),
+            #heading.border.bottom.width = gt::px(0),
+            #row_group.border.top.width = gt::px(0),
+            #row_group.border.bottom.width = gt::px(0),
             column_labels.border.top.width = gt::px(0),
-            column_labels.border.bottom.width = gt::px(0),
-            table_body.border.top.width = gt::px(0),
-            table_body.border.bottom.width = gt::px(0))
+            #column_labels.border.bottom.width = gt::px(0),
+            #table_body.border.top.width = gt::px(0),
+            table_body.border.bottom.width = gt::px(0)
+        )
+
     # gt::opt_css(
     #   css = "
     #     .gt_table {

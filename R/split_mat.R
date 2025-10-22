@@ -19,31 +19,40 @@
 #' m <- matrix(rnorm(20), nrow = 4)
 #' split_mat(m, c(1,1,2,2,2), byrow = FALSE)
 #' split_mat(m, c(1,1,2,2), byrow = TRUE)
-split_mat <- function(x, f, byrow = TRUE, ...) {
+split_mat <- function(x,
+                      f = NULL,
+                      byrow = TRUE,
+                      ...) {
 
 
-  ## https://stackoverflow.com/questions/62161916/is-there-a-function-in-r-that-splits-a-matrix-along-a-margin-using-a-factor-or-c
-  ## modified from base function split.data.frame (to avoid 2 x transposation)
-  ## multi dirs: split count matrix by orig.idents
+    ## https://stackoverflow.com/questions/62161916/is-there-a-function-in-r-that-splits-a-matrix-along-a-margin-using-a-factor-or-c
+    ## modified from base function split.data.frame (to avoid 2 x transposation)
+    ## multi dirs: split count matrix by orig.idents
 
-  if (!is.logical(byrow)) {
-    stop("byrow should be logical, TRUE or FALSE.")
-  }
-
-  if (!is.matrix(x) && !methods::is(x, "sparseMatrix")) {
-    stop("x should be a (sparse) matrix.")
-  }
-
-  if (byrow) {
-    if (length(f) != nrow(x)) {
-      stop("length(f) should be equal to nrow(x).")
+    # do nothing
+    if (is.null(f) || length(unique(f)) == 1) {
+        return(x)
     }
-    lapply(split(x = seq_len(nrow(x)), f = f, ...), function(ind) x[ind,,drop = FALSE])
-  } else {
-    if (length(f) != ncol(x)) {
-      stop("length(f) should be equal to ncol(x).")
+
+    if (!is.logical(byrow)) {
+        stop("byrow should be logical, TRUE or FALSE.")
     }
-    lapply(split(x = seq_len(ncol(x)), f = f, ...), function(ind) x[,ind,drop = FALSE])
-  }
+
+    if (!is.matrix(x) && !methods::is(x, "sparseMatrix")) {
+        stop("x should be a (sparse) matrix.")
+    }
+
+    if (byrow) {
+        if (length(f) != nrow(x)) {
+            stop("length(f) should be equal to nrow(x).")
+        }
+        return(lapply(split(x = seq_len(nrow(x)), f = f, ...), function(ind) x[ind,,drop = FALSE]))
+    } else {
+        if (length(f) != ncol(x)) {
+            stop("length(f) should be equal to ncol(x).")
+        }
+        return(lapply(split(x = seq_len(ncol(x)), f = f, ...), function(ind) x[,ind,drop = FALSE]))
+        #split.data.frame(x, f, ...)
+    }
 
 }

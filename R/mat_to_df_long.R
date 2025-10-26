@@ -59,6 +59,7 @@ mat_to_df_long <- function(x,
         tidyr::pivot_longer(
             -dplyr::all_of(rownames_to),
             names_to = colnames_to,
-            values_to = values_to
-        )
+            values_to = values_to) |>
+        dplyr::mutate(!!rlang::sym(rownames_to) := factor(!!rlang::sym(rownames_to), rownames(x))) |>
+        dplyr::mutate(!!rlang::sym(colnames_to) := factor(!!rlang::sym(colnames_to), colnames(x)))
 }

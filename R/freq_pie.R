@@ -37,7 +37,7 @@
 #'          label_rel_dec = 1)
 #' piechart(x = setNames(1:10, letters[1:10]))
 piechart <- function(x,
-                     order = T,
+                     order = NULL,
                      fill = colrr::col_pal("custom"),
                      fill_na = "grey50",
                      color = "white",
@@ -254,6 +254,7 @@ make_rel_labels <- function(which = c("label_text_inside", "label_text_outside")
 
 make_pie_basis <- function(x, order) {
     # https://stackoverflow.com/questions/16184188/ggplot-facet-piechart-placing-text-in-the-middle-of-pie-chart-slices (ggforce)
+
     if (is.null(names(x))) {
         tab <- table(as.character(x), exclude = c())
         tab <- stats::setNames(as.numeric(tab), names(tab)) # to ordinary named numeric vector

@@ -4,7 +4,7 @@
 \alias{df_long_to_mat}
 \title{Convert long data frame to matrix format}
 \usage{
-df_long_to_mat(df, to_rows = "rows", to_cols = "cols", values = "values")
+df_long_to_mat(df, to_rows = "rname", to_cols = "cname", values = "value")
 }
 \arguments{
 \item{df}{data frame in long format}
@@ -22,7 +22,7 @@ a matrix
 Just for convenience.
 }
 \examples{
-df <- expand.grid(rows = letters[1:5], cols = LETTERS[5:1])
-df$values <- 1:25
+df <- expand.grid(rname = letters[1:5], cname = LETTERS[5:1])
+df$value <- 1:25
 df_long_to_mat(df)
 }

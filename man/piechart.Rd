@@ -6,7 +6,7 @@
 \usage{
 piechart(
   x,
-  order = T,
+  order = NULL,
   fill = colrr::col_pal("custom"),
   fill_na = "grey50",
   color = "white",

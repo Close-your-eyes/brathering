@@ -21,6 +21,7 @@ row_scale = function(x,
                      drop.na.rows = T) {
 
     ## redo this in c++
+    ## sparse mat!
 
     if (!is.null(rows) && !is.null(cols)) {
         x <- x[rows, cols, drop = FALSE]

@@ -33,7 +33,9 @@ Imports:
     MASS,
     Matrix,
     methods,
-    fs
+    fs,
+    magrittr,
+    zeallot
 Suggests:
     bench,
     limma,

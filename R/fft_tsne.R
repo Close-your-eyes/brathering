@@ -69,7 +69,7 @@
 #' 1
 #' @param K Number of nearest neighbors to get when using fixed sigma
 #' @param sigma Fixed sigma value to use when perplexity==-1
-#' @param initialization 'pca', 'random', or N x no_dims array to initialize the solution.
+#' @param initialization 'pca', 'random', or N x no_dims array to initialize the solution or NULL
 #' @param max_step_norm Maximum distance that a point is allowed to move on
 #'      one iteration. Larger steps are clipped to this value. This prevents
 #'      possible instabilities during gradient descent.  Set to -1 to switch it
@@ -96,7 +96,7 @@ fft_tsne <- function(
     X,
     dims = 2,
     perplexity = 30,
-    theta = 0.5,
+    theta = 0.01,
     max_iter = 750,
     fft_not_bh = TRUE,
     ann_not_vptree = TRUE,
@@ -111,13 +111,13 @@ fft_tsne <- function(
     learning_rate = "auto",
     n_trees = 50,
     search_k = -1,
-    rand_seed = -1,
+    rand_seed = 42,
     nterms = 3,
     intervals_per_integer = 1,
     min_num_intervals = 50,
     K = -1,
     sigma = -30,
-    initialization = "pca",
+    initialization = NULL,
     max_step_norm = 5,
     #data_path = NULL,
     #result_path = NULL,

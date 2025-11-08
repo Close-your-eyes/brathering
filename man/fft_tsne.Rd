@@ -8,7 +8,7 @@ fft_tsne(
   X,
   dims = 2,
   perplexity = 30,
-  theta = 0.5,
+  theta = 0.01,
   max_iter = 750,
   fft_not_bh = TRUE,
   ann_not_vptree = TRUE,
@@ -23,13 +23,13 @@ fft_tsne(
   learning_rate = "auto",
   n_trees = 50,
   search_k = -1,
-  rand_seed = -1,
+  rand_seed = 42,
   nterms = 3,
   intervals_per_integer = 1,
   min_num_intervals = 50,
   K = -1,
   sigma = -30,
-  initialization = "pca",
+  initialization = NULL,
   max_step_norm = 5,
   load_affinities = NULL,
   fast_tsne_path = system2("which", "fast_tsne", stdout = TRUE),
@@ -121,7 +121,7 @@ min_num_intervals=50, intervals_per_integer =
 
 \item{sigma}{Fixed sigma value to use when perplexity==-1}
 
-\item{initialization}{'pca', 'random', or N x no_dims array to initialize the solution.}
+\item{initialization}{'pca', 'random', or N x no_dims array to initialize the solution or NULL}
 
 \item{max_step_norm}{Maximum distance that a point is allowed to move on
 one iteration. Larger steps are clipped to this value. This prevents

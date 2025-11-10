@@ -16,7 +16,7 @@ make_filepath_unique <- function(path, sep = "_") {
         return(path)
     }
     filewoext <- tools::file_path_sans_ext(basename(path), compression = T)
-    ext <- sub(paste0("^", filewoext), "", basename(path))
+    ext <- sub(filewoext, "", basename(path), fixed = T)
     incr <- 1
     path <- file.path(dirname(path), paste0(filewoext, sep, incr, ext))
     while (file.exists(path)) {

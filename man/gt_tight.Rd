@@ -19,3 +19,14 @@ gt table
 \description{
 Make a tight gt table by default
 }
+\examples{
+# add colored rows like so:
+brathering::gt_tight(df) |>
+    gt::tab_style(
+        style = gt::cell_fill(color = "lightgreen"),
+        locations = gt::cells_body(
+            columns = c(x, y),
+            rows = x \%in\% c("FIB", "MES", "PC", "PEC", "PT_VCAM1")
+        )
+    )
+}

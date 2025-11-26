@@ -19,4 +19,5 @@ numeric: averaged p-value
 }
 \description{
 Check packages metap or poolr
+metapod combineParallelPValues
 }

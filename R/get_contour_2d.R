@@ -7,6 +7,9 @@
 #' @param scale scale levels to range 0-1 (for each group separately when
 #' !is.null(group))
 #' @param nlevels how many contour line levels
+#' @param levels define contour levels explicitly; easy to use when scale = T
+#' because then choose value between 0-1; if scale = F levels are not predictable
+#' before
 #'
 #' @returns data frame to use with ggplot2::geom_path
 #' @export
@@ -19,11 +22,17 @@
 #'                   y = rnorm(2000, mean = 10, sd = 2),
 #'                   group = "2")
 #' df <- rbind(df1, df2)
-#' cdf <- get_contour_2d(x = df, group = "group")
+#' cdf <- get_contour_2d(x = df, group = "group", levels = 0.2)
 #' ggplot(df, aes(x, y)) +
 #'     geom_point(alpha = 0.3, aes(color = group)) +
 #'     geom_path(data = cdf, aes(x, y, group = combined_group))
-get_contour_2d <- function(x, y, group = NULL, n = NULL, scale = T, nlevels = 10) {
+get_contour_2d <- function(x,
+                           y,
+                           group = NULL,
+                           n = NULL,
+                           scale = T,
+                           nlevels = 10,
+                           levels = NULL) {
 
     xname <- "x"
     yname <- "y"
@@ -47,13 +56,22 @@ get_contour_2d <- function(x, y, group = NULL, n = NULL, scale = T, nlevels = 10
         # adaptive grid: finer for larger samples
         n <- pmin(200, max(50, sqrt(length(x))))
     }
+
+    if (is.factor(group)) {
+        group <- as.character(group)
+    }
     contour_df <- purrr::map2_dfr(.x = split(x, group), .y = split(y, group), function(x,y) {
         # decrease/increase limits by 10 % to not have contour lines cut prematurely
         dens <- MASS::kde2d(x, y, n = n, lims = c(adjust_range(range(x)), adjust_range(range(y))))
         if (scale) {
             dens$z <- dens$z/max(dens$z)
         }
-        clines <- grDevices::contourLines(dens$x, dens$y, dens$z, nlevels = nlevels)
+        if (is.null(levels)) {
+            clines <- grDevices::contourLines(dens$x, dens$y, dens$z, nlevels = nlevels)
+        } else {
+            clines <- grDevices::contourLines(dens$x, dens$y, dens$z, levels = levels)
+        }
+
         names(clines) <- as.character(seq_along(clines))
         contour_df <- purrr::map_dfr(clines,
                                      ~data.frame(level = .x$level,

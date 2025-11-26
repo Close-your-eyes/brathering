@@ -13,7 +13,7 @@ plot2(
   legend = c("bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright",
     "right", "center"),
   transform = NULL,
-  least_freq_col_top = TRUE,
+  least_freq_col_top = FALSE,
   color_text_pos = "tl",
   color_text = NULL,
   discrete_lvls = 8,

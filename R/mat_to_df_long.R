@@ -5,6 +5,7 @@
 #' @param x matrix or wide data frame
 #' @param rownames_to column name that will hold rownames(mat)
 #' @param colnames_to column name that will hold colnames(mat)
+#' @param row_col_type how to return row and col indices
 #' @param values_to column name that will hold values of mat
 #'
 #' @returns data frame in long format
@@ -52,14 +53,36 @@
 mat_to_df_long <- function(x,
                            rownames_to = "rname",
                            colnames_to = "cname",
-                           values_to = "value") {
-    x |>
+                           values_to = "value",
+                           row_col_type = c("factor", "char", "num", "character", "numeric")) {
+
+    row_col_type <- rlang::arg_match(row_col_type)
+
+    if (is.null(rownames(x))) {
+        rownames(x) <- as.character(1:nrow(x))
+    }
+    if (is.null(colnames(x))) {
+        colnames(x) <- as.character(1:ncol(x))
+    }
+    z <- x |>
         as.data.frame() |>
         tibble::rownames_to_column(rownames_to) |>
         tidyr::pivot_longer(
             -dplyr::all_of(rownames_to),
             names_to = colnames_to,
-            values_to = values_to) |>
-        dplyr::mutate(!!rlang::sym(rownames_to) := factor(!!rlang::sym(rownames_to), rownames(x))) |>
-        dplyr::mutate(!!rlang::sym(colnames_to) := factor(!!rlang::sym(colnames_to), colnames(x)))
+            values_to = values_to)
+    if (row_col_type == "factor") {
+        z[[rownames_to]] <- factor(z[[rownames_to]], levels = unique(rownames(x)))
+        z[[colnames_to]] <- factor(z[[colnames_to]], levels = unique(colnames(x)))
+    } else if (row_col_type %in% c("numeric", "num")) {
+        z[[rownames_to]] <- as.numeric(z[[rownames_to]])
+        z[[colnames_to]] <- as.numeric(z[[colnames_to]])
+    } else if (row_col_type %in% c("character", "char")) {
+        z[[rownames_to]] <- as.character(z[[rownames_to]])
+        z[[colnames_to]] <- as.character(z[[colnames_to]])
+    }
+
+    return(z)
+        # dplyr::mutate(!!rlang::sym(rownames_to) := factor(!!rlang::sym(rownames_to), rownames(x))) |>
+        # dplyr::mutate(!!rlang::sym(colnames_to) := factor(!!rlang::sym(colnames_to), colnames(x)))
 }

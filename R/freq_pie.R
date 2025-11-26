@@ -70,10 +70,10 @@ piechart <- function(x,
         utils::install.packages("farver")
     }
 
-    if (!is.null(label_angle_inside)  && !is.numeric(label_angle_inside)) {
+    if (!is.null(label_angle_inside)  && !is.numeric(label_angle_inside) && label_angle_inside != "circle") {
         stop("label_angle_inside has to be 'circle' or numeric.")
     }
-    if (!is.null(label_angle_outside) && !is.numeric(label_angle_outside)) {
+    if (!is.null(label_angle_outside) && !is.numeric(label_angle_outside) && label_angle_outside != "circle") {
         stop("label_angle_outside has to be 'circle' or numeric.")
     }
 

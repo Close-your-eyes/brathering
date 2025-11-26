@@ -4,7 +4,15 @@
 \alias{get_contour_2d}
 \title{Calculate contour lines from x-y coordinates}
 \usage{
-get_contour_2d(x, y, group = NULL, n = NULL, scale = T, nlevels = 10)
+get_contour_2d(
+  x,
+  y,
+  group = NULL,
+  n = NULL,
+  scale = T,
+  nlevels = 10,
+  levels = NULL
+)
 }
 \arguments{
 \item{x}{x coordinates or data frame}
@@ -19,6 +27,10 @@ get_contour_2d(x, y, group = NULL, n = NULL, scale = T, nlevels = 10)
 !is.null(group))}
 
 \item{nlevels}{how many contour line levels}
+
+\item{levels}{define contour levels explicitly; easy to use when scale = T
+because then choose value between 0-1; if scale = F levels are not predictable
+before}
 }
 \value{
 data frame to use with ggplot2::geom_path
@@ -34,7 +46,7 @@ df2 <- data.frame(x = rnorm(2000, mean = 10, sd = 1),
                   y = rnorm(2000, mean = 10, sd = 2),
                   group = "2")
 df <- rbind(df1, df2)
-cdf <- get_contour_2d(x = df, group = "group")
+cdf <- get_contour_2d(x = df, group = "group", levels = 0.2)
 ggplot(df, aes(x, y)) +
     geom_point(alpha = 0.3, aes(color = group)) +
     geom_path(data = cdf, aes(x, y, group = combined_group))

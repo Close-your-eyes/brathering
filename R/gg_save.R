@@ -42,8 +42,12 @@ gg_save <- function(plot = ggplot2::last_plot(),
                     append_filename = T,
                     ...) {
 
+    if (!is.null(height) && !is.null(width)) {
+        aspect_ratio <- width/height
+    }
+
     if (is.null(height) && is.null(width)) {
-        height <- 8
+        width <- 8
     }
 
     if (is.null(height)) {
@@ -53,6 +57,7 @@ gg_save <- function(plot = ggplot2::last_plot(),
     if (is.null(width)) {
         width <- height*aspect_ratio
     }
+    message("w: ", round(width,1), " h: ", round(height,1), " ar: ", round(aspect_ratio,1))
 
     target <- file.path(path, filename)
 

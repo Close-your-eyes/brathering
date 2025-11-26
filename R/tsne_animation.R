@@ -49,8 +49,14 @@ tsne_animation <- function(x,
                                                                                    fft_tsne_args))),
                               mc.cores = mc.cores)
 
-    out <- purrr::map_dfr(out, ~cbind(.x, y), .id = "max_iter") |>
-        dplyr::mutate(max_iter = as.numeric(max_iter))
+    if (!is.null(y)) {
+        out <- purrr::map_dfr(out, ~cbind(.x, y), .id = "max_iter") |>
+            dplyr::mutate(max_iter = as.numeric(max_iter))
+    } else {
+        out <- dplyr::bind_rows(out, .id = "max_iter") |>
+            dplyr::mutate(max_iter = as.numeric(max_iter))
+    }
+
 
     if (!is.null(y)) {
         p <- ggplot2::ggplot(out, ggplot2::aes(x = tSNE_1, y = tSNE_2, color = !!rlang::sym(names(y)[1]))) +

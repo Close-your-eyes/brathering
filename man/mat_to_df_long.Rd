@@ -8,7 +8,8 @@ mat_to_df_long(
   x,
   rownames_to = "rname",
   colnames_to = "cname",
-  values_to = "value"
+  values_to = "value",
+  row_col_type = c("factor", "char", "num", "character", "numeric")
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ mat_to_df_long(
 \item{colnames_to}{column name that will hold colnames(mat)}
 
 \item{values_to}{column name that will hold values of mat}
+
+\item{row_col_type}{how to return row and col indices}
 }
 \value{
 data frame in long format

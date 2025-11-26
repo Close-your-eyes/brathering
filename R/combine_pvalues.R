@@ -1,6 +1,7 @@
 #' Average p-values with fisher of stouffer method
 #'
 #' Check packages metap or poolr
+#' metapod combineParallelPValues
 #'
 #' @param pvalues vector of p-values
 #' @param method method

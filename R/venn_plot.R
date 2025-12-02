@@ -86,7 +86,7 @@ venn_plot <- function(data,
 
     wide_summ <-
         long_summ |>
-        tidyr::pivot_wider(names_from = cat, values_from = n)
+        tidyr::pivot_wider(names_from = !!rlang::sym(cat_col), values_from = n)
 
     if (any(long_summ$n > 1)) {
         message("There are duplicate observations per category.
@@ -96,8 +96,8 @@ venn_plot <- function(data,
     }
 
     if (make_obs_by_cat_unique) {
-        sep <- find_sep(unique(c(data[,cat_col], data[,obs_col])))
-        data[,obs_col] <- sapply(strsplit(make.unique(paste(data[,cat_col], data[,obs_col], sep = sep)), sep), "[", 2)
+        sep <- find_sep(unique(c(data[[cat_col]], data[[obs_col]])))
+        data[,obs_col] <- sapply(strsplit(make.unique(paste(data[[cat_col]], data[[obs_col]], sep = sep)), sep), "[", 2)
     } else {
         rows1 <- nrow(data)
         # factors are not lost by this line

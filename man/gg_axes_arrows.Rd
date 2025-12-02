@@ -4,7 +4,13 @@
 \alias{gg_axes_arrows}
 \title{Add axes arrows to ggplot}
 \usage{
-gg_axes_arrows(ggobj, rel_len = 0.3, add_names = T)
+gg_axes_arrows(
+  ggobj,
+  rel_len = 0.1,
+  add_names = T,
+  arrow_args = list(angle = 25, length = grid::unit(0.2, "cm"), type = "open"),
+  segment_args = list(linewidth = 0.2, color = "black")
+)
 }
 \arguments{
 \item{ggobj}{ggplot object}
@@ -12,6 +18,10 @@ gg_axes_arrows(ggobj, rel_len = 0.3, add_names = T)
 \item{rel_len}{relative length of axis}
 
 \item{add_names}{add axis titles?}
+
+\item{arrow_args}{arguments to grid::arrow}
+
+\item{segment_args}{arguments to ggplot2::geom_segment}
 }
 \value{
 ggplot object

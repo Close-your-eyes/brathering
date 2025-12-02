@@ -13,12 +13,22 @@
 #' gg_lims(ggobj)
 
 gg_lims <- function(ggobj) {
+
     plot_build <- ggplot2::ggplot_build(ggobj)
     x_limits <- plot_build$layout$panel_params[[1]]$x.range
     y_limits <- plot_build$layout$panel_params[[1]]$y.range
 
-    xvar <- rlang::as_name(rlang::quo_get_expr(ggobj[["mapping"]][["x"]]))
-    yvar <- rlang::as_name(rlang::quo_get_expr(ggobj[["mapping"]][["y"]]))
+    xvar <- "x"
+    yvar <- "y"
+    xmap <- ggobj[["mapping"]][["x"]]
+    if (!is.null(xmap)) {
+        xvar <- rlang::as_name(rlang::quo_get_expr(xmap))
+    }
+    ymap <- ggobj[["mapping"]][["y"]]
+    if (!is.null(ymap)) {
+        yvar <- rlang::as_name(rlang::quo_get_expr(ymap))
+    }
+
     #x_data <- range(ggobj$data[[1]][,1])
     #y_data <- range(ggobj$data[[1]][,2])
     return(stats::setNames(list(

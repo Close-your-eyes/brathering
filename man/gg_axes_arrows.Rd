@@ -8,6 +8,7 @@ gg_axes_arrows(
   ggobj,
   rel_len = 0.1,
   add_names = T,
+  annotate_args = list(size = 3, color = "black"),
   arrow_args = list(angle = 25, length = grid::unit(0.2, "cm"), type = "open"),
   segment_args = list(linewidth = 0.2, color = "black")
 )

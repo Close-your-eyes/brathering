@@ -4,12 +4,15 @@
 \alias{recycle}
 \title{Recycle vectors or lists}
 \usage{
-recycle(short, long)
+recycle(short, long, one_or_equal = F)
 }
 \arguments{
 \item{short}{shorter element, vector or list}
 
 \item{long}{longer element}
+
+\item{one_or_equal}{shorter element must be length one or equal to longer
+element}
 }
 \value{
 vector or list of length(long) and class(x)

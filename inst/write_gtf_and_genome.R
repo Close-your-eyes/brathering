@@ -33,14 +33,15 @@ write_gtf_and_genome_for_cellranger <- function(data,
 
 
     # example:
-    'ncbi_data <- webscrape_ncbi(accession = "NG_011608.2")
-    ncbi_data[["features_to_genome_gtf"]] <- setNames(c("exon", "transcript"), c("exon", "mRNA")) # conversion from to
-    ncbi_data[["values_to_genome_gtf"]] <- "CD8A"
-    # ncbi_data[["origin_name"]] <- "CD8A" # optional
-    ncbi_data2 <- webscrape_ncbi(accession = "NC_001348.1") # HHV3
-    ncbi_data2[["features_to_genome_gtf"]] <- setNames(c("exon"), c("CDS"))
-    ncbi_data2[["values_to_genome_gtf"]] <- c("HHV3_gp01", "HHV3_gp02", "HHV3_gp03")
-    data <- list(ncbi_data, ncbi_data2)'
+    # library(igsc)
+    # ncbi_data <- webscrape_ncbi(accession = "NG_011608.2")
+    # ncbi_data[["features_to_genome_gtf"]] <- setNames(c("exon", "transcript"), c("exon", "mRNA")) # conversion from to
+    # ncbi_data[["values_to_genome_gtf"]] <- "CD8A"
+    # # ncbi_data[["origin_name"]] <- "CD8A" # optional
+    # ncbi_data2 <- webscrape_ncbi(accession = "NC_001348.1") # HHV3
+    # ncbi_data2[["features_to_genome_gtf"]] <- setNames(c("exon"), c("CDS"))
+    # ncbi_data2[["values_to_genome_gtf"]] <- c("HHV3_gp01", "HHV3_gp02", "HHV3_gp03")
+    # data <- list(ncbi_data, ncbi_data2)
 
     if (!is.list(data) || is.null(names(data))) {
         stop("data has to be a named list.")

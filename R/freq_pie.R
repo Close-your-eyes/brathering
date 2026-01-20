@@ -206,8 +206,8 @@ check_and_add_col_pal <- function(tab, col_pal) {
     return(tab)
 }
 
-bw_txt <- function(bg_col) {
-    ifelse(farver::decode_colour(bg_col, to = "hcl")[, "l"] > 50, "black", "white")
+bw_txt <- function(bg_col, cutoff = 50) {
+    ifelse(farver::decode_colour(bg_col, to = "hcl")[, "l"] > cutoff, "black", "white")
 }
 
 make_rel_labels <- function(which = c("label_text_inside", "label_text_outside"),
@@ -261,7 +261,7 @@ make_pie_basis <- function(x, order) {
         if (!is.null(order)) {
             tab <- tab[order(tab, decreasing = order)]
         } else if (is.factor(x)) {
-            tab <- tab[levels(x)]
+            tab <- tab[levels(x)[which(levels(x) %in% names(tab))]]
         }
     } else if (is.numeric(x) && !is.null(names(x))) {
         tab <- x

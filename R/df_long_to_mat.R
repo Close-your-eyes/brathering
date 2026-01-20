@@ -25,10 +25,14 @@ df_long_to_mat <- function(df,
         tibble::column_to_rownames(to_rows) |>
         as.matrix()
     if (is.factor(df[[to_rows]])) {
-        mat <- mat[levels(df[[to_rows]]),]
+        lvl <- levels(df[[to_rows]])
+        lvl <- lvl[which(lvl %in% rownames(mat))]
+        mat <- mat[lvl,]
     }
     if (is.factor(df[[to_cols]])) {
-        mat <- mat[,levels(df[[to_cols]])]
+        lvl <- levels(df[[to_cols]])
+        lvl <- lvl[which(lvl %in% colnames(mat))]
+        mat <- mat[,lvl]
     }
     return(mat)
 }

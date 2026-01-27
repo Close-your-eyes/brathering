@@ -18,6 +18,7 @@
 #' @export
 #'
 #' @examples
+#' # see transfer_labels which uses compare_labels
 #' x <- data.frame(
 #'     label1 = c("A","A","A","B","B","C","C","C","C"),
 #'     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")

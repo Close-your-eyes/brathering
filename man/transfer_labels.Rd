@@ -4,7 +4,13 @@
 \alias{transfer_labels}
 \title{Transfer best matching/corresponding labels between two label columns}
 \usage{
-transfer_labels(df1, df2, labelcol1, labelcol2, joincol = NULL)
+transfer_labels(
+  df1,
+  df2,
+  labelcol1 = "label1",
+  labelcol2 = "label2",
+  joincol = NULL
+)
 }
 \arguments{
 \item{df1}{data frame 1}

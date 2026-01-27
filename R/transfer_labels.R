@@ -24,8 +24,8 @@
 #' transfer_labels(df1, df2, "label1", "label2", "id")
 transfer_labels <- function(df1,
                             df2,
-                            labelcol1,
-                            labelcol2,
+                            labelcol1 = "label1",
+                            labelcol2 = "label2",
                             joincol = NULL) {
 
     if (identical(labelcol1, labelcol2)) {

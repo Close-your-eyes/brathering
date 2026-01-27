@@ -30,7 +30,13 @@ split_mat <- function(x,
     ## multi dirs: split count matrix by orig.idents
 
     # do nothing
-    if (is.null(f) || length(unique(f)) == 1) {
+    if (is.null(f)) {
+        return(x)
+    }
+
+    if (length(unique(f)) == 1) {
+        x <- list(x)
+        names(x) <- unique(f)
         return(x)
     }
 

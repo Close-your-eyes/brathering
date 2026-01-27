@@ -32,6 +32,7 @@ col_props are row_corres and col_corres. These may be used to transfer
 labels.
 }
 \examples{
+# see transfer_labels which uses compare_labels
 x <- data.frame(
     label1 = c("A","A","A","B","B","C","C","C","C"),
     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")

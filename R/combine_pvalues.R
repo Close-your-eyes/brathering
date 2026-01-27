@@ -22,9 +22,13 @@ combine_pvalues <- function(pvalues,
     # Input checks
     method <- rlang::arg_match(method)
     pvalues <- as.numeric(pvalues)
-
+    pvalues <- pvalues[which(!is.na(pvalues))]
+    if (!length(pvalues)) {
+        stop("NA only?!")
+    }
+    #zz <- metap::meanp(stats::na.omit(pvalues))[["p"]]
     if (any(pvalues <= 0 | pvalues > 1, na.rm = TRUE)) {
-        stop("All p-values must be between 0 and 1 (exclusive).")
+        stop("All p-values must be between 0 (exclusive) and 1.")
     }
 
     if (method == "fisher") {

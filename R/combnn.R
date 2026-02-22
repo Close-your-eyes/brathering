@@ -8,6 +8,11 @@
 #' of all lengths of x.
 #'
 #' @param x a vector
+#' @param order_matters if F: get all combinations; if T: permutations
+#' @param repeats_allowed allow repeated elements
+#' @param min_len min combination length of x
+#' @param consecutive_only
+#' @param return_numeric return values as in x (=F), or as numeric (=T)
 #'
 #' @returns list
 #' @export
@@ -19,7 +24,8 @@ combnn <- function(x,
                    order_matters = F,
                    repeats_allowed = F,
                    min_len = 1,
-                   consecutive_only = F) {
+                   consecutive_only = F,
+                   return_numeric = F) {
 
     # Combinations -> subsets, order doesn’t matter, no repetition.
     # Permutations -> subsets, order matters, no repetition.
@@ -56,16 +62,6 @@ combnn <- function(x,
             all_grouped <- purrr::map(all_grouped, ~purrr::map(.x, ~x[.x]))
         }
 
-        all_flat <- purrr::list_flatten(all_grouped)
-
-
-        # if (consecutive_only) {
-        #     is_consecutive <- purrr::map_lgl(purrr::map(all_flat, diff), ~all(dplyr::near(.x, 1)))
-        #     all_flat <- all_flat[is_consecutive]
-        # }
-        # all_flat <- purrr::map(all_flat, ~x[.x])
-
-
     } else {
         # this is 'permutations of all possible lengths'
 
@@ -75,15 +71,26 @@ combnn <- function(x,
         # with repeats allowed all_grouped is expand.grid(x), expand.grid(x,x), expand.grid(x,x,x), ....
         all_grouped <- purrr::map(stats::setNames(seq, as.character(seq)), ~gtools::permutations(n = n, r = .x, v = x, repeats.allowed = repeats_allowed))
         all_grouped <- purrr::map(all_grouped, asplit, MARGIN = 1)
-        all_flat <- purrr::list_flatten(all_grouped)
+
     }
 
-    return(list(
-        total = total,
-        grouped = outcomes_by_size,
-        combs = all_grouped,
-        combs2 = all_flat
-    ))
+    if (!return_numeric) {
+        all_grouped <- purrr::map(all_grouped, ~purrr::map(.x, ~x[.x]))
+        all_grouped <- purrr::map(all_grouped, function(x) {
+            names(x) <- purrr::map_chr(x, paste, collapse = "_")
+            return(x)
+        })
+    }
+    #all_flat <- purrr::list_flatten(all_grouped)
+
+    # return(list(
+    #     total = total,
+    #     grouped = outcomes_by_size,
+    #     combs = all_grouped,
+    #     combs2 = all_flat
+    # ))
+
+    return(all_grouped)
 }
 
 

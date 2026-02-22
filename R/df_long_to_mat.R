@@ -15,9 +15,9 @@
 #' df$value <- 1:25
 #' df_long_to_mat(df)
 df_long_to_mat <- function(df,
-                           to_rows = "rname",
-                           to_cols = "cname",
-                           values = "value") {
+                           to_rows = names(df)[1],
+                           to_cols = names(df)[2],
+                           values = names(df)[3]) {
     mat <-
         df |>
         dplyr::select(dplyr::all_of(c(to_rows, to_cols, values))) |>

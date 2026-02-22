@@ -9,11 +9,20 @@ combnn(
   order_matters = F,
   repeats_allowed = F,
   min_len = 1,
-  consecutive_only = F
+  consecutive_only = F,
+  return_numeric = F
 )
 }
 \arguments{
 \item{x}{a vector}
+
+\item{order_matters}{if F: get all combinations; if T: permutations}
+
+\item{repeats_allowed}{allow repeated elements}
+
+\item{min_len}{min combination length of x}
+
+\item{return_numeric}{return values as in x (=F), or as numeric (=T)}
 }
 \value{
 list

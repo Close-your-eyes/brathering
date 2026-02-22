@@ -111,6 +111,7 @@ piechart <- function(x,
     #   tab[which(tab[[i]] >= 1), gsub("label_radius", "text_color", i)] <- bw_txt(plot[["theme"]][["panel.background"]][["fill"]])
     # }
 
+
     if (label_inside == "rel") {
         tab <- make_rel_labels(which = "label_text_inside",
                                label_rel_pct = label_rel_pct,
@@ -119,7 +120,7 @@ piechart <- function(x,
                                label_rel_dec = label_rel_dec,
                                tab = tab)
     } else if (label_inside == "abs") {
-        tab$label_text_inside <- tab[,"abs"]
+        tab$label_text_inside <- ifelse(tab[["rel"]] > label_rel_cutoff, tab[["abs"]], "")
     }
 
     if (label_outside == "rel") {
@@ -130,7 +131,7 @@ piechart <- function(x,
                                label_rel_dec = label_rel_dec,
                                tab = tab)
     } else if (label_outside == "abs") {
-        tab$label_text_outside <- tab[,"abs"]
+        tab$label_text_outside <- ifelse(tab[["rel"]] > label_rel_cutoff, tab[["abs"]], "")
     }
 
 
@@ -216,6 +217,7 @@ make_rel_labels <- function(which = c("label_text_inside", "label_text_outside")
                             print_pct_sign = T,
                             label_rel_dec,
                             tab) {
+
     which <- rlang::arg_match(which)
     if (label_rel_pct) {
         ## problem with decimals and > 1 % may arise
@@ -244,6 +246,7 @@ make_rel_labels <- function(which = c("label_text_inside", "label_text_outside")
             tab[[which]] <- format(tab[[which]], nsmall = label_rel_dec)
         }
     } else {
+
         tab[[which]] <- format(round2(tab$rel, label_rel_dec), nsmall = label_rel_dec)
         if (any(tab$rel < label_rel_cutoff)) {
             tab[[which]][which(tab$rel <= label_rel_cutoff)] <- ""

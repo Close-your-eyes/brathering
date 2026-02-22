@@ -4,10 +4,18 @@
 \alias{jaccard_index_pairwise}
 \title{Pairwise jaccard indices}
 \usage{
-jaccard_index_pairwise(x)
+jaccard_index_pairwise(
+  x,
+  return = c("all", "upper_triangle", "lower_triangle", "no_diagonal", "upper", "lower",
+    "no_diag"),
+  calc_order = T,
+  return_plot = T
+)
 }
 \arguments{
 \item{x}{named list of vectors}
+
+\item{return_plot}{}
 }
 \value{
 list of jaccard index formats and plot

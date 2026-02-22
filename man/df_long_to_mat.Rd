@@ -4,7 +4,12 @@
 \alias{df_long_to_mat}
 \title{Convert long data frame to matrix format}
 \usage{
-df_long_to_mat(df, to_rows = "rname", to_cols = "cname", values = "value")
+df_long_to_mat(
+  df,
+  to_rows = names(df)[1],
+  to_cols = names(df)[2],
+  values = names(df)[3]
+)
 }
 \arguments{
 \item{df}{data frame in long format}

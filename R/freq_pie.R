@@ -90,7 +90,7 @@ piechart <- function(x,
 
     tab <- make_label_angles_and_radii(tab = tab,
                                        label_angle_inside = label_angle_inside,
-                                       label_angle_outside = label_angle_inside,
+                                       label_angle_outside = label_angle_outside,
                                        label_radius_outside = label_radius_outside,
                                        label_radius_inside = label_radius_inside,
                                        label_overlap = label_overlap)
@@ -300,6 +300,7 @@ make_label_angles_and_radii <- function(tab,
                                         label_radius_outside,
                                         label_radius_inside,
                                         label_overlap) {
+
     # text angle equal to angle of circle but readable
     # relevant if order = T or order = F ??
     tab$label_angle_inside  <- label_angle_inside %||% tab$label_angle

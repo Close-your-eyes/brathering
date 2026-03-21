@@ -35,7 +35,7 @@ run_default_mofa2 <- function(list_of_matrices,
     }
 
     list_of_matrices <- check_matrices(liofma = list_of_matrices)
-    plots <- inspect_matrices(liofma = list_of_matrices,
+    inspect <- inspect_matrices(liofma = list_of_matrices,
                               interactive_cluster_select = interactive_cluster_select)
 
     ## run mofa
@@ -52,7 +52,7 @@ run_default_mofa2 <- function(list_of_matrices,
     mo <- MOFA2::run_mofa(mo, outfile = outfile)
     # MOFA2::plot_factors(mo, factors = c(1,2))
     # MOFA2::plot_variance_explained(mo)
-    return(list(plots,
+    return(list(single_inspect = inspect,
                 mofa = mo))
 }
 
@@ -64,11 +64,11 @@ plot_eigen <- function(x, title = "", max_pc = 10) {
         ggplot2::labs(subtitle = title)
 }
 
-plot_loadings <- function(pca_prcomp, title) {
+plot_loadings <- function(pca_prcomp, title, limits = c(-1,1)) {
 
     #loadings <- purrr::map(pcas, ~.x$rotation)
     loadings <- pca_prcomp$rotation
-    x <- loadings[,1:max(5,ncol(loadings))]
+    x <- loadings[,1:min(5,ncol(loadings))]
     pc1_order <- names(sort(x[,1]))
     x <- brathering::mat_to_df_long(x = x,
                                     colnames_to = "PC",
@@ -83,21 +83,33 @@ plot_loadings <- function(pca_prcomp, title) {
     plot <- ggplot2::ggplot(x, ggplot2::aes(x = PC, y = feature, fill = loading)) +
         ggplot2::geom_tile() +
         ggplot2::scale_fill_gradientn(colors = colrr::col_pal("RdBu", direction = -1),
-                                      limits = c(-1,1)) +
+                                      limits = limits) +
         colrr::theme_material(white = T) +
         ggplot2::labs(subtitle = title)
     return(plot)
 
 }
 
-plot_pca_vars <- function(prcomp_pca, cluster_df, title = "") {
-    ggplot2::ggplot(cbind(prcomp_pca$x, cluster_df), ggplot2::aes(x = PC1, y = PC2, color = !!rlang::sym(colnames(cluster_df)[1]))) +
-        ggplot2::geom_point() +
-        ggplot2::labs(subtitle = title)
+plot_pca_vars <- function(prcomp_pca, cluster_df = NULL, title = "") {
+
+    if (is.null(cluster_df)) {
+        ggplot2::ggplot(prcomp_pca$x, ggplot2::aes(x = PC1, y = PC2)) +
+            ggplot2::geom_point() +
+            ggplot2::labs(subtitle = title)
+    } else {
+        ggplot2::ggplot(cbind(prcomp_pca$x, cluster_df), ggplot2::aes(x = PC1, y = PC2, color = !!rlang::sym(colnames(cluster_df)[1]))) +
+            ggplot2::geom_point() +
+            ggplot2::labs(subtitle = title)
+    }
+
 }
 
 
 plot_silhoutte <- function(clusters, dist, title) {
+
+    if (length(unique(clusters)) == 1) {
+        return(NULL)
+    }
     sil <- cluster::silhouette(x = clusters, dist = dist)
     sil_df <- dplyr::mutate(dplyr::mutate(dplyr::arrange(as.data.frame(sil),
                                                          cluster, dplyr::desc(sil_width)), row = dplyr::row_number()),
@@ -109,42 +121,63 @@ plot_silhoutte <- function(clusters, dist, title) {
         ggplot2::geom_hline(yintercept = mean(sil_df$sil_width),
                             linetype = "dashed") + theme + ggplot2::scale_color_manual(values = col_pal) +
         ggplot2::labs(subtitle = title) +
-        ggplot2::scale_fill_manual(values = col_pal) + theme(axis.text.x = ggplot2::element_blank(),
-                                                             axis.title.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank())
+        ggplot2::scale_fill_manual(values = col_pal) +
+        ggplot2::theme(axis.text.x = ggplot2::element_blank(),
+                       axis.title.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank())
     return(plot)
 }
 
 inspect_matrices <- function(liofma,
                              interactive_cluster_select = F) {
 
+    ## impute missing values, how?
+    if (any(purrr::map_lgl(liofma, anyNA))) {
+        message("missing values will be imputed by median imputation (very simple).")
+        print(purrr::map_lgl(liofma, anyNA))
+
+        liofma <- purrr::map(liofma, ~t(apply(.x, 1, function(row) {
+            row[is.na(row)] <- median(row, na.rm = TRUE)
+            row
+        })))
+    }
+
     ## compare variances, only makes sense when matrices were not scaled
     # matrices should be  feature x sample  by now
     message("sum of variances. consider data_opts$scale_views.")
     print(purrr::map_dbl(liofma, ~sum(apply(.x, 1, var))))
-
-    # but total variance does not tell us about the structure, i.e. is variance isotropic (spread evenly across features) or low-dimensional (most variance in few directions)
-    # so eigenvalues:
-    # Using cov(X): eigenvalues = variance in original units
-    # Using cor(X): eigenvalues = variance after standardization
-    raw_eigen <- dplyr::bind_rows(purrr::map(liofma, ~data.frame(variance = eigen(cov(t(.x)))$values, pc = 1:nrow(.x))), .id = "view")
-    scale_eigen <- dplyr::bind_rows(purrr::map(liofma, ~data.frame(variance = eigen(cor(t(.x)))$values, pc = 1:nrow(.x))), .id = "view")
-
-    eigen_plot <- patchwork::wrap_plots(plot_eigen(raw_eigen, title = "raw"),
-                                        plot_eigen(scale_eigen, title = "scaled"),
-                                        guides = "collect", axis_titles = "collect")
-    print(eigen_plot)
-
 
     # get feature loadings, which are feature weights, per PC
     # Positive loading: variable moves with the component
     # Negative loading: variable moves against the component
     # focus on top features per PC, just to get an idea of main source of variance
     # loadings from prcomp are always between −1 and 1
-    pcas <- purrr::map(liofma, ~prcomp(t(.x)))
+    pcas <- purrr::map(liofma, ~prcomp(t(.x), scale. = F))
+    loadings_plot1 <- patchwork::wrap_plots(purrr::map2(pcas,
+                                                        names(pcas),
+                                                        ~plot_loadings(.x,.y, limits = c(-1,1))),
+                                            guides = "collect", axes = "collect")
+    print(loadings_plot1)
+    loadings_plot2 <- patchwork::wrap_plots(purrr::map2(pcas,
+                                                        names(pcas),
+                                                        ~plot_loadings(.x,.y, limits = NULL)),
+                                            axes = "collect")
+    print(loadings_plot2)
+    pcas2 <- purrr::map(liofma, ~prcomp(t(.x), scale. = T))
 
-    loadings_plot <- patchwork::wrap_plots(purrr::map2(pcas, names(pcas), ~plot_loadings(.x,.y)),
-                                           guides = "collect", axes = "collect")
-    print(loadings_plot)
+    # but total variance does not tell us about the structure, i.e. is variance isotropic (spread evenly across features) or low-dimensional (most variance in few directions)
+    # so eigenvalues:
+    # Using cov(X): eigenvalues = variance in original units
+    # Using cor(X): eigenvalues = variance after standardization
+    #raw_eigen <- dplyr::bind_rows(purrr::map(liofma, ~data.frame(variance = eigen(cov(t(.x)))$values, pc = 1:nrow(.x))), .id = "view")
+    #scale_eigen <- dplyr::bind_rows(purrr::map(liofma, ~data.frame(variance = eigen(cor(t(.x)))$values, pc = 1:nrow(.x))), .id = "view")
+
+    raw_eigen <- dplyr::bind_rows(purrr::map(pcas, ~data.frame(variance = .x$sdev^2, pc = 1:length(.x$sdev))), .id = "view")
+    scale_eigen <- dplyr::bind_rows(purrr::map(pcas2, ~data.frame(variance = .x$sdev^2, pc = 1:length(.x$sdev))), .id = "view")
+
+    eigen_plot <- patchwork::wrap_plots(plot_eigen(raw_eigen, title = "raw"),
+                                        plot_eigen(scale_eigen, title = "scaled"),
+                                        guides = "collect", axis_titles = "collect")
+    print(eigen_plot)
 
 
     # cluster samples based on all features across views
@@ -154,35 +187,54 @@ inspect_matrices <- function(liofma,
     # matrix_scale <- dplyr::bind_rows(purrr::map(liofma_scale, as.data.frame))
     matrix <- dplyr::bind_rows(purrr::map(liofma, as.data.frame))
     matrix_dist <- stats::dist(t(matrix))
-    cl <- fcexpr::get_louvain_cluster(t(matrix), FindClusters_args = list(resolution = seq(0.1,1,0.1)))
-    # cl <- stats::setNames(as.data.frame(cl), "clusters") |> dplyr::mutate(clusters = as.character(clusters))
-    # get unique clusterings
-    hashes <- apply(cl, 2, digest::digest)
-    cl_unique <- hashes[!duplicated(hashes)]
-    cl <- cl[,names(cl_unique), drop = F]
-    cl <- purrr::map(brathering::split_mat(cl, colnames(cl), byrow = F), ~.x[,1])
-    sil_plot <- patchwork::wrap_plots(purrr::map2(cl, names(cl), ~plot_silhoutte(clusters = .x, dist = matrix_dist, title = .y)))
-    print(sil_plot)
 
+    cl <- fcexpr::get_louvain_cluster(t(matrix),
+                                      FindClusters_args = list(resolution = seq(0.1,1.6,0.1)),
+                                      mc.cores = 4)
+    rownames(cl) <- colnames(matrix)
+    cl <- cl[,which(apply(cl, 2, function(x) length(unique(x))) > 1)]
 
-    if (length(cl_unique) > 1 && interactive_cluster_select) {
-        choice <- menu(names(cl_unique), title = "Pick a clustering")
-        cl_choice <- names(cl_unique[choice])
-    } else if (length(cl_unique) > 1 && !interactive_cluster_select) {
-        cl_choice <- names(cl_unique)[ceiling(length(cl_unique)/2)] # midpoint
-    } else {
-        cl_choice <- names(cl_unique)[1]
+    sil_plot <- NULL
+    cluster_df <- NULL
+
+    if (ncol(cl) > 0) {
+        # cl <- stats::setNames(as.data.frame(cl), "clusters") |> dplyr::mutate(clusters = as.character(clusters))
+        # get unique clusterings
+        hashes <- apply(cl, 2, digest::digest)
+        cl_unique <- hashes[!duplicated(hashes)]
+        cl <- cl[,names(cl_unique), drop = F]
+        cl <- purrr::map(brathering::split_mat(cl, colnames(cl), byrow = F), ~.x[,1])
+
+        sil_plot <- patchwork::wrap_plots(purrr::map2(cl, names(cl),
+                                                      ~plot_silhoutte(clusters = .x, dist = matrix_dist, title = .y)))
+        print(sil_plot)
+
+        if (length(cl_unique) > 1 && interactive_cluster_select) {
+            choice <- menu(names(cl_unique), title = "Pick a clustering")
+            cl_choice <- names(cl_unique[choice])
+        } else if (length(cl_unique) > 1 && !interactive_cluster_select) {
+            cl_choice <- names(cl_unique)[ceiling(length(cl_unique)/2)] # midpoint
+        } else {
+            cl_choice <- names(cl_unique)[1]
+        }
+        cluster_df <- as.data.frame(cl[cl_choice,drop = F])
+        cluster_df[[1]] <- as.character(cluster_df[[1]])
     }
-    cluster_df <- as.data.frame(cl[cl_choice,drop = F])
-    cluster_df[[1]] <- as.character(cluster_df[[1]])
-    vars_plot <- patchwork::wrap_plots(purrr::map2(pcas, names(pcas), ~plot_pca_vars(prcomp_pca = .x, cluster_df = cluster_df, title = .y)),
+
+    vars_plot <- patchwork::wrap_plots(purrr::map2(pcas, names(pcas), ~plot_pca_vars(prcomp_pca = .x,
+                                                                                     cluster_df = cluster_df,
+                                                                                     title = .y)),
                                        guides = "collect", axes = "collect")
     print(vars_plot)
 
-    return(list(eigen_plot = eigen_plot,
-                loadings_plot = loadings_plot,
-                sil_plot = sil_plot,
-                vars_plot = vars_plot))
+    return(list(data = list(pcas_raw = pcas,
+                            pcas_scale = pcas2,
+                            clusters = cluster_df),
+                plots = list(eigen_plot = eigen_plot,
+                             loadings_plot1 = loadings_plot1,
+                             loadings_plot2 = loadings_plot2,
+                             sil_plot = sil_plot,
+                             vars_plot = vars_plot)))
 }
 
 check_matrices <- function(liofma) {

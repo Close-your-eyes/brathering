@@ -10,9 +10,11 @@ gg_save(
   device = png,
   path = getOption("im_path", default = getwd()),
   width = 8,
+  w = NULL,
   height = NULL,
+  h = NULL,
   aspect_ratio = 4/3,
-  create.dir = T,
+  ar = NULL,
   overwrite = F,
   append_filename = T,
   ...
@@ -29,11 +31,15 @@ gg_save(
 
 \item{width}{w}
 
+\item{w}{width shorthand}
+
 \item{height}{h}
+
+\item{h}{height shorthand}
 
 \item{aspect_ratio}{set height relative to width: height = width/aspect_ratio}
 
-\item{create.dir}{do it?}
+\item{ar}{aspect_ratio shorthand}
 
 \item{overwrite}{overwrite existing file on disk?}
 

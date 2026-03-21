@@ -13,11 +13,13 @@
 #' @param path filepath
 #' @param width w
 #' @param height h
-#' @param create.dir do it?
 #' @param ... other arg to ggplot2::ggsave
 #' @param aspect_ratio set height relative to width: height = width/aspect_ratio
 #' @param overwrite overwrite existing file on disk?
 #' @param append_filename when overwrite = F, change filename to save plot?
+#' @param w width shorthand
+#' @param h height shorthand
+#' @param ar aspect_ratio shorthand
 #'
 #' @returns nothing
 #' @export
@@ -35,12 +37,25 @@ gg_save <- function(plot = ggplot2::last_plot(),
                     device = png,
                     path = getOption("im_path", default = getwd()),
                     width = 8,
+                    w = NULL,
                     height = NULL,
+                    h = NULL,
                     aspect_ratio = 4/3,
-                    create.dir = T,
+                    ar = NULL,
                     overwrite = F,
                     append_filename = T,
                     ...) {
+
+    if (!is.null(h)) {
+        height <- h
+    }
+    if (!is.null(w)) {
+        width <- w
+    }
+    if (!is.null(ar)) {
+        aspect_ratio <- ar
+    }
+
 
     if (!is.null(height) && !is.null(width)) {
         aspect_ratio <- width/height
@@ -81,7 +96,7 @@ gg_save <- function(plot = ggplot2::last_plot(),
       path = path,
       width = width,
       height = height,
-      create.dir = create.dir,
+      create.dir = T,
       ...
     )
 

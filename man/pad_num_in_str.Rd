@@ -7,7 +7,7 @@
 pad_num_in_str(x, pad = "0", len = "overall_max", len_indwise_remain = 1)
 }
 \arguments{
-\item{x}{character vector}
+\item{x}{character or numeric vector}
 
 \item{pad}{pad to stringr::str_pad}
 
@@ -31,4 +31,5 @@ pad_num_in_str(x, len = 2)
 pad_num_in_str(x, len = 5)
 pad_num_in_str(x, len = "indwise_max")
 pad_num_in_str(x, len = "indwise_max", len_indwise_remain = 5)
+pad_num_in_str(c(1,20,200))
 }

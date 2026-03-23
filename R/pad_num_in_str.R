@@ -2,7 +2,7 @@
 #'
 #' Intended for subsequent sorting.
 #'
-#' @param x character vector
+#' @param x character or numeric vector
 #' @param pad pad to stringr::str_pad
 #' @param len how to pad numbers: overall_max = all to the longest number in x,
 #' indwise_max: index wise longest number, one fixed number to pad all numbers to,
@@ -20,6 +20,7 @@
 #' pad_num_in_str(x, len = 5)
 #' pad_num_in_str(x, len = "indwise_max")
 #' pad_num_in_str(x, len = "indwise_max", len_indwise_remain = 5)
+#' pad_num_in_str(c(1,20,200))
 pad_num_in_str <- function(x,
                            pad = "0",
                            # indwise_max or numeric or overall_max
@@ -28,7 +29,7 @@ pad_num_in_str <- function(x,
 
     # complicated to pad arbitrary number of numerics in strings
     # one intention: proper ordering
-
+    x <- as.character(x)
     parts <- strsplit_at_num(x)
     ## different n of numerics across x?
     suppressWarnings(num_positions <- purrr::map(parts, ~which(!is.na(as.numeric(.x)))))
@@ -89,3 +90,4 @@ pad_num_in_str <- function(x,
 
     return(y)
 }
+

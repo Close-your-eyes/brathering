@@ -11,6 +11,7 @@
 #' @param f a character or factor vector for splitting
 #' @param byrow split by rows (T) or by columns (F)
 #' @param ... arguments passed to split
+#' @param drop drop when one row or column only?
 #'
 #' @return a list of length unique(f) of splitted matrices in returned
 #' @export
@@ -22,6 +23,7 @@
 split_mat <- function(x,
                       f = NULL,
                       byrow = TRUE,
+                      drop = F,
                       ...) {
 
 
@@ -52,12 +54,12 @@ split_mat <- function(x,
         if (length(f) != nrow(x)) {
             stop("length(f) should be equal to nrow(x).")
         }
-        return(lapply(split(x = seq_len(nrow(x)), f = f, ...), function(ind) x[ind,,drop = FALSE]))
+        return(lapply(split(x = seq_len(nrow(x)), f = f, ...), function(ind) x[ind,,drop = drop]))
     } else {
         if (length(f) != ncol(x)) {
             stop("length(f) should be equal to ncol(x).")
         }
-        return(lapply(split(x = seq_len(ncol(x)), f = f, ...), function(ind) x[,ind,drop = FALSE]))
+        return(lapply(split(x = seq_len(ncol(x)), f = f, ...), function(ind) x[,ind,drop = drop]))
         #split.data.frame(x, f, ...)
     }
 

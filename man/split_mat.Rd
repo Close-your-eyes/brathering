@@ -4,7 +4,7 @@
 \alias{split_mat}
 \title{Split matrices just like splitting a data frame.}
 \usage{
-split_mat(x, f = NULL, byrow = TRUE, ...)
+split_mat(x, f = NULL, byrow = TRUE, drop = F, ...)
 }
 \arguments{
 \item{x}{a matrix}
@@ -12,6 +12,8 @@ split_mat(x, f = NULL, byrow = TRUE, ...)
 \item{f}{a character or factor vector for splitting}
 
 \item{byrow}{split by rows (T) or by columns (F)}
+
+\item{drop}{drop when one row or column only?}
 
 \item{...}{arguments passed to split}
 }

@@ -34,6 +34,11 @@ run_default_mofa2 <- function(list_of_matrices,
         list_of_matrices <- purrr::map(list_of_matrices, Matrix::t)
     }
 
+    # View-wise scaling to prevent domination by one?
+    # a) scale features per view
+    # b) normalize by total variance per view: data[[view]] <- data[[view]] / sd(as.vector(data[[view]]))
+    # c) select HVF per view vars <- apply(meth, 2, var); meth <- meth[, order(vars, decreasing=TRUE)[1:5000]]
+
     list_of_matrices <- check_matrices(liofma = list_of_matrices)
     inspect <- inspect_matrices(liofma = list_of_matrices,
                                 interactive_cluster_select = interactive_cluster_select)
@@ -62,6 +67,46 @@ plot_eigen <- function(x, title = "", max_pc = 10) {
         ggplot2::geom_point() +
         ggplot2::geom_line() +
         ggplot2::labs(subtitle = title)
+}
+
+plot_loadings_pc12 <- function(pca_prcomp, title, limits = c(-1,1), limits_col = NULL) {
+
+    loadings <- brathering::mat_to_df_long(x = pca_prcomp$rotation[,c(1,2)],
+                                           colnames_to = "PC",
+                                           rownames_to = "feature",
+                                           values_to = "loading")
+    plots <- purrr::map(unique(loadings$PC), function(pc) {
+        ## weighted: 5 and 5
+        feats_high <- loadings |>
+            dplyr::filter(PC == pc) |>
+            dplyr::slice_max(order_by = loading, n = 5, by = PC, with_ties = F) |>
+            dplyr::pull(feature)
+        feats_low <- loadings |>
+            dplyr::filter(PC == pc) |>
+            dplyr::slice_max(order_by = -loading, n = 5, by = PC, with_ties = F) |>
+            dplyr::pull(feature)
+        x <- loadings |>
+            dplyr::filter(PC == pc) |>
+            dplyr::filter(feature %in% c(feats_high, feats_low)) |>
+            dplyr::mutate(feature = forcats::fct_reorder(feature, loading))
+
+        plot <- ggplot2::ggplot(x, ggplot2::aes(x = loading, y = feature)) +
+            ggplot2::geom_col() +
+            colrr::theme_material(white = T) +
+            ggplot2::scale_x_continuous(limits = limits) +
+            ggplot2::facet_wrap(vars(PC))
+
+        if (!is.null(limits_col)) {
+            plot <- plot + ggplot2::geom_col(ggplot2::aes(fill = loading), color = "grey40") +
+                ggplot2::scale_fill_gradientn(colors = colrr::col_pal("RdBu", direction = -1),
+                                              limits = limits_col)
+        }
+        return(plot)
+    })
+    plots <- patchwork::wrap_plots(plots, nrow = 1, axis_titles = "collect", guides = "collect") +
+        patchwork::plot_annotation(title = title)
+    return(plots)
+
 }
 
 plot_loadings <- function(pca_prcomp, title, limits = c(-1,1)) {
@@ -184,17 +229,24 @@ inspect_matrices <- function(liofma,
     # focus on top features per PC, just to get an idea of main source of variance
     # loadings from prcomp are always between −1 and 1
     pcas <- purrr::map(liofma, ~prcomp(t(.x), scale. = F))
-    loadings_plot1 <- patchwork::wrap_plots(purrr::map2(pcas,
-                                                        names(pcas),
-                                                        ~plot_loadings(.x,.y, limits = c(-1,1))),
-                                            guides = "collect", axes = "collect")
-    print(loadings_plot1)
-    loadings_plot2 <- patchwork::wrap_plots(purrr::map2(pcas,
-                                                        names(pcas),
-                                                        ~plot_loadings(.x,.y, limits = NULL)),
-                                            axes = "collect")
-    print(loadings_plot2)
 
+    all_loadings <- purrr::map_dfr(pcas, ~brathering::mat_to_df_long(x = .x$rotation[,c(1,2)],
+                                                                     colnames_to = "PC",
+                                                                     rownames_to = "feature",
+                                                                     values_to = "loading"), .id = "view") |>
+        dplyr::filter(PC %in% c("PC1", "PC2"))
+    limits <- c(brathering::floor2(min(all_loadings$loading), 1),
+                brathering::ceiling2(max(all_loadings$loading), 1))
+    loadings_plot1 <- purrr::map2(pcas,
+                                  names(pcas),
+                                  ~plot_loadings_pc12(.x,.y, limits = NULL, limits_col = limits))
+
+    loadings_plot2 <- purrr::map2(pcas,
+                                  names(pcas),
+                                  ~plot_loadings_pc12(.x,.y, limits = NULL, limits_col = NULL))
+    for (i in loadings_plot2) {
+        print(i)
+    }
     ## scaled pca
     pcas2 <- purrr::map(liofma, ~prcomp(t(.x), scale. = T))
 
@@ -202,6 +254,14 @@ inspect_matrices <- function(liofma,
     pca_total_raw <- prcomp(t(dplyr::bind_rows(purrr::map(liofma, as.data.frame))))
     pca_total_scale <- prcomp(dplyr::bind_cols(purrr::map(liofma, ~as.data.frame(scale(t(.x))))))
 
+
+    ## tsne of all pc1, pc2
+    all_vars <- purrr::map2_dfc(pcas, names(pcas), ~stats::setNames(as.data.frame(.x$x[,c(1,2)]), paste0(colnames(.x$x[,c(1,2)]), "_", .y)))
+    umap <- fcexpr::ff_calc_umap_tsne(exprs = as.matrix(all_vars))
+
+    clusterings_all_pc12 <- fcexpr::get_louvain_cluster(exprs = as.matrix(all_vars),
+                                                FindClusters_args = list(resolution = c(1), verbose = T))
+    colnames(clusterings_all_pc12) <- paste0("overall_", colnames(clusterings_all_pc12))
     # but total variance does not tell us about the structure, i.e. is variance isotropic (spread evenly across features) or low-dimensional (most variance in few directions)
     # so eigenvalues:
     # Using cov(X): eigenvalues = variance in original units
@@ -260,19 +320,31 @@ inspect_matrices <- function(liofma,
 
 
     clusterings <- as.data.frame(dplyr::bind_cols(purrr::list_flatten(clusterings_view, name_spec = "{inner}"),
-                                                  purrr::list_flatten(clusterings_total, name_spec = "{inner}")))
+                                                  purrr::list_flatten(clusterings_total, name_spec = "{inner}"),
+                                                  clusterings_all_pc12))
     rownames(clusterings) <- names(clusterings_view[[1]][[1]])
+
+    umap2 <- cbind(as.data.frame(umap), clusterings)
+    umap_plots <- purrr::map(names(clusterings), function(x) {
+        ggplot2::ggplot(umap2, aes(x = UMAP_1, y = UMAP_2, color = !!rlang::sym(x))) +
+            ggplot2::geom_point() +
+            colrr::scale_color_custom()
+    })
+    umap_plots <- patchwork::wrap_plots(umap_plots, axis_titles = "collect")
+
 
     return(list(data = list(pcas_raw = pcas,
                             pcas_scale = pcas2,
                             pca_total_raw = pca_total_raw,
                             pca_total_scale = pca_total_scale,
-                            clusterings = clusterings),
+                            clusterings = clusterings,
+                            umap = as.data.frame(umap)),
                 plots = list(eigen_plot = eigen_plot,
-                             loadings_plot1 = loadings_plot1,
-                             loadings_plot2 = loadings_plot2,
+                             loading_plots1 = loadings_plot1,
+                             loading_plots2 = loadings_plot2,
                              vars_plot_view = vars_plot_view,
-                             vars_plot_total = vars_plot_total)))
+                             vars_plot_total = vars_plot_total,
+                             umap_plots = umap_plots)))
 }
 
 check_matrices <- function(liofma) {

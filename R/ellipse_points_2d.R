@@ -273,35 +273,3 @@ givens_rotation <- function(n, i, j, theta) {
     R
 }
 
-
-#' Random rotation matrix in nD
-#'
-#' @param n
-#'
-#' @returns
-#' @export
-#'
-#' @examples
-#' random_rotation(2)
-#' hdos:::is_rotation_matrix(random_rotation(2))
-#' random_rotation(4)
-#' hdos:::is_rotation_matrix(random_rotation(4))
-#' ggplot(ellipse_points_2d(covmat = c(5,0,0,1)), aes(x,y)) +
-#'     geom_point() +
-#'     coord_equal()
-#'
-#' ggplot(ellipse_points_2d(covmat = matrix(c(5,0,0,1), nrow = 2) %*% random_rotation(2)), aes(x,y)) +
-#'     geom_point() +
-#'     coord_equal()
-random_rotation <- function(n) {
-    A <- matrix(rnorm(n^2), n, n)
-    Q <- qr.Q(qr(A))
-
-    # ensure det = +1 (proper rotation)
-    if (det(Q) < 0) Q[,1] <- -Q[,1]
-
-    Q
-}
-
-
-

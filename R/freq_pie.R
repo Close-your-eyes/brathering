@@ -208,7 +208,8 @@ check_and_add_col_pal <- function(tab, col_pal) {
 }
 
 bw_txt <- function(bg_col, cutoff = 50) {
-    ifelse(farver::decode_colour(bg_col, to = "hcl")[, "l"] > cutoff, "black", "white")
+    # bg_col <- "#253238"
+    unname(ifelse(farver::decode_colour(bg_col, to = "hcl")[, "l"] > cutoff, "black", "white"))
 }
 
 make_rel_labels <- function(which = c("label_text_inside", "label_text_outside"),

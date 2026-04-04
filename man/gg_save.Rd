@@ -15,7 +15,7 @@ gg_save(
   h = NULL,
   aspect_ratio = 4/3,
   ar = NULL,
-  overwrite = F,
+  overwrite = T,
   append_filename = T,
   ...
 )

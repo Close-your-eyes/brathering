@@ -94,7 +94,7 @@ plot_loadings_pc12 <- function(pca_prcomp, title, limits = c(-1,1), limits_col =
             ggplot2::geom_col() +
             colrr::theme_material(white = T) +
             ggplot2::scale_x_continuous(limits = limits) +
-            ggplot2::facet_wrap(vars(PC))
+            ggplot2::facet_wrap(ggplot2::vars(PC))
 
         if (!is.null(limits_col)) {
             plot <- plot + ggplot2::geom_col(ggplot2::aes(fill = loading), color = "grey40") +
@@ -260,7 +260,7 @@ inspect_matrices <- function(liofma,
     umap <- fcexpr::ff_calc_umap_tsne(exprs = as.matrix(all_vars))
 
     clusterings_all_pc12 <- fcexpr::get_louvain_cluster(exprs = as.matrix(all_vars),
-                                                FindClusters_args = list(resolution = c(1), verbose = T))
+                                                        FindClusters_args = list(resolution = c(1), verbose = T))
     colnames(clusterings_all_pc12) <- paste0("overall_", colnames(clusterings_all_pc12))
     # but total variance does not tell us about the structure, i.e. is variance isotropic (spread evenly across features) or low-dimensional (most variance in few directions)
     # so eigenvalues:
@@ -326,14 +326,15 @@ inspect_matrices <- function(liofma,
 
     umap2 <- cbind(as.data.frame(umap), clusterings)
     umap_plots <- purrr::map(names(clusterings), function(x) {
-        ggplot2::ggplot(umap2, aes(x = UMAP_1, y = UMAP_2, color = !!rlang::sym(x))) +
+        ggplot2::ggplot(umap2, ggplot2::aes(x = UMAP_1, y = UMAP_2, color = !!rlang::sym(x))) +
             ggplot2::geom_point() +
             colrr::scale_color_custom()
     })
     umap_plots <- patchwork::wrap_plots(umap_plots, axis_titles = "collect")
 
 
-    return(list(data = list(pcas_raw = pcas,
+    return(list(data = list(input = liofma,
+                            pcas_raw = pcas,
                             pcas_scale = pcas2,
                             pca_total_raw = pca_total_raw,
                             pca_total_scale = pca_total_scale,

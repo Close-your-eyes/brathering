@@ -42,7 +42,7 @@ gg_save <- function(plot = ggplot2::last_plot(),
                     h = NULL,
                     aspect_ratio = 4/3,
                     ar = NULL,
-                    overwrite = F,
+                    overwrite = T,
                     append_filename = T,
                     ...) {
 
@@ -74,6 +74,7 @@ gg_save <- function(plot = ggplot2::last_plot(),
     }
     message("w: ", round(width,1), " h: ", round(height,1), " ar: ", round(aspect_ratio,1))
 
+    filename <- gsub("cairo_pdf$", "pdf", filename)
     target <- file.path(path, filename)
 
     if (file.exists(target)) {

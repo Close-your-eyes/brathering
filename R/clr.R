@@ -36,6 +36,9 @@ clr <- function(x, margin = 1) {
         return(x)
     }
 
+
+    isdf <- is.data.frame(x)
+    x <- as.matrix(x)
     if (!is.numeric(x)) {
         stop("x must be numeric.")
     }
@@ -47,20 +50,27 @@ clr <- function(x, margin = 1) {
     if (is.vector(x)) {
 
         message("total: ", sum(x, na.rm = T))
-        x <- clr_base(x)
+        y <- clr_base(x)
 
     } else if (is.matrix(x) || is.data.frame(x)) {
 
-        if (margin == 1 && unique(Matrix::rowSums(x, na.rm = T) != 1)) {
+        if (margin == 1 && unique(round(Matrix::rowSums(x, na.rm = T), 3)) != 1) {
             stop("unequal rowsums.")
         }
-        if (margin == 2 && unique(Matrix::colSums(x, na.rm = T) != 1)) {
+        if (margin == 2 && unique(round(Matrix::colSums(x, na.rm = T), 3)) != 1) {
             stop("unequal colsums.")
         }
-        x <- apply(X = x, MARGIN = margin, clr_base)
-
+        if (margin == 1) {
+            y <- t(apply(X = x, MARGIN = margin, clr_base))
+        }
+        if (margin == 2) {
+            y <- apply(X = t(x), MARGIN = margin, clr_base)
+        }
+        if (isdf) {
+            y <- as.data.frame(y)
+        }
     }
-    return(x)
+    return(y)
 }
 
 

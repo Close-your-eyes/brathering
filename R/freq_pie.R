@@ -23,8 +23,10 @@
 #' @param label_rel_dec decimal places of relative labels
 #' @param legend_title legend title
 #' @param theme_args arguments to ggplot2::theme()
-#' @param fill_na
-#' @param col_pal_args
+#' @param fill_na fill for NA
+#' @param col_pal_args args to colrr::make_col_pal
+#' @param theme ggplot theme
+#' @param color_text text color
 #'
 #' @returns list of plot and data frame
 #' @export
@@ -41,6 +43,7 @@ piechart <- function(x,
                      fill = colrr::col_pal("custom"),
                      fill_na = "grey50",
                      color = "white",
+                     color_text = "..auto..",
                      radius_inside = 0.3,
                      label_outside = c("none", "abs", "rel"),
                      label_inside = c("rel", "abs", "none"),
@@ -55,6 +58,7 @@ piechart <- function(x,
                      label_rel_pct = F,
                      label_rel_dec = 2,
                      legend_title = NULL,
+                     theme = ggplot2::theme_classic(),
                      theme_args = list(panel.grid = ggplot2::element_blank(),
                                        axis.title = ggplot2::element_blank(),
                                        axis.text = ggplot2::element_blank(),
@@ -105,7 +109,11 @@ piechart <- function(x,
 
     # add text colors
     for (i in c("text_color_inside", "text_color_outside")) {
-        tab[[i]] <- bw_txt(tab$group_cols)
+        if (color_text[1] == "..auto..") {
+            tab[[i]] <- bw_txt(tab$group_cols)
+        } else {
+            tab[[i]] <- color_text
+        }
     }
     # for (i in c("label_radius_inside", "label_radius_outside")) {
     #   tab[which(tab[[i]] >= 1), gsub("label_radius", "text_color", i)] <- bw_txt(plot[["theme"]][["panel.background"]][["fill"]])
@@ -149,6 +157,7 @@ piechart <- function(x,
         ggplot2::scale_fill_manual(values = stats::setNames(tab$group_cols, tab$group),
                                    na.value = fill_na) +
         ggplot2::coord_fixed(ratio = 1) +
+        theme +
         Gmisc::fastDoCall(ggplot2::theme, args = theme_args)
 
     if (label_inside != "none") {

@@ -10,6 +10,7 @@ piechart(
   fill = colrr::col_pal("custom"),
   fill_na = "grey50",
   color = "white",
+  color_text = "..auto..",
   radius_inside = 0.3,
   label_outside = c("none", "abs", "rel"),
   label_inside = c("rel", "abs", "none"),
@@ -24,6 +25,7 @@ piechart(
   label_rel_pct = F,
   label_rel_dec = 2,
   legend_title = NULL,
+  theme = ggplot2::theme_classic(),
   theme_args = list(panel.grid = ggplot2::element_blank(), axis.title =
     ggplot2::element_blank(), axis.text = ggplot2::element_blank(), axis.ticks =
     ggplot2::element_blank()),
@@ -38,7 +40,11 @@ TRUE for decreasing, FALSE for increasing}
 
 \item{fill}{color palette to fill pie pieces, can be named by groups in x}
 
+\item{fill_na}{fill for NA}
+
 \item{color}{border color of pie pieces}
+
+\item{color_text}{text color}
 
 \item{radius_inside}{inner radius where pieces are cut. outer radius is fixed
 to 1. set to 0 to get pie chart}
@@ -71,9 +77,11 @@ gets recycled}
 
 \item{legend_title}{legend title}
 
+\item{theme}{ggplot theme}
+
 \item{theme_args}{arguments to ggplot2::theme()}
 
-\item{col_pal_args}{}
+\item{col_pal_args}{args to colrr::make_col_pal}
 }
 \value{
 list of plot and data frame

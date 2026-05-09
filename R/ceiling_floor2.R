@@ -84,7 +84,7 @@ decimals_adaptive <- function(x) {
 
     if (max_val > 100) return(0)
 
-    if (max_val > 1 && any(abs(x - round(x)) > .Machine$double.eps^0.5)) {
+    if (max_val > 1 && any(abs(x - round(x)) > .Machine$double.eps^0.5, na.rm = T)) {
         return(1)
     } else if (max_val > 1) {
         return(0)
@@ -99,7 +99,7 @@ decimals_adaptive <- function(x) {
     # +1 as rounding may cause differences in a decimal place that is yet equal
 
     # rm one dec place if only zeros follow
-    if (all(abs(x - round(x, decimals)) < .Machine$double.eps^0.5)) {
+    if (all(abs(x - round(x, decimals)) < .Machine$double.eps^0.5, na.rm = T)) {
         decimals <- decimals - 1
     }
 

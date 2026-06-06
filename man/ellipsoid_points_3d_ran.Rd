@@ -11,9 +11,6 @@ ellipsoid_points_3d_ran(
   c = 1
 )
 }
-\arguments{
-\item{c}{}
-}
 \description{
 Title
 }

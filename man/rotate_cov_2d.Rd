@@ -6,9 +6,6 @@
 \usage{
 rotate_cov_2d(covmat = c(1, 0, 0, 1), theta = pi * 0)
 }
-\arguments{
-\item{theta}{}
-}
 \description{
 Title
 }

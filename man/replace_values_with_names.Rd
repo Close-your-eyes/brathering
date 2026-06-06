@@ -6,9 +6,6 @@
 \usage{
 replace_values_with_names(code_block)
 }
-\arguments{
-\item{code_block}{}
-}
 \value{
 character to prep with cat()
 }

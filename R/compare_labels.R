@@ -12,7 +12,7 @@
 #' @param y vector 2
 #' @param freq_label_cutoff
 #' @param join_label_sep
-#' @param join_label_tresh
+#' @param join_label_thresh
 #'
 #' @returns list
 #' @export
@@ -28,7 +28,7 @@ compare_labels <- function(x,
                            y,
                            freq_label_cutoff = 0,
                            join_label_sep = "_",
-                           join_label_tresh = 0.05) {
+                           join_label_thresh = 0.05) {
 
     # related:
     # https://github.com/lazappi/clustree
@@ -63,6 +63,7 @@ compare_labels <- function(x,
 
     #purrr::map_int(apply(row_props, 1, c, simplify = F), which.max)
     #purrr::map_int(apply(col_props, 2, c, simplify = F), which.max)
+
 
     # catch error when one cluster does not have any match in other labels
     row_maxes <- apply(row_props, 1, which.max)
@@ -110,7 +111,7 @@ compare_labels <- function(x,
         dplyr::mutate(total = sum(n),
                       rel = n / total,
                       xyfix = xy[which.max(n)],
-                      xyfix = dplyr::if_else(rel < join_label_tresh, xyfix, xy),
+                      xyfix = dplyr::if_else(rel < join_label_thresh, xyfix, xy),
                       .by = x) |>
         dplyr::distinct(x, xy, xyfix)
     xy_fix <- stats::setNames(xy_join_df$xyfix, xy_join_df$xy)
@@ -124,7 +125,7 @@ compare_labels <- function(x,
         dplyr::mutate(total = sum(n),
                       rel = n / total,
                       yxfix = yx[which.max(n)],
-                      yxfix = dplyr::if_else(rel < join_label_tresh, yxfix, yx),
+                      yxfix = dplyr::if_else(rel < join_label_thresh, yxfix, yx),
                       .by = y) |>
         dplyr::distinct(y, yx, yxfix)
     yx_fix <- stats::setNames(yx_join_df$yxfix, yx_join_df$yx)
@@ -203,3 +204,9 @@ adjust_order_make_df <- function(mat,
 
     return(list(mat = mat, df = df, plot = plot))
 }
+
+# x <- data.frame(
+#     label1 = c("A","A","A","B","B","C","C","C","C"),
+#     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")
+# )
+# out <- compare_labels(x = x)

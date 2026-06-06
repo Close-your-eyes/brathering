@@ -12,9 +12,6 @@ ellipsoid_points_3d(
   c = 1
 )
 }
-\arguments{
-\item{c}{}
-}
 \description{
 Title
 }

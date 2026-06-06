@@ -14,8 +14,6 @@ jaccard_index_pairwise(
 }
 \arguments{
 \item{x}{named list of vectors}
-
-\item{return_plot}{}
 }
 \value{
 list of jaccard index formats and plot

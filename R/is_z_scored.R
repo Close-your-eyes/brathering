@@ -31,7 +31,7 @@ is_z_scored <- function(x,
 
     m <- mean(x, na.rm = TRUE)
     s <- stats::sd(x, na.rm = TRUE)
-    is_z <- (abs(m) < tol && (s - 1) < tol)
+    is_z <- ((any(x<0) && any(x>0)) && abs(m) < tol && (s - 1) < tol)
 
     if (!is_z && verbose) {
         message("mean: ", round(m, get_decimal_places(tol)+1), ", sd: ", round(s, get_decimal_places(tol)+1))

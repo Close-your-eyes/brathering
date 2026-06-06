@@ -6,9 +6,6 @@
 \usage{
 trim_zeros_df_cols(df, cols, which = list(c("lead", "trail")))
 }
-\arguments{
-\item{which}{}
-}
 \description{
 Title
 }

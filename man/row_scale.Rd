@@ -14,9 +14,6 @@ row_scale(
   drop.na.rows = T
 )
 }
-\arguments{
-\item{drop.na.rows}{}
-}
 \description{
 Title
 }

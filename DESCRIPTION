@@ -1,12 +1,11 @@
 Package: brathering
 Type: Package
 Title: Collection of Useful Functions I Do Not Want to Forget About
-Version: 0.2.1
+Version: 0.2.2
 Description: Many functions that once helped me to solve a generic task or that simply contain an elegant piece of code for solving a problem.
 License: AGPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.3
 Authors@R: 
     person(given = "Christopher Mark",
            family = "Skopnik",
@@ -55,3 +54,4 @@ Suggests:
     Gmisc,
     deunicode,
     officer
+Config/roxygen2/version: 8.0.0

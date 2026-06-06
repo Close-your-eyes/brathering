@@ -18,7 +18,8 @@ strsplit2 <- function(x, pattern, inds = 1, SIMPLIFY = FALSE) {
     inds <- as.numeric(inds)
     inds <- inds[which(!is.na(inds))]
     inds <- inds[which(inds!=0)]
-    mapply(x = x, y = gregexpr(pattern, x), function(x,y) {
+    out <- mapply(x = x, y = gregexpr(pattern, x), function(x,y) {
+
 
         if (length(inds) > 1) {
 
@@ -38,7 +39,7 @@ strsplit2 <- function(x, pattern, inds = 1, SIMPLIFY = FALSE) {
             }
 
             # split at one index only
-            if (inds > length(y)) {
+            if (inds > length(y) || inds < 1) {
                 # index not present in this string (x)
                 return(x)
             } else {
@@ -48,6 +49,8 @@ strsplit2 <- function(x, pattern, inds = 1, SIMPLIFY = FALSE) {
         }
 
     }, SIMPLIFY = SIMPLIFY)
+
+    return(out)
 }
 
 

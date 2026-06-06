@@ -6,9 +6,6 @@
 \usage{
 list_selfname(lst)
 }
-\arguments{
-\item{lst}{}
-}
 \description{
 Title
 }

@@ -9,15 +9,13 @@ compare_labels(
   y,
   freq_label_cutoff = 0,
   join_label_sep = "_",
-  join_label_tresh = 0.05
+  join_label_thresh = 0.05
 )
 }
 \arguments{
 \item{x}{vector 1 or data frame; if df then col1 and col2 become x and y}
 
 \item{y}{vector 2}
-
-\item{join_label_tresh}{}
 }
 \value{
 list

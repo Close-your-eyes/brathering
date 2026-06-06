@@ -11,9 +11,6 @@ rotate_cov_3d(
   Rz = 0 * pi
 )
 }
-\arguments{
-\item{Rz}{}
-}
 \description{
 Title
 }

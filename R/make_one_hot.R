@@ -56,8 +56,11 @@ make_one_hot <- function(x, col = NULL) {
 
 
     lvls <- unique(x)
-    # onehot <- purrr::map_dfr(x, ~as.data.frame(matrix(as.numeric(.x == lvls), nrow = 1)))
-    onehot <- as.data.frame(model.matrix(~ x - 1))
+    onehot <- purrr::map_dfr(x, ~as.data.frame(matrix(as.numeric(.x == lvls), nrow = 1)))
+
+    # mdel.matrix does not preserve row order
+    # onehot <- as.data.frame(model.matrix(~ x - 1))
+
     names(onehot) <- lvls
 
     return(onehot)

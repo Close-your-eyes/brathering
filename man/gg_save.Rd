@@ -7,7 +7,7 @@
 gg_save(
   plot = ggplot2::last_plot(),
   filename = paste0(deparse(substitute(plot)), ".", deparse(substitute(device))),
-  device = png,
+  device = ragg::agg_png,
   path = getOption("im_path", default = getwd()),
   width = 8,
   w = NULL,

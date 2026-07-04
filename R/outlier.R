@@ -159,7 +159,12 @@ outlier <- function(df,
         }
     }
 
-    return(cbind(hdout, db, lvs, mah, lof, mv, rb, mcl))
+    out <- cbind(hdout, db, lvs, mah, lof, mv, rb, mcl)
+    if (!is.null(rownames(df))) {
+      rownames(out) <- rownames(df)
+    }
+
+    return(out)
 }
 
 

@@ -18,6 +18,7 @@ strsplit2 <- function(x, pattern, inds = 1, SIMPLIFY = FALSE) {
     inds <- as.numeric(inds)
     inds <- inds[which(!is.na(inds))]
     inds <- inds[which(inds!=0)]
+    x <- as.character(x)
     out <- mapply(x = x, y = gregexpr(pattern, x), function(x,y) {
 
 

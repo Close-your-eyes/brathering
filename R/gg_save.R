@@ -34,7 +34,7 @@
 #' gg_save(pp)
 gg_save <- function(plot = ggplot2::last_plot(),
                     filename = paste0(deparse(substitute(plot)), ".", deparse(substitute(device))),
-                    device = png,
+                    device = ragg::agg_png,
                     path = getOption("im_path", default = getwd()),
                     width = 8,
                     w = NULL,
@@ -74,7 +74,10 @@ gg_save <- function(plot = ggplot2::last_plot(),
     }
     message("w: ", round(width,1), " h: ", round(height,1), " ar: ", round(aspect_ratio,1))
 
+
     filename <- gsub("cairo_pdf$", "pdf", filename)
+    filename <- gsub("ragg::agg_png$", "png", filename)
+
     target <- file.path(path, filename)
 
     if (file.exists(target)) {

@@ -403,11 +403,10 @@ find_peaks <- function(x,
     }
 
 
-
-
-
     return(xtrmfinal)
 }
+
+
 make_intervals <- function(start = 0,
                            end = 100,
                            step = 5,
@@ -653,123 +652,3 @@ get_median_val <- function(y) {
 }
 
 
-
-
-# catgpt:
-# find_local_extrema_inds <- function(
-        #         x,
-#         threshold = -Inf,
-#         min_gap = 0,
-#         close_extremes = c("random", "both"),
-#         type = c("maxima", "minima"),
-#         min_mono_width = 0,
-#         adaptive_window_sizes = NULL
-# ) {
-#     close_extremes <- rlang::arg_match(close_extremes)
-#     type <- rlang::arg_match(type)
-#
-#     # Flip sign for minima search
-#     x_proc <- if (type == "minima") -x else x
-#
-#     original_indices <- seq_along(x_proc)
-#     na_mask <- !is.na(x_proc)
-#     x_clean <- x_proc[na_mask]
-#     index_clean <- original_indices[na_mask]
-#     x_orig_clean <- x[na_mask]
-#
-#     n <- length(x_clean)
-#     extrema_candidates <- integer(0)
-#
-#     i <- 2
-#     while (i < n) {
-#         if (x_clean[i] > x_clean[i - 1]) {
-#             start <- i
-#             while (i < n && x_clean[i] == x_clean[i + 1]) {
-#                 i <- i + 1
-#             }
-#             if (i < n && x_clean[i] > x_clean[i + 1]) {
-#                 mid <- round((start + i) / 2)
-#                 value_at_mid <- x_orig_clean[mid]
-#
-#                 # Threshold condition
-#                 if ((type == "maxima" && value_at_mid > threshold) ||
-#                     (type == "minima" && value_at_mid < threshold)) {
-#
-#                     # Semi-monotonic trend check
-#                     pass_prominence <- TRUE
-#                     if (min_mono_width > 0) {
-#                         left_start <- max(1, mid - min_mono_width)
-#                         right_end <- min(n, mid + min_mono_width)
-#
-#                         left_trend <- all(diff(x_clean[left_start:mid]) >= 0)
-#                         right_trend <- all(diff(x_clean[mid:right_end]) <= 0)
-#
-#                         if (!(left_trend && right_trend)) {
-#                             pass_prominence <- FALSE
-#                         }
-#                     }
-#
-#                     # Adaptive window check
-#                     pass_window <- FALSE
-#                     if (!is.null(adaptive_window_sizes)) {
-#                         for (w in adaptive_window_sizes) {
-#                             if (mid > w && mid <= n - w) {
-#                                 left <- x_clean[(mid - w):(mid - 1)]
-#                                 right <- x_clean[(mid + 1):(mid + w)]
-#                                 center <- x_clean[mid]
-#
-#                                 if (all(center > left) && all(center > right)) {
-#                                     pass_window <- TRUE
-#                                     break
-#                                 }
-#                             }
-#                         }
-#                     }
-#
-#                     # Accept if passes either strategy
-#                     if (pass_prominence || pass_window) {
-#                         extrema_candidates <- c(extrema_candidates, index_clean[mid])
-#                     }
-#                 }
-#             }
-#         }
-#         i <- i + 1
-#     }
-#
-#     # Merge close extrema
-#     if (min_gap > 0 && length(extrema_candidates) > 1) {
-#         kept <- logical(length(extrema_candidates))
-#         i <- 1
-#         while (i <= length(extrema_candidates)) {
-#             group <- extrema_candidates[i]
-#             j <- i + 1
-#             while (j <= length(extrema_candidates) &&
-#                    (extrema_candidates[j] - extrema_candidates[j - 1]) < min_gap) {
-#                 group <- c(group, extrema_candidates[j])
-#                 j <- j + 1
-#             }
-#
-#             values <- x[group]
-#             best_val <- if (type == "maxima") max(values) else min(values)
-#             best_indices <- which(values == best_val)
-#
-#             if (length(best_indices) == 1 || close_extremes == "random") {
-#                 keep_one <- if (length(best_indices) == 1) best_indices else sample(best_indices, 1)
-#                 kept[i + keep_one - 1] <- TRUE
-#             } else if (close_extremes == "both") {
-#                 kept[i - 1 + best_indices] <- TRUE
-#             }
-#
-#             i <- j
-#         }
-#         extrema_candidates <- extrema_candidates[kept]
-#     }
-#
-#     # Fallback: global max/min
-#     if (length(extrema_candidates) == 0 && any(!is.na(x))) {
-#         fallback_index <- if (type == "maxima") which.max(x) else which.min(x)
-#         extrema_candidates <- fallback_index
-#     }
-#
-#     return(extrema_candidates)
-# }

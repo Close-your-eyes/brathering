@@ -8,7 +8,7 @@ img_save(
   plotdata,
   plotfun = plot,
   filename = paste0(deparse(substitute(plotdata)), ".", device),
-  device = c("png", "tiff", "jpeg", "bmp"),
+  device = c("ragg::agg_png", "png", "tiff", "jpeg", "bmp"),
   path = getOption("im_path", default = getwd()),
   width = 8,
   height = NULL,

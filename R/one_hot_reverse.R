@@ -15,6 +15,7 @@
 #'   are allowed.
 #' @param sep Character string used to separate category names when
 #'   `multiple = TRUE`.
+#' @param missing value for rows with zeros only
 #'
 #' @returns
 #' A character vector with one element per row:
@@ -48,22 +49,24 @@
 #' one_hot_reverse(y, multiple = TRUE, sep = "; ")
 one_hot_reverse <- function(x,
                             multiple = FALSE,
-                            sep = ", ") {
+                            sep = ", ",
+                            missing = "") {
 
     if (is.null(colnames(x))) {
         stop("x needs colnames.")
     }
 
-    if (!multiple) {
-        row_sums <- rowSums(x)
-
-        if (any(row_sums != 1)) {
-            stop("Each row must contain exactly one 1.")
-        }
-        return(colnames(x)[max.col(x)])
-    } else {
-        return(apply(x, 1, function(row) paste(colnames(x)[as.logical(row)], collapse = sep)))
+    row_sums <- rowSums(x)
+    if (!multiple && any(row_sums > 1)) {
+        stop("Each row must contain max. one 1.")
     }
 
-
+    if (all(row_sums == 1)) {
+        # more efficient
+        out <- colnames(x)[max.col(x)]
+    } else {
+        out <- apply(x, 1, function(row) paste(colnames(x)[as.logical(row)], collapse = sep))
+    }
+    out[which(out == "")] <- missing
+    return(out)
 }

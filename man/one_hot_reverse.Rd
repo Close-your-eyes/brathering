@@ -4,7 +4,7 @@
 \alias{one_hot_reverse}
 \title{Reverse one-hot encoding}
 \usage{
-one_hot_reverse(x, multiple = FALSE, sep = ", ")
+one_hot_reverse(x, multiple = FALSE, sep = ", ", missing = "")
 }
 \arguments{
 \item{x}{A one-hot encoded matrix or data frame. Column names are interpreted
@@ -16,6 +16,8 @@ are allowed.}
 
 \item{sep}{Character string used to separate category names when
 `multiple = TRUE`.}
+
+\item{missing}{value for rows with zeros only}
 }
 \value{
 A character vector with one element per row:

@@ -2,38 +2,99 @@
 % Please edit documentation in R/compare_labels.R
 \name{compare_labels}
 \alias{compare_labels}
-\title{Compare two vectors of labels for overlap/correspondence/similarity}
+\title{Compare two label vectors for overlap, correspondence, and similarity}
 \usage{
 compare_labels(
   x,
   y,
+  adjust_order = T,
+  make_plots = T,
   freq_label_cutoff = 0,
   join_label_sep = "_",
   join_label_thresh = 0.05
 )
 }
 \arguments{
-\item{x}{vector 1 or data frame; if df then col1 and col2 become x and y}
+\item{x}{A label vector, data frame, or matrix. If a data frame or matrix,
+the first column is used as `x` and the second column as `y`.}
 
-\item{y}{vector 2}
+\item{y}{A second label vector. Ignored when `x` is a data frame or matrix.}
+
+\item{freq_label_cutoff}{Numeric cutoff used for displaying text labels in
+heatmap plots. Values less than or equal to this cutoff are not printed
+inside tiles.}
+
+\item{join_label_sep}{Character string used to join `x` and `y` labels.}
+
+\item{join_label_thresh}{Numeric threshold for joined-label frequencies.
+Joined labels with relative frequency below this threshold are reassigned
+to the most frequent joined label within the same parent label.}
 }
 \value{
-list
+A list with entries:
+\describe{
+  \item{raw}{Shared observation counts between `x` and `y` labels.}
+  \item{x_probs}{Conditional proportions of `y` labels within each `x` label.}
+  \item{y_probs}{Conditional proportions of `x` labels within each `y` label.}
+  \item{jaccard}{Pairwise Jaccard index between `x` and `y` labels.}
+  \item{x_corres}{Best-matching `y` label for each `x` label.}
+  \item{y_corres}{Best-matching `x` label for each `y` label.}
+  \item{join_labels}{Joined and frequency-corrected joined labels in both
+    `xy` and `yx` directions.}
+}
 }
 \description{
-x and y may be two label vectors for same observations. compare how one
-splits in the other. In return: raw is pure counts of shared obs; row_props
-and col_probs tells relative sharing: e.g row1 of row_props tells the relative
-split of label of row1 to collabels, col_probs: same from column perspective.
-jaccard is self-explaining. row or colwise max values in row_props or
-col_props are row_corres and col_corres. These may be used to transfer
-labels.
+Compares two label vectors, `x` and `y`, describing the same observations.
+The function summarizes how labels in `x` split across labels in `y`, and
+vice versa.
+}
+\details{
+If `x` is a data frame or matrix, its first two columns are used as `x` and
+`y`. Missing pairs are removed before comparison.
+
+The returned `raw`, `x_probs`, `y_probs`, and `jaccard` entries each contain
+a matrix, a long-format data frame, and a heatmap plot. `raw` contains shared
+observation counts. `x_probs` contains the distribution of each `x` label
+across `y` labels. `y_probs` contains the distribution of each `y` label
+across `x` labels. `jaccard` contains pairwise Jaccard indices between labels
+in `x` and labels in `y`.
+
+`x_corres` gives the best-matching `y` label for each `x` label, based on
+the maximum value in `x_probs`. `y_corres` gives the best-matching `x` label
+for each `y` label, based on the maximum value in `y_probs`. Ties are reported
+by message and the first maximum is used.
+
+Joined labels are returned in `join_labels`. Low-frequency joined labels,
+defined by `join_label_thresh`, are reassigned to the most frequent joined
+label within the corresponding parent label.
+
+Overall similarity (global_comp)
+Detailed overlap (raw)
+Conditional relationships (x_probs, y_probs)
+Pairwise similarity (jaccard)
+Best correspondences (x_corres, y_corres)
+Utilities for relabeling (join_labels)
 }
 \examples{
-# see transfer_labels which uses compare_labels
 x <- data.frame(
     label1 = c("A","A","A","B","B","C","C","C","C"),
     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")
 )
-compare_labels(x = x)
+
+out <- compare_labels(x = x)
+out$x_corres
+out$y_corres
+
+# global_comp: A panel of complementary similarity measures between two clusterings.
+# They fall into three broad categories: pair-counting, information-theoretic, and contingency-table measures.
+# | Metric | Range | Higher/lower | What it measures                   | Sensitive to splitting? |
+# | ------ | ----: | :----------: | ---------------------------------- | :---------------------: |
+# | RI     |   0–1 |    Higher    | Pairwise agreement                 |          Weakly         |
+# | ARI    | ~−1–1 |    Higher    | Chance-adjusted pairwise agreement |           Yes           |
+# | MARI   | ~−1–1 |    Higher    | Modified ARI                       |           Yes           |
+# | NMI    |   0–1 |    Higher    | Shared information                 |        Moderately       |
+# | AMI    |  ~0–1 |    Higher    | Chance-adjusted mutual information |        Moderately       |
+# | NVI    |   0–1 |     Lower    | Normalized information loss        |           Yes           |
+# | NID    |   0–1 |     Lower    | Information distance               |           Yes           |
+# | Chi²   |    ≥0 |    Higher    | Dependence between partitions      |      Not normalized     |
 }

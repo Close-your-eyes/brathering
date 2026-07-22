@@ -1,31 +1,86 @@
-#' Compare two vectors of labels for overlap/correspondence/similarity
+#' Compare two label vectors for overlap, correspondence, and similarity
 #'
-#' x and y may be two label vectors for same observations. compare how one
-#' splits in the other. In return: raw is pure counts of shared obs; row_props
-#' and col_probs tells relative sharing: e.g row1 of row_props tells the relative
-#' split of label of row1 to collabels, col_probs: same from column perspective.
-#' jaccard is self-explaining. row or colwise max values in row_props or
-#' col_props are row_corres and col_corres. These may be used to transfer
-#' labels.
+#' Compares two label vectors, `x` and `y`, describing the same observations.
+#' The function summarizes how labels in `x` split across labels in `y`, and
+#' vice versa.
 #'
-#' @param x vector 1 or data frame; if df then col1 and col2 become x and y
-#' @param y vector 2
-#' @param freq_label_cutoff
-#' @param join_label_sep
-#' @param join_label_thresh
+#' If `x` is a data frame or matrix, its first two columns are used as `x` and
+#' `y`. Missing pairs are removed before comparison.
 #'
-#' @returns list
+#' The returned `raw`, `x_probs`, `y_probs`, and `jaccard` entries each contain
+#' a matrix, a long-format data frame, and a heatmap plot. `raw` contains shared
+#' observation counts. `x_probs` contains the distribution of each `x` label
+#' across `y` labels. `y_probs` contains the distribution of each `y` label
+#' across `x` labels. `jaccard` contains pairwise Jaccard indices between labels
+#' in `x` and labels in `y`.
+#'
+#' `x_corres` gives the best-matching `y` label for each `x` label, based on
+#' the maximum value in `x_probs`. `y_corres` gives the best-matching `x` label
+#' for each `y` label, based on the maximum value in `y_probs`. Ties are reported
+#' by message and the first maximum is used.
+#'
+#' Joined labels are returned in `join_labels`. Low-frequency joined labels,
+#' defined by `join_label_thresh`, are reassigned to the most frequent joined
+#' label within the corresponding parent label.
+#'
+#' Overall similarity (global_comp)
+#' Detailed overlap (raw)
+#' Conditional relationships (x_probs, y_probs)
+#' Pairwise similarity (jaccard)
+#' Best correspondences (x_corres, y_corres)
+#' Utilities for relabeling (join_labels)
+#'
+#' @param x A label vector, data frame, or matrix. If a data frame or matrix,
+#'   the first column is used as `x` and the second column as `y`.
+#' @param y A second label vector. Ignored when `x` is a data frame or matrix.
+#' @param freq_label_cutoff Numeric cutoff used for displaying text labels in
+#'   heatmap plots. Values less than or equal to this cutoff are not printed
+#'   inside tiles.
+#' @param join_label_sep Character string used to join `x` and `y` labels.
+#' @param join_label_thresh Numeric threshold for joined-label frequencies.
+#'   Joined labels with relative frequency below this threshold are reassigned
+#'   to the most frequent joined label within the same parent label.
+#'
+#' @returns A list with entries:
+#' \describe{
+#'   \item{raw}{Shared observation counts between `x` and `y` labels.}
+#'   \item{x_probs}{Conditional proportions of `y` labels within each `x` label.}
+#'   \item{y_probs}{Conditional proportions of `x` labels within each `y` label.}
+#'   \item{jaccard}{Pairwise Jaccard index between `x` and `y` labels.}
+#'   \item{x_corres}{Best-matching `y` label for each `x` label.}
+#'   \item{y_corres}{Best-matching `x` label for each `y` label.}
+#'   \item{join_labels}{Joined and frequency-corrected joined labels in both
+#'     `xy` and `yx` directions.}
+#' }
+#'
 #' @export
 #'
 #' @examples
-#' # see transfer_labels which uses compare_labels
 #' x <- data.frame(
 #'     label1 = c("A","A","A","B","B","C","C","C","C"),
 #'     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")
 #' )
-#' compare_labels(x = x)
+#'
+#' out <- compare_labels(x = x)
+#' out$x_corres
+#' out$y_corres
+#'
+#' # global_comp: A panel of complementary similarity measures between two clusterings.
+#' # They fall into three broad categories: pair-counting, information-theoretic, and contingency-table measures.
+#' # | Metric | Range | Higher/lower | What it measures                   | Sensitive to splitting? |
+#' # | ------ | ----: | :----------: | ---------------------------------- | :---------------------: |
+#' # | RI     |   0–1 |    Higher    | Pairwise agreement                 |          Weakly         |
+#' # | ARI    | ~−1–1 |    Higher    | Chance-adjusted pairwise agreement |           Yes           |
+#' # | MARI   | ~−1–1 |    Higher    | Modified ARI                       |           Yes           |
+#' # | NMI    |   0–1 |    Higher    | Shared information                 |        Moderately       |
+#' # | AMI    |  ~0–1 |    Higher    | Chance-adjusted mutual information |        Moderately       |
+#' # | NVI    |   0–1 |     Lower    | Normalized information loss        |           Yes           |
+#' # | NID    |   0–1 |     Lower    | Information distance               |           Yes           |
+#' # | Chi²   |    ≥0 |    Higher    | Dependence between partitions      |      Not normalized     |
 compare_labels <- function(x,
                            y,
+                           adjust_order = T,
+                           make_plots = T,
                            freq_label_cutoff = 0,
                            join_label_sep = "_",
                            join_label_thresh = 0.05) {
@@ -33,73 +88,87 @@ compare_labels <- function(x,
     # related:
     # https://github.com/lazappi/clustree
     # https://github.com/crazyhottommy/scclusteval
+    # mclust::adjustedRandIndex()
 
     if (is.data.frame(x)) {
         y <- x[,2,drop=T]
         x <- x[,1,drop=T]
+    } else if (is.matrix(x)) {
+        y <- x[,2]
+        x <- x[,1]
+    } else {
+        if (length(x) != length(y)) {
+            stop("x and y must have the same length.")
+        }
     }
-    # else: vectors
-    x <- as.character(x)
-    y <- as.character(y)
 
-    tab <- table(x, y)
+    # remove NA by default
+    keep <- !is.na(x) & !is.na(y)
+    nonnafreq <- mean(keep)
+    if (nonnafreq == 0) {
+        stop("no complete pairs left after NA removal.")
+    } else if (nonnafreq < 1) {
+        message("keeping ", round(nonnafreq, 2)*100, " % of complete pairs which are non-NA.")
+    }
 
-    # For each col1 label: distribution over col2 (rows sum to 1)
-    row_props <- prop.table(tab, margin = 1)
+    x <- as.character(x[keep])
+    y <- as.character(y[keep])
 
-    # For each col2 label: distribution over col1 (columns sum to 1)
-    col_props <- prop.table(tab, margin = 2)
+    global_comp <- aricode::compare_clustering(as.factor(x),
+                                               as.factor(y))
 
-    # 2) Jaccard matrix between labels in col1 (rows) and col2 (cols)
-    # J_ij = n_ij / (n_i + m_j - n_ij)
-    n_i <- rowSums(tab)
-    m_j <- colSums(tab)
-    den <- outer(n_i, m_j, "+") - tab
-    jaccard <- tab / den
-    jaccard[is.na(jaccard)] <- 0  # just in case of zeros
+    local_comp <- list(raw = table(x, y))
+    local_comp[["x_props"]] <- prop.table(local_comp[["raw"]], margin = 1)
+    local_comp[["y_props"]] <- prop.table(local_comp[["raw"]], margin = 2)
+    local_comp[["jaccard"]] <- make_jaccard(local_comp[["raw"]])
 
     # correspondence: top shared label
     # can be used to transfer labels
 
-    #purrr::map_int(apply(row_props, 1, c, simplify = F), which.max)
-    #purrr::map_int(apply(col_props, 2, c, simplify = F), which.max)
-
-
     # catch error when one cluster does not have any match in other labels
-    row_maxes <- apply(row_props, 1, which.max)
-    row_maxes[which(lengths(row_maxes) == 0)] <- NA
-    row_maxes <- stats::setNames(unlist(row_maxes), names(row_maxes))
+    x_maxes <- max.col(local_comp[["x_props"]], ties.method = "first")
+    names(x_maxes) <- rownames(local_comp[["x_props"]])
+    #x_maxes[which(lengths(x_maxes) == 0)] <- NA
 
-    col_maxes <- apply(col_props, 2, which.max)
-    col_maxes[which(lengths(col_maxes) == 0)] <- NA
-    col_maxes <- stats::setNames(unlist(col_maxes), names(col_maxes))
+    y_maxes <- max.col(t(local_comp[["y_props"]]), ties.method = "first")
+    names(y_maxes) <- colnames(local_comp[["y_props"]])
+    #y_maxes[which(lengths(y_maxes) == 0)] <- NA
 
-    row_corres <- stats::setNames(colnames(row_props)[row_maxes], rownames(row_props))
-    col_corres <- stats::setNames(rownames(col_props)[col_maxes], colnames(col_props))
+    x_corres <- stats::setNames(colnames(local_comp[["x_props"]])[x_maxes],
+                                rownames(local_comp[["x_props"]]))
+    y_corres <- stats::setNames(rownames(local_comp[["y_props"]])[y_maxes],
+                                colnames(local_comp[["y_props"]]))
 
     # check for ties of max
     # these would question label correspondence; first max is returned
-    row_tie <- apply(row_props, 1, function(x) sum(x == max(x)) > 1)
-    col_tie <- apply(col_props, 2, function(x) sum(x == max(x)) > 1)
-    if (any(row_tie, na.rm = T)) {
-        message(sum(row_tie), " rowwise max values of row_props are ties.")
-        print(row_tie)
+    x_tie <- apply(local_comp[["x_props"]], 1, function(x) sum(x == max(x)) > 1)
+    y_tie <- apply(local_comp[["y_props"]], 2, function(x) sum(x == max(x)) > 1)
+    if (any(x_tie, na.rm = T)) {
+        message(sum(x_tie), " rowwise max values of x_props are ties.")
+        print(x_tie)
     }
-    if (any(col_tie, na.rm = T)) {
-        message(sum(col_tie), " colwise max values of col_props are ties.")
-        print(col_tie)
+    if (any(y_tie, na.rm = T)) {
+        message(sum(y_tie), " colwise max values of y_props are ties.")
+        print(y_tie)
     }
 
     # make matrices from tables
-    tab <- make_matrix(tab)
-    row_props <- make_matrix(row_props)
-    col_props <- make_matrix(col_props)
-    jaccard <- make_matrix(jaccard)
+    local_comp <- purrr::map(local_comp, make_matrix_and_df, adjust_order = adjust_order)
 
-    col_props <- adjust_order_make_df(col_props, legend_name = "x in y", freq_label_cutoff = freq_label_cutoff)
-    row_props <- adjust_order_make_df(row_props, legend_name = "y in x", freq_label_cutoff = freq_label_cutoff)
-    tab <- adjust_order_make_df(tab, legend_name = "shared (n)", freq_label_cutoff = freq_label_cutoff)
-    jaccard <- adjust_order_make_df(jaccard, legend_name = "jaccard\nindex", freq_label_cutoff = freq_label_cutoff)
+    if (make_plots) {
+        local_comp <- purrr::map2(local_comp,
+                                  c("shared (n)", "y in x", "x in y", "jaccard\nindex"),
+                                  function(x,y) {
+                                      x[["plot"]] <- make_plot(x[["df"]], legend_name = y,
+                                                               freq_label_cutoff = freq_label_cutoff)
+                                      return(x)
+                                  })
+    } else {
+        local_comp <- purrr::map(local_comp, function(x) {
+            x[["plot"]] <- NULL
+            return(x)
+        })
+    }
 
     ## join labels:
     # in fix: groups below tresh are assigned to top freq group
@@ -132,32 +201,10 @@ compare_labels <- function(x,
     yx_join_vec <- paste0(y, join_label_sep, x)
     yx_join_vec_fix <- unname(yx_fix[yx_join_vec])
 
-    ## long version of join labels:
-    # jj <- paste0(hinze@meta.data$celltype, "_", as.character(hinze@meta.data$integrated_snn_res.0.4))
-    # df1 <- data.frame(celltype = hinze@meta.data$celltype,
-    #                   join = jj)
-    # df11 <- df1 |>
-    #   dplyr::count(dplyr::pick(dplyr::everything())) |>
-    #   dplyr::left_join(dplyr::count(df1, celltype) |> dplyr::rename("total" = n)) |>
-    #   dplyr::mutate(rel = n/total)
-    #
-    # df11maxgroup <- df11 |>
-    #   dplyr::filter(n == max(n), .by = celltype) |>
-    #   dplyr::select(celltype, join) |>
-    #   dplyr::rename("joinfix" = join) |>
-    #   dplyr::select(celltype, joinfix)
-    #
-    # df11fix <- df11 |>
-    #   dplyr::left_join(df11maxgroup, by = "celltype") |>
-    #   dplyr::mutate(joinfix = ifelse(rel < tresh, joinfix, join)) |>
-    #   dplyr::distinct(celltype, join, joinfix)
-
-    return(list(raw = tab,
-                row_props = row_props,
-                col_props = col_props,
-                jaccard = jaccard,
-                row_corres = row_corres,
-                col_corres = col_corres,
+    return(list(global_comp = global_comp,
+                local_comp = local_comp,
+                correspondence = list(x = x_corres,
+                                      y = y_corres),
                 join_labels = list(xy = list(df = xy_join_df,
                                              fix = xy_fix,
                                              join = xy_join_vec,
@@ -168,45 +215,58 @@ compare_labels <- function(x,
                                              join_fix = yx_join_vec_fix))))
 }
 
-make_matrix <- function(m) {
-    m <- matrix(
+make_matrix_and_df <- function(m,
+                               adjust_order = T) {
+    mat <- matrix(
         data = as.vector(m),
         nrow = nrow(m),
         ncol = ncol(m),
         dimnames = dimnames(m))
-    m[which(is.na(m))] <- 0
-    return(m)
-}
+    mat[which(is.na(mat))] <- 0
 
-adjust_order_make_df <- function(mat,
-                                 legend_name,
-                                 freq_label_cutoff = 0) {
+    # contingency table is kind-of flipped. fix this here for mat and df.
+    mat <- t(mat)
 
     df <- brathering::mat_to_df_long(x = mat,
                                      rownames_to = "y",
                                      colnames_to = "x")
+    if (adjust_order) {
+        df <- fcexpr::heatmap_ordering(
+            df = df,
+            features = "x",
+            groups = "y",
+            values = "value",
+            feature_order = "custom",
+            group_order = "hclust")
+        mat <- mat[rev(levels(df[["y"]])), levels(df[["x"]])]
+    }
 
-    df <- fcexpr::heatmap_ordering(
-        df = df,
-        features = "x",
-        groups = "y",
-        values = "value",
-        feature_order = "custom",
-        group_order = "hclust")
-    mat <- mat[rev(levels(df[["y"]])), levels(df[["x"]])]
+    return(list(mat = mat, df = df))
+}
+
+make_plot <- function(df,
+                      legend_name,
+                      freq_label_cutoff = 0) {
 
     plot <- ggplot2::ggplot(df, ggplot2::aes(x, y)) +
         ggplot2::geom_tile(ggplot2::aes(fill = value), color = "black") +
         colrr::scale_fill_spectral() +
         ggplot2::labs(fill = legend_name) +
         ggplot2::geom_text(data = dplyr::filter(df, value > freq_label_cutoff),
-                           ggplot2::aes(label = round(value, 2)))
+                           ggplot2::aes(label = round(value, 2))) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-    return(list(mat = mat, df = df, plot = plot))
+    return(plot)
 }
 
-# x <- data.frame(
-#     label1 = c("A","A","A","B","B","C","C","C","C"),
-#     label2 = c("X","X","Y","Y","Z","X","Z","Z","Z")
-# )
-# out <- compare_labels(x = x)
+make_jaccard <- function(raw) {
+    # 2) Jaccard matrix between labels in col1 (rows) and col2 (cols)
+    # J_ij = n_ij / (n_i + m_j - n_ij)
+    n_i <- rowSums(raw)
+    m_j <- colSums(raw)
+    den <- outer(n_i, m_j, "+") - raw
+    jaccard <- raw / den
+    jaccard[is.na(jaccard)] <- 0  # just in case of zeros
+    return(jaccard)
+}
+

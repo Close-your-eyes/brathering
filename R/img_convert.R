@@ -14,9 +14,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' image_convert(path/to/image.heic, format = "png")
+#' img_convert(path/to/image.heic, format = "png")
 #' }
-image_convert <- function(path, format = "jpeg", path_save = NULL, ...) {
+img_convert <- function(path, format = "jpeg", path_save = NULL, ...) {
 
     if (!requireNamespace("magick", quietly = T)) {
         utils::install.packages("magick")

@@ -42,9 +42,42 @@ is_z_scored <- function(x,
     return(is_z)
 }
 
-get_decimal_places <- function(x) {
-    if (!is.finite(x)) return(NA)  # Handle Inf, -Inf, NaN
-    x_str <- sub("0+$", "", sub("^.*\\.", "", format(x, scientific = FALSE)))
-    nchar(x_str)
+#' Get the Number of Decimal Places
+#'
+#' Returns the number of decimal places in a finite numeric value by examining
+#' its decimal representation. Trailing zeros are ignored.
+#'
+#' @param x A numeric vector
+#'
+#' @returns An integer giving the number of decimal places in `x`. Returns
+#' `NA_integer_` if `x` is not finite (i.e., `Inf`, `-Inf`, or `NaN`).
+#'
+#' @export
+#'
+#' @examples
+#' get_decimal_places(1)
+#' # 0
+#'
+#' get_decimal_places(3.14)
+#' # 2
+#'
+#' get_decimal_places(2.500)
+#' # 1
+#'
+#' get_decimal_places(0.001)
+#' # 3
+#'
+#' get_decimal_places(Inf)
+#' # NA
+get_decimal_places <- function(x,
+                               cut_zero = T) {
+
+
+    if (any(!is.finite(x))) return(NA)  # Handle Inf, -Inf, NaN
+    x_str <- sub("^.*\\.", "", format(x, scientific = FALSE))
+    if (cut_zero) {
+        x_str <- sub("0+$", "", x_str)
+    }
+    return(nchar(x_str))
 }
 

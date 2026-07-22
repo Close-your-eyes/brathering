@@ -2,26 +2,63 @@
 % Please edit documentation in R/interpolate_vec.R
 \name{interpolate_vec}
 \alias{interpolate_vec}
-\title{Interpolate a vector (time series)}
+\title{Interpolate a Numeric Vector}
 \usage{
 interpolate_vec(y, x = NULL, len_out = NULL, x_out = NULL)
 }
 \arguments{
-\item{y}{numeric vector of y values}
+\item{y}{A numeric vector containing the values to interpolate.}
 
-\item{x}{optionally x values to y}
+\item{x}{Optional numeric vector of x-coordinates corresponding to `y`.
+Must have the same length as `y`. Ignored when `len_out` is supplied.}
 
-\item{len_out}{output length}
+\item{len_out}{Optional integer specifying the desired number of output
+points. When provided, `x` is ignored and the input is assumed to be
+equally spaced.}
 
-\item{x_out}{sequence of x to interpolate at, if NULL step of 1 between
-min(x) and max(x) are chosen}
+\item{x_out}{Optional numeric vector of x-values at which to evaluate the
+interpolation. Only used when `x` is supplied. If `NULL`, a sequence with
+a step size of 1 from `min(x)` to `max(x)` is generated.}
 }
 \value{
-numeric vector
+A data frame with two columns:
+\describe{
+  \item{x}{The x-values used for interpolation.}
+  \item{y}{The interpolated values.}
+}
 }
 \description{
-Either provide y and len_out or y and x with x_out optional.
+Linearly interpolates a numeric vector using either a desired output length
+or explicit x-coordinates.
+}
+\details{
+There are two supported modes:
+\enumerate{
+  \item Provide `y` and `len_out` to resample the vector to a specified
+  number of equally spaced points.
+  \item Provide `y` and `x` to interpolate at arbitrary x-values. If
+  `x_out` is not supplied, interpolation is performed at unit intervals
+  between `min(x)` and `max(x)`.
+}
+
+Interpolation is performed using [stats::approx()].
 }
 \examples{
-interpolate_vec(y = seq(1,10), len_out = 20)
+# Resample to a fixed number of points
+interpolate_vec(y = 1:10, len_out = 20)
+
+# Interpolate irregularly spaced observations
+x <- c(1, 2, 4, 7, 10)
+y <- c(3, 5, 2, 8, 6)
+interpolate_vec(y = y, x = x)
+
+# Interpolate at user-defined locations
+interpolate_vec(
+  y = y,
+  x = x,
+  x_out = seq(1, 10, by = 0.5)
+)
+}
+\seealso{
+[stats::approx()]
 }

@@ -2,9 +2,17 @@
 % Please edit documentation in R/df_long_to_mat.R
 \name{df_long_to_mat}
 \alias{df_long_to_mat}
+\alias{df_long_to_mat_legacy}
 \title{Convert long data frame to matrix format}
 \usage{
 df_long_to_mat(
+  df,
+  to_rows = names(df)[1L],
+  to_cols = names(df)[2L],
+  values = names(df)[3L]
+)
+
+df_long_to_mat_legacy(
   df,
   to_rows = names(df)[1],
   to_cols = names(df)[2],
@@ -30,4 +38,5 @@ Just for convenience.
 df <- expand.grid(rname = letters[1:5], cname = LETTERS[5:1])
 df$value <- 1:25
 df_long_to_mat(df)
+df_long_to_mat_legacy(df)
 }

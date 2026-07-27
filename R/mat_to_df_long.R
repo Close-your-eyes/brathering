@@ -10,6 +10,7 @@
 #'
 #' @returns data frame in long format
 #' @export
+#' @importFrom rlang %||%
 #'
 #' @examples
 #' mat <- structure(c(0.29, 0.27, 0.38, 0.37, 0.41, 0.37, 0.4, 0.37, 0.62,
@@ -41,20 +42,64 @@
 #'                                                                      "15", "16", "17", "18", "19", "20", "21"), c("CD-IC-A", "CD-IC-B",
 #'                                                                                                                   "CD-PC", "CNT", "DCT", "EC", "IntC", "Leuk", "Podo", "PT", "TAL",
 #'                                                                                                                   "tL")))
-#' df <- brathering::mat_to_df_long(
-#'     mat,
-#'     values_to = "score"
-#' )
-#'
+#' df <- mat_to_df_long(mat, values_to = "score")
 #' plot <- fcexpr::heatmap_long_df(df,
 #'                                 groups = names(df)[2],
 #'                                 features = names(df)[1],
 #'                                 values = names(df)[3])
-mat_to_df_long <- function(x,
-                           rownames_to = "rname",
-                           colnames_to = "cname",
-                           values_to = "value",
-                           row_col_type = c("factor", "char", "num", "character", "numeric")) {
+#' df2 <- mat_to_df_long_legacy(mat, values_to = "score")
+#' waldo::compare(df |> dplyr::arrange(rname, cname), df2 |> dplyr::arrange(rname, cname))
+mat_to_df_long <- function(
+        x,
+        rownames_to = "rname",
+        colnames_to = "cname",
+        values_to   = "value",
+        row_col_type = c("factor", "character", "numeric", "char", "num")) {
+    row_col_type <- match.arg(row_col_type)
+
+    nr <- nrow(x)
+    nc <- ncol(x)
+
+    rn <- rownames(x) %||% as.character(seq_len(nr))
+    cn <- colnames(x) %||% as.character(seq_len(nc))
+
+    # Same row-major ordering as pivot_longer()
+    # Follow R's native column-major matrix storage order
+    r <- rep(rn, times = nc)
+    c <- rep(cn, each = nr)
+
+    if (row_col_type == "factor") {
+        r <- factor(r, levels = unique(rn))
+        c <- factor(c, levels = unique(cn))
+    } else if (row_col_type %in% c("numeric", "num")) {
+        r <- as.numeric(r)
+        c <- as.numeric(c)
+    } else {
+        r <- as.character(r)
+        c <- as.character(c)
+    }
+
+    names(r) <- NULL
+    names(c) <- NULL
+
+    df <- tibble::new_tibble(
+        stats::setNames(
+            list(r, c, as.vector(x)),
+            c(rownames_to, colnames_to, values_to)
+        ),
+        nrow = nr * nc
+    )
+    return(df)
+}
+
+#' @rdname mat_to_df_long
+mat_to_df_long_legacy <- function(x,
+                                  rownames_to = "rname",
+                                  colnames_to = "cname",
+                                  values_to = "value",
+                                  row_col_type = c("factor", "char", "num", "character", "numeric")) {
+
+    message("legacy version with tidyr::pivot_longer: uses much more memory and is slower.")
 
     row_col_type <- rlang::arg_match(row_col_type)
 
@@ -83,6 +128,6 @@ mat_to_df_long <- function(x,
     }
 
     return(z)
-        # dplyr::mutate(!!rlang::sym(rownames_to) := factor(!!rlang::sym(rownames_to), rownames(x))) |>
-        # dplyr::mutate(!!rlang::sym(colnames_to) := factor(!!rlang::sym(colnames_to), colnames(x)))
+    # dplyr::mutate(!!rlang::sym(rownames_to) := factor(!!rlang::sym(rownames_to), rownames(x))) |>
+    # dplyr::mutate(!!rlang::sym(colnames_to) := factor(!!rlang::sym(colnames_to), colnames(x)))
 }

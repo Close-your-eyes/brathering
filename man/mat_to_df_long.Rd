@@ -2,9 +2,18 @@
 % Please edit documentation in R/mat_to_df_long.R
 \name{mat_to_df_long}
 \alias{mat_to_df_long}
+\alias{mat_to_df_long_legacy}
 \title{Matrix to long data frame}
 \usage{
 mat_to_df_long(
+  x,
+  rownames_to = "rname",
+  colnames_to = "cname",
+  values_to = "value",
+  row_col_type = c("factor", "character", "numeric", "char", "num")
+)
+
+mat_to_df_long_legacy(
   x,
   rownames_to = "rname",
   colnames_to = "cname",
@@ -59,13 +68,11 @@ mat <- structure(c(0.29, 0.27, 0.38, 0.37, 0.41, 0.37, 0.4, 0.37, 0.62,
                                                                      "15", "16", "17", "18", "19", "20", "21"), c("CD-IC-A", "CD-IC-B",
                                                                                                                   "CD-PC", "CNT", "DCT", "EC", "IntC", "Leuk", "Podo", "PT", "TAL",
                                                                                                                   "tL")))
-df <- brathering::mat_to_df_long(
-    mat,
-    values_to = "score"
-)
-
+df <- mat_to_df_long(mat, values_to = "score")
 plot <- fcexpr::heatmap_long_df(df,
                                 groups = names(df)[2],
                                 features = names(df)[1],
                                 values = names(df)[3])
+df2 <- mat_to_df_long_legacy(mat, values_to = "score")
+waldo::compare(df |> dplyr::arrange(rname, cname), df2 |> dplyr::arrange(rname, cname))
 }

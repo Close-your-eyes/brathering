@@ -15,6 +15,9 @@ get_unique_level_columns(df, refcol)
 column names with refcol at first position
 }
 \description{
+Same as find_group_constant_columns.
+}
+\details{
 It finds columns which can be joined via refcol to another df without
 increasing
 }

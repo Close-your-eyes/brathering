@@ -1,5 +1,7 @@
 #' Find columns with unique levels within groups of reference column
 #'
+#' Same as find_group_constant_columns.
+#'
 #' It finds columns which can be joined via refcol to another df without
 #' increasing
 #'

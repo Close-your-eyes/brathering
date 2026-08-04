@@ -80,7 +80,7 @@ decimals_adaptive <- function(x) {
     if (all(x == 0)) return(0)
 
 
-    max_val <- max(abs(x), na.rm = T)
+    max_val <- max(abs(x[which(is.finite(x))]), na.rm = T)
 
     if (max_val > 100) return(0)
 

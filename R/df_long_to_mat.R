@@ -51,12 +51,31 @@ df_long_to_mat <- function(
     # A linear index follows R's native column-major matrix layout.
     index <- row_index + (col_index - 1L) * length(row_names)
 
-    if (anyDuplicated(index)) {
-        stop(
-            "`df` contains duplicate row-column combinations.",
-            call. = FALSE
+    # add option to use make.unique to modify row col combinations instaed of rempving them?
+    # Retain the first occurrence of each row-column combination.
+    keep <- !duplicated(index)
+
+    if (!all(keep)) {
+        n_duplicates <- sum(!keep)
+        message(
+            n_duplicates,
+            if (n_duplicates == 1L) {
+                " duplicate row-column combination was removed; "
+            } else {
+                " duplicate row-column combinations were removed; "
+            },
+            "the first value for each combination was retained."
         )
+
+        index <- index[keep]
+        vals  <- vals[keep]
     }
+    # if (anyDuplicated(index)) {
+    #     stop(
+    #         "`df` contains duplicate row-column combinations.",
+    #         call. = FALSE
+    #     )
+    # }
 
     # Create an appropriately typed missing value.
     mat <- matrix(
@@ -75,9 +94,9 @@ df_long_to_mat <- function(
 
 #' @rdname df_long_to_mat
 df_long_to_mat_legacy <- function(df,
-                           to_rows = names(df)[1],
-                           to_cols = names(df)[2],
-                           values = names(df)[3]) {
+                                  to_rows = names(df)[1],
+                                  to_cols = names(df)[2],
+                                  values = names(df)[3]) {
     mat <-
         df |>
         dplyr::select(dplyr::all_of(c(to_rows, to_cols, values))) |>

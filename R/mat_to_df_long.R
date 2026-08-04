@@ -7,6 +7,8 @@
 #' @param colnames_to column name that will hold colnames(mat)
 #' @param row_col_type how to return row and col indices
 #' @param values_to column name that will hold values of mat
+#' @param keep_diagonal set to FALSE to remove entries
+#' on the diagonal nrow(x) == ncol(x)
 #'
 #' @returns data frame in long format
 #' @export
@@ -54,8 +56,10 @@ mat_to_df_long <- function(
         rownames_to = "rname",
         colnames_to = "cname",
         values_to   = "value",
-        row_col_type = c("factor", "character", "numeric", "char", "num")) {
-    row_col_type <- match.arg(row_col_type)
+        row_col_type = c("factor", "character", "numeric", "char", "num", "f", "c", "n"),
+        keep_diagonal = T) {
+
+    row_col_type <- rlang::arg_match(row_col_type)
 
     nr <- nrow(x)
     nc <- ncol(x)
@@ -68,10 +72,10 @@ mat_to_df_long <- function(
     r <- rep(rn, times = nc)
     c <- rep(cn, each = nr)
 
-    if (row_col_type == "factor") {
+    if (row_col_type %in% c("f", "factor")) {
         r <- factor(r, levels = unique(rn))
         c <- factor(c, levels = unique(cn))
-    } else if (row_col_type %in% c("numeric", "num")) {
+    } else if (row_col_type %in% c("numeric", "num", "n")) {
         r <- as.numeric(r)
         c <- as.numeric(c)
     } else {
@@ -82,13 +86,24 @@ mat_to_df_long <- function(
     names(r) <- NULL
     names(c) <- NULL
 
+    if (!keep_diagonal) {
+        keep <- as.vector(row(x) != col(x))
+
+        r <- r[keep]
+        c <- c[keep]
+        x <- as.vector(x)[keep]
+    } else {
+        x <- as.vector(x)
+    }
+
     df <- tibble::new_tibble(
         stats::setNames(
-            list(r, c, as.vector(x)),
+            list(r, c, x),
             c(rownames_to, colnames_to, values_to)
         ),
-        nrow = nr * nc
+        nrow = length(x)
     )
+
     return(df)
 }
 

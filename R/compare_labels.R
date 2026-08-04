@@ -91,15 +91,21 @@ compare_labels <- function(x,
     # mclust::adjustedRandIndex()
 
     if (is.data.frame(x)) {
+        message("x is df. using its first 2 columns for x and y.")
         y <- x[,2,drop=T]
         x <- x[,1,drop=T]
     } else if (is.matrix(x)) {
+        message("x is matrix. using its first 2 columns for x and y.")
         y <- x[,2]
         x <- x[,1]
     } else {
         if (length(x) != length(y)) {
             stop("x and y must have the same length.")
         }
+    }
+
+    if (is.numeric(x) || is.numeric(y)) {
+        stop("x or y is numeric. not allowed.")
     }
 
     # remove NA by default
@@ -217,6 +223,7 @@ compare_labels <- function(x,
 
 make_matrix_and_df <- function(m,
                                adjust_order = T) {
+
     mat <- matrix(
         data = as.vector(m),
         nrow = nrow(m),

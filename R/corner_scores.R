@@ -28,7 +28,7 @@ corner_scores <- function(x,
                           label_frac_x = 0.5) {
 
     if (!is.null(ggobj)) {
-        c(xr, yr) %<-% brathering::gg_lims(ggobj)
+        c(xr, yr) %<-% gg_lims(ggobj)
         mapping_chr <- sapply(ggobj$mapping, rlang::as_name)
         x <- ggobj$data[[mapping_chr[1]]]
         y <- ggobj$data[[mapping_chr[2]]]

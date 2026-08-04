@@ -10,7 +10,8 @@ mat_to_df_long(
   rownames_to = "rname",
   colnames_to = "cname",
   values_to = "value",
-  row_col_type = c("factor", "character", "numeric", "char", "num")
+  row_col_type = c("factor", "character", "numeric", "char", "num", "f", "c", "n"),
+  keep_diagonal = T
 )
 
 mat_to_df_long_legacy(
@@ -31,6 +32,9 @@ mat_to_df_long_legacy(
 \item{values_to}{column name that will hold values of mat}
 
 \item{row_col_type}{how to return row and col indices}
+
+\item{keep_diagonal}{set to FALSE to remove entries
+on the diagonal nrow(x) == ncol(x)}
 }
 \value{
 data frame in long format

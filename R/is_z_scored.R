@@ -48,6 +48,7 @@ is_z_scored <- function(x,
 #' its decimal representation. Trailing zeros are ignored.
 #'
 #' @param x A numeric vector
+#' @param cut_zero
 #'
 #' @returns An integer giving the number of decimal places in `x`. Returns
 #' `NA_integer_` if `x` is not finite (i.e., `Inf`, `-Inf`, or `NaN`).
@@ -72,8 +73,10 @@ is_z_scored <- function(x,
 get_decimal_places <- function(x,
                                cut_zero = T) {
 
-
     if (any(!is.finite(x))) return(NA)  # Handle Inf, -Inf, NaN
+
+    if (all(!grepl("\\.", x))) return(0)
+
     x_str <- sub("^.*\\.", "", format(x, scientific = FALSE))
     if (cut_zero) {
         x_str <- sub("0+$", "", x_str)

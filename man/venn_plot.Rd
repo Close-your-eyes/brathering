@@ -2,69 +2,145 @@
 % Please edit documentation in R/venn_plot.R
 \name{venn_plot}
 \alias{venn_plot}
-\title{Create venn diagramm from long data frame}
+\title{Create a Venn or UpSet plot from long-format data}
 \usage{
 venn_plot(
   data,
   obs_col = "obs",
   cat_col = "cat",
-  make_obs_by_cat_unique = TRUE,
   limma_plot = FALSE,
-  flip = FALSE,
-  rm_non_intersect = TRUE
+  upset_plot = FALSE,
+  upset_order_intersects = "degree",
+  upset_order_sets = F,
+  flip_axes = FALSE,
+  ...
 )
 }
 \arguments{
-\item{data}{data frame or tibble}
+\item{data}{A data frame or tibble in long format.}
 
-\item{obs_col}{name of column with observations}
+\item{obs_col}{Character string naming the column containing observation
+identifiers.}
 
-\item{cat_col}{name of column with categories}
+\item{cat_col}{Character string naming the column containing category
+identifiers.}
 
-\item{make_obs_by_cat_unique}{make same observations per group unique
-so that they are not collapsed into a single observation by limma}
+\item{limma_plot}{Logical. If \code{TRUE}, draw the diagram using
+\code{\link[limma]{vennDiagram}}. This is automatically enabled when
+exactly five categories are present, unless \code{upset_plot = TRUE}.}
 
-\item{limma_plot}{return a plot from limma library instead of ggplot
-(required of number of categories > 4)}
+\item{upset_plot}{Logical. If \code{TRUE}, create an UpSet plot using
+\code{\link[ComplexUpset]{upset}}. This is automatically enabled when
+six or more categories are present.}
 
-\item{flip}{flip x and y axes of ggplot}
+\item{upset_order_intersects}{Character string or character vector specifying
+how intersections are ordered in an UpSet plot. Supported values include
+\code{"cardinality"}, \code{"degree"}, and \code{"ratio"}. Multiple
+criteria may be supplied, for example
+\code{c("degree", "cardinality")}.}
 
-\item{rm_non_intersect}{remove elements that do not intersect with any
-category}
+\item{upset_order_sets}{Either \code{FALSE}, \code{"ascending"}, or
+\code{"descending"}. Controls whether and how sets are ordered in an
+UpSet plot. If \code{FALSE}, the original set order is retained.}
+
+\item{flip_axes}{Logical. If \code{TRUE}, exchange the x- and y-axes of the
+ggplot-based Venn diagram. Ignored when \code{limma_plot = TRUE} or
+\code{upset_plot = TRUE}.}
+
+\item{...}{Additional arguments passed to
+\code{\link[ComplexUpset]{upset}} when \code{upset_plot = TRUE}.}
 }
 \value{
-list of processed data frames and plot (limma or ggplot)
+A list containing:
+\describe{
+  \item{\code{data}}{
+    For Venn diagrams, a data frame containing membership patterns, counts,
+    relative counts, and formatted count labels. For UpSet plots, a data
+    frame containing the binary observation-by-category membership matrix.
+  }
+  \item{\code{data_circ}}{
+    A data frame describing the circles or ellipses used in the ggplot-based
+    Venn diagram. It is \code{NULL} for limma and UpSet plots.
+  }
+  \item{\code{plot}}{
+    For ggplot-based Venn and UpSet diagrams, the resulting plot object.
+    For a limma diagram, the plot is drawn as a side effect and this element
+    contains the value returned by \code{\link[limma]{vennDiagram}}.
+  }
+}
 }
 \description{
-Create venn diagramm from long data frame
+Converts observation-category pairs into a binary membership matrix and
+creates a ggplot-based Venn diagram, a \pkg{limma} Venn diagram, or an
+UpSet plot.
+}
+\details{
+Each distinct observation-category pair represents membership of an
+observation in a category. Duplicate pairs and rows containing missing
+observation or category values are removed before membership counts are
+calculated.
+
+The ggplot-based Venn diagram supports two to four categories. With five
+categories, \code{limma_plot} is automatically enabled if it is not already
+requested. With six or more categories, \code{upset_plot} is automatically
+enabled and \code{limma_plot} is disabled.
+
+If \code{limma_plot = TRUE} and \code{upset_plot = TRUE} are both supplied
+for five or fewer categories, the limma plot takes precedence.
+
+For UpSet plots, intersections are ordered according to
+\code{upset_order_intersects}. The default, \code{"degree"}, orders them by
+the number of sets participating in each intersection. To order by the
+number of observations instead, use \code{"cardinality"}.
 }
 \examples{
-# 2-way venn
-cat <- sample(c("A","B"), 100, replace = TRUE)
-obs <- sample(letters[5:15], 100, replace = TRUE)
-df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
-                 rm_non_intersect = FALSE, limma_plot = FALSE)
-out[["plot"]]
-# 3-way venn
-cat <- sample(c("A","B","C"), 100, replace = TRUE)
-obs <- sample(letters[5:15], 100, replace = TRUE)
-df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
-                 rm_non_intersect = FALSE, limma_plot = FALSE)
-out[["plot"]]
-# 4-way venn
-cat <- sample(c("A","B","C","D"), 100, replace = TRUE)
-obs <- sample(letters[5:15], 100, replace = TRUE)
-df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
-                 rm_non_intersect = FALSE, limma_plot = FALSE)
-out[["plot"]]
-# 5-way venn only with limma
-cat <- sample(c("A","B","C","D","E"), 100, replace = TRUE)
-obs <- sample(letters[5:15], 100, replace = TRUE)
-df <- data.frame(cat = cat, obs = obs)
-out <- venn_plot(df, obs_col = "obs", cat_col = "cat",
-                 rm_non_intersect = F, limma_plot = TRUE)
-out[["plot"]]
+# Two-category ggplot-based Venn diagram
+dat2 <- data.frame(
+    observation = c("a", "b", "b", "c"),
+    category = c("A", "A", "B", "B")
+)
+
+result2 <- venn_plot(
+    dat2,
+    obs_col = "observation",
+    cat_col = "category"
+)
+result2$plot
+
+# Three-category Venn diagram with flipped axes
+dat3 <- data.frame(
+    observation = c("a", "b", "b", "c", "c", "d"),
+    category = c("A", "A", "B", "B", "C", "C")
+)
+
+result3 <- venn_plot(
+    dat3,
+    obs_col = "observation",
+    cat_col = "category",
+    flip_axes = TRUE
+)
+result3$plot
+
+# UpSet plot ordered by intersection size
+dat_upset <- data.frame(
+    observation = c(
+        "a", "a", "b", "b", "c", "c",
+        "d", "d", "e", "e", "f", "f"
+    ),
+    category = c(
+        "A", "B", "A", "C", "B", "D",
+        "C", "E", "D", "F", "A", "F"
+    )
+)
+
+result_upset <- venn_plot(
+    dat_upset,
+    obs_col = "observation",
+    cat_col = "category",
+    upset_plot = TRUE,
+    upset_order_intersects = "cardinality",
+    upset_order_sets = "descending"
+)
+result_upset$plot
+
 }

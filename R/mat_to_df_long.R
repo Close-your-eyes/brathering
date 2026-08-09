@@ -61,6 +61,7 @@ mat_to_df_long <- function(
 
     row_col_type <- rlang::arg_match(row_col_type)
 
+
     nr <- nrow(x)
     nc <- ncol(x)
 
@@ -86,6 +87,7 @@ mat_to_df_long <- function(
     names(r) <- NULL
     names(c) <- NULL
 
+    browser()
     if (!keep_diagonal) {
         keep <- as.vector(row(x) != col(x))
 
@@ -95,6 +97,7 @@ mat_to_df_long <- function(
     } else {
         x <- as.vector(x)
     }
+    x <- purrr::list_c(x) # why suddenly needed?
 
     df <- tibble::new_tibble(
         stats::setNames(

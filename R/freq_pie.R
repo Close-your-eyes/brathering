@@ -142,7 +142,6 @@ piechart <- function(x,
         tab$label_text_outside <- ifelse(tab[["rel"]] > label_rel_cutoff, tab[["abs"]], "")
     }
 
-
     plot <-
         ggplot2::ggplot(tab, ggplot2::aes(
             x0 = 0,

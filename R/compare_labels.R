@@ -163,7 +163,7 @@ compare_labels <- function(x,
 
     if (make_plots) {
         local_comp <- purrr::map2(local_comp,
-                                  c("shared (n)", "y in x", "x in y", "jaccard\nindex"),
+                                  c("shared (n)", "x in y", "y in x", "jaccard\nindex"),
                                   function(x,y) {
                                       x[["plot"]] <- make_plot(x[["df"]], legend_name = y,
                                                                freq_label_cutoff = freq_label_cutoff)

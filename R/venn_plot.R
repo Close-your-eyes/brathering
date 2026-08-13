@@ -165,7 +165,7 @@ venn_plot <- function(data,
     }
 
     if (ncat > 5 && !upset_plot) {
-        message("More than 5 categories can only be plotted with upset of tile plot. Setting upset_plot to TRUE.")
+        message("More than 5 categories can only be plotted with upset plot. Setting upset_plot to TRUE.")
         limma_plot <- FALSE
         upset_plot <- TRUE
     }

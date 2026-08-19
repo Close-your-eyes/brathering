@@ -4,7 +4,7 @@
 \alias{split_chunks}
 \title{Split an Object into Chunks}
 \usage{
-split_chunks(x, chunks = NULL, size = NULL)
+split_chunks(x, chunks = NULL, size = NULL, shuffle = F)
 }
 \arguments{
 \item{x}{A vector or list to split.}
@@ -14,6 +14,8 @@ chunks. Cannot be used together with `size`.}
 
 \item{size}{A positive whole number giving the maximum number of elements
 per chunk. Cannot be used together with `chunks`.}
+
+\item{shuffle}{shuffle x before split?}
 }
 \value{
 A named list containing the chunks. An empty `x` returns an empty

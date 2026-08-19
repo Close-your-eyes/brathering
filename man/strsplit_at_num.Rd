@@ -15,3 +15,6 @@ list of split characters
 \description{
 First step to extraction or modification of numerical string parts
 }
+\examples{
+strsplit_at_num(x = c("abc45efg690hij5xyz"))
+}

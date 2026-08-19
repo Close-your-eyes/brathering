@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-#' strsplit_at_num(x = c("abc45efg690hij5xyz))
+#' strsplit_at_num(x = c("abc45efg690hij5xyz"))
 strsplit_at_num <- function(x) {
     # (?<=\\d)(?=\\D) matches the boundary between a digit and a non-digit.
     # (?<=\\D)(?=\\d) matches the boundary between a non-digit and a digit.

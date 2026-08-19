@@ -1,93 +1,160 @@
-#' Make pie or donut chart
+#' Make a Pie or Donut Chart
 #'
-#' @param x unnamed vector or named numeric vector (= already summarized)
-#' @param order sort summarized/tabulated groups of x; NULL for no sorting;
-#' TRUE for decreasing, FALSE for increasing
-#' @param fill color palette to fill pie pieces, can be named by groups in x
-#' @param color border color of pie pieces
-#' @param radius_inside inner radius where pieces are cut. outer radius is fixed
-#' to 1. set to 0 to get pie chart
-#' @param label_outside which labels outside of pie pieces (radius > 1): none,
-#' absolute, relative
-#' @param label_inside see label_outside, radius < 1
-#' @param label_rel_cutoff min. fraction of pie piece to plot label
-#' @param label_size size of label, passed to geom_text
-#' @param label_radius_inside vector of radii where to place labels,
-#' gets recycled
-#' @param label_radius_outside see label_radius_inside
-#' @param label_angle_inside vector of label angles, gets recycled
-#' @param label_angle_outside see label_angle_inside
-#' @param label_overlap method of trying to fix overlapping labels
-#' @param overlap_outside_radius radius for label_overlap = "outside"
-#' @param label_rel_pct relative labels in percent?
-#' @param label_rel_dec decimal places of relative labels
-#' @param legend_title legend title
-#' @param theme_args arguments to ggplot2::theme()
-#' @param fill_na fill for NA
-#' @param col_pal_args args to colrr::make_col_pal
-#' @param theme ggplot theme
-#' @param color_text text color
+#' Draw a pie or donut chart in Cartesian coordinates. Input may be raw
+#' observations or an already summarized named numeric vector. Absolute or
+#' relative labels can be placed and rotated independently inside and outside
+#' the slices.
 #'
-#' @returns list of plot and data frame
+#' @param x An unnamed vector of observations to tabulate, or a named numeric
+#'   vector of already summarized non-negative values.
+#' @param order Controls sorting after tabulation. Use `NULL` to retain the
+#'   existing order, `TRUE` for decreasing values, or `FALSE` for increasing
+#'   values.
+#' @param fill A vector of valid slice colours. It may be named with groups in
+#'   `x`; otherwise colours are matched by position.
+#' @param fill_na Colour used for a missing group.
+#' @param color Border colour of the slices. Use `NA` for no border.
+#' @param radius_inside Inner radius of the slices. The outer radius is fixed at
+#'   `1`; use `0` for a pie chart or a value between `0` and `1` for a donut.
+#' @param label_outside Outside-label content: `"none"`, `"abs"` for absolute
+#'   values, or `"rel"` for relative values.
+#' @param label_inside Inside-label content. Accepts the same values as
+#'   `label_outside`.
+#' @param label_rel_cutoff Minimum slice proportion required for a label to be
+#'   displayed. For example, `0.05` suppresses labels below five percent.
+#' @param label_size Text size passed to [ggplot2::geom_text()].
+#' @param label_radius_inside Numeric vector of radii for inside labels. Values
+#'   are recycled across slices.
+#' @param label_radius_outside Numeric vector of radii for outside labels.
+#'   Values are recycled across slices; values greater than `1` lie beyond the
+#'   outer edge.
+#' @param label_angle_inside Inside-label orientation. Supply
+#'   `"radial_readable"`, `"radial"`, `"tangent_readable"`, or `"tangent"`;
+#'   alternatively, supply one or more numeric angles in degrees as interpreted
+#'   by [ggplot2::geom_text()]. See **Label angles**.
+#' @param label_angle_outside Outside-label orientation. Accepts the same values
+#'   as `label_angle_inside`.
+#' @param label_overlap Method used to reduce overlap among nearby labels:
+#'   `"ignore"`, `"alternate"`, or `"outside"`. `"alternate"` offsets inside
+#'   label radii; `"outside"` moves affected inside labels to
+#'   `overlap_outside_radius`.
+#' @param label_color_inside Colour for inside labels. The special value
+#'   `"..auto.."` chooses black or white separately for each label from its
+#'   slice fill. For an explicit vector, only the first value is used.
+#' @param label_color_outside Colour for outside labels. The special value
+#'   `"..auto.."` chooses black or white from the plot-background fill. For an
+#'   explicit vector, only the first value is used.
+#' @param overlap_outside_radius Radius used when
+#'   `label_overlap = "outside"`.
+#' @param label_rel_pct If `TRUE`, relative labels are multiplied by 100 and
+#'   printed with a percent sign. If `FALSE`, proportions are printed.
+#' @param label_rel_dec Non-negative number of decimal places used for relative
+#'   labels.
+#' @param legend_title Optional title for the fill legend.
+#' @param theme A ggplot2 theme added to the plot before `theme_args` are
+#'   applied.
+#' @param theme_args Named list of arguments passed to [ggplot2::theme()]. The
+#'   defaults remove axes, ticks, and axis lines.
+#' @param theme_args_add Additional named theme arguments appended to
+#'   `theme_args`. This is useful for wrappers such as [donutchart()].
+#' @param col_pal_args Additional named arguments passed to
+#'   `colrr::make_col_pal()`.
+#' @param axes_expand Non-negative multiplicative expansion applied to both
+#'   Cartesian axes. Increase it to leave more room for outside labels.
+#'
+#' @section Label angles:
+#' Slice angles used by [ggforce::geom_arc_bar()] are measured in radians,
+#' beginning at 12 o'clock and increasing clockwise. Text angles passed to
+#' [ggplot2::geom_text()] are measured in degrees, with positive values rotating
+#' counterclockwise.
+#'
+#' The named label-angle modes are:
+#'
+#' * `"radial"`: align the text baseline with the slice's radial direction.
+#' * `"radial_readable"`: use radial alignment and flip labels on the opposite
+#'   half of the circle to keep them upright.
+#' * `"tangent"`: align the text baseline with the circle's tangent, making it
+#'   orthogonal to the slice's radial direction.
+#' * `"tangent_readable"`: use tangential alignment and flip equivalent
+#'   orientations to keep labels upright.
+#'
+#' Modes without the `_readable` suffix preserve the uncorrected geometric
+#' orientation, so some labels may appear upside down. Numeric angles bypass
+#' automatic calculation; for example, `0` makes labels horizontal.
+#'
+#' @return A named list with two elements: `plot`, the ggplot object, and `data`,
+#'   the per-slice data frame used to construct it.
 #' @export
 #'
-#' @importFrom rlang %||%
-#'
 #' @examples
-#' piechart(x = c(rep("a",10), rep("b",6), rep("c", 3), rep("d",2)),
-#'          label_rel_pct = T,
-#'          label_rel_dec = 1)
+#' piechart(
+#'     x = c(rep("a", 10), rep("b", 6), rep("c", 3), rep("d", 2)),
+#'     label_rel_pct = TRUE,
+#'     label_rel_dec = 1
+#' )
+#'
 #' piechart(x = setNames(1:10, letters[1:10]))
+#'
+#' # Place percentage labels outside and align them with the circle tangent.
+#' piechart(
+#'     x = setNames(c(10, 6, 3, 2), letters[1:4]),
+#'     label_inside = "none",
+#'     label_outside = "rel",
+#'     label_rel_pct = TRUE,
+#'     label_angle_outside = "tangent_readable",
+#'     axes_expand = 0.15
+#'
+#' piechart(
+#'     x = setNames(c(10, 6, 3, 2), letters[1:4]),
+#'     radius_inside = 0.7,
+#'     label_inside = "none",
+#'     label_outside = "rel",
+#'     label_rel_pct = TRUE,
+#'     label_angle_outside = "tangent_readable",
+#'     axes_expand = 0.15,
+#'     theme = colrr::theme_material())$plot +
+#'     theme(legend.position = "inside")
+#' )
 piechart <- function(x,
                      order = NULL,
                      fill = colrr::col_pal("custom"),
                      fill_na = "grey50",
                      color = "white",
-                     color_text = "..auto..",
                      radius_inside = 0.3,
                      label_outside = c("none", "abs", "rel"),
                      label_inside = c("rel", "abs", "none"),
                      label_rel_cutoff = 0,
                      label_size = 5,
-                     label_radius_inside = 0.75,
+                     label_radius_inside = 0.65,
                      label_radius_outside = 1.1,
-                     label_angle_inside = NULL, # circle or numeric
-                     label_angle_outside = NULL, # circle or numeric
+                     label_angle_inside = "radial_readable",
+                     label_angle_outside = "radial_readable",
                      label_overlap = c("ignore", "alternate", "outside"),
+                     label_color_inside = "..auto..",
+                     label_color_outside = "..auto..",
                      overlap_outside_radius = 1.1,
                      label_rel_pct = F,
                      label_rel_dec = 2,
                      legend_title = NULL,
                      theme = ggplot2::theme_classic(),
                      theme_args = list(panel.grid = ggplot2::element_blank(),
-                                       axis.title = ggplot2::element_blank(),
-                                       axis.text = ggplot2::element_blank(),
-                                       axis.ticks = ggplot2::element_blank()),
-                     col_pal_args = list(missing_fct_to_na = T)) {
-
-    ## geom_textpath for labels?
-
-    if (!requireNamespace("ggforce", quietly = T)) {
-        utils::install.packages("ggforce")
-    }
-    if (!requireNamespace("farver", quietly = T)) {
-        utils::install.packages("farver")
-    }
-
-    if (!is.null(label_angle_inside)  && !is.numeric(label_angle_inside) && label_angle_inside != "circle") {
-        stop("label_angle_inside has to be 'circle' or numeric.")
-    }
-    if (!is.null(label_angle_outside) && !is.numeric(label_angle_outside) && label_angle_outside != "circle") {
-        stop("label_angle_outside has to be 'circle' or numeric.")
-    }
-
-    ## ... make that a list and check for default elements (see below)
-    ## then call theme with Gmisc::fastDoCall
+                                       axis.title.x = ggplot2::element_blank(),
+                                       axis.title.y = ggplot2::element_blank(),
+                                       axis.text.x = ggplot2::element_blank(),
+                                       axis.text.y = ggplot2::element_blank(),
+                                       axis.ticks.x = ggplot2::element_blank(),
+                                       axis.ticks.y = ggplot2::element_blank(),
+                                       axis.line.x = ggplot2::element_blank(),
+                                       axis.line.y = ggplot2::element_blank()),
+                     theme_args_add = list(),
+                     col_pal_args = list(missing_fct_to_na = T),
+                     axes_expand = 0.05) {
 
     label_overlap <- rlang::arg_match(label_overlap)
     label_outside <- rlang::arg_match(label_outside)
     label_inside <- rlang::arg_match(label_inside)
 
+    theme_args <- c(theme_args, theme_args_add)
 
     tab <- make_pie_basis(x = x,
                           order = order)
@@ -97,7 +164,8 @@ piechart <- function(x,
                                        label_angle_outside = label_angle_outside,
                                        label_radius_outside = label_radius_outside,
                                        label_radius_inside = label_radius_inside,
-                                       label_overlap = label_overlap)
+                                       label_overlap = label_overlap,
+                                       overlap_outside_radius = overlap_outside_radius)
     # adds group_cols
     # tab <- check_and_add_col_pal(tab = tab, col_pal = fill)
 
@@ -106,18 +174,6 @@ piechart <- function(x,
                                    missing_fct_to_na = ifelse("missing_fct_to_na" %in% names(col_pal_args), col_pal_args[["missing_fct_to_na"]], T),
                                    col_pal_args = col_pal_args[-which(names(col_pal_args) %in% c("name", "missing_fct_to_na"))])
     tab$group_cols <- col_pal[as.character(tab$group)]
-
-    # add text colors
-    for (i in c("text_color_inside", "text_color_outside")) {
-        if (color_text[1] == "..auto..") {
-            tab[[i]] <- bw_txt(tab$group_cols)
-        } else {
-            tab[[i]] <- color_text
-        }
-    }
-    # for (i in c("label_radius_inside", "label_radius_outside")) {
-    #   tab[which(tab[[i]] >= 1), gsub("label_radius", "text_color", i)] <- bw_txt(plot[["theme"]][["panel.background"]][["fill"]])
-    # }
 
 
     if (label_inside == "rel") {
@@ -142,48 +198,125 @@ piechart <- function(x,
         tab$label_text_outside <- ifelse(tab[["rel"]] > label_rel_cutoff, tab[["abs"]], "")
     }
 
-    plot <-
-        ggplot2::ggplot(tab, ggplot2::aes(
-            x0 = 0,
-            y0 = 0,
-            r0 = radius_inside,
-            r = 1,
-            start = start_angle,
-            end = end_angle,
-            fill = group)) +
+
+
+    plot <- ggplot2::ggplot(tab, ggplot2::aes(
+        x0 = 0,
+        y0 = 0,
+        r0 = radius_inside,
+        r = 1,
+        start = start_angle_rad,
+        end = end_angle_rad,
+        fill = group)) +
         ggforce::geom_arc_bar(colour = color) +
         ggplot2::labs(fill = legend_title) +
         ggplot2::scale_fill_manual(values = stats::setNames(tab$group_cols, tab$group),
                                    na.value = fill_na) +
         ggplot2::coord_fixed(ratio = 1) +
         theme +
-        Gmisc::fastDoCall(ggplot2::theme, args = theme_args)
+        Gmisc::fastDoCall(ggplot2::theme, args = theme_args) +
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = axes_expand)) +
+        ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = axes_expand))
+
+    # add text colors
+
+    if (label_color_inside[1] == "..auto..") {
+        tab[["text_color_inside"]] <- bw_txt(tab$group_cols)
+    } else {
+        tab[["text_color_inside"]] <- label_color_inside[1]
+    }
+    if (label_color_outside[1] == "..auto..") {
+        tab[["text_color_outside"]] <- bw_txt(gg_get_theme_element(ggobj = plot, element = "plot.background")@fill)
+    } else {
+        tab[["text_color_outside"]] <- label_color_outside[1]
+    }
 
     if (label_inside != "none") {
-        plot <-
-            plot +
+        plot <- plot +
             ggplot2::geom_text(data = tab, ggplot2::aes(color = I(text_color_inside),
-                                                        x = label_radius_inside*sin(mid_angle),
-                                                        y = label_radius_inside*cos(mid_angle),
+                                                        x = label_radius_inside*sin(mid_angle_rad),
+                                                        y = label_radius_inside*cos(mid_angle_rad),
                                                         angle = label_angle_inside,
                                                         label = label_text_inside),
                                size = label_size)
     }
 
     if (label_outside != "none") {
-        plot <-
-            plot +
+        plot <- plot +
             ggplot2::geom_text(data = tab, ggplot2::aes(color = I(text_color_outside),
-                                                        x = label_radius_outside*sin(mid_angle),
-                                                        y = label_radius_outside*cos(mid_angle),
+                                                        x = label_radius_outside*sin(mid_angle_rad),
+                                                        y = label_radius_outside*cos(mid_angle_rad),
                                                         angle = label_angle_outside,
                                                         label = label_text_outside),
-                               size = label_size,
-                               hjust = 1)
+                               size = label_size)
+        # hjust = 1)
     }
 
     return(list(plot = plot, data = tab))
 }
+
+
+#' Make a Donut Chart
+#'
+#' A convenience wrapper around [piechart()] with a larger inner radius,
+#' tangential readable labels, and optional placement of the legend inside the
+#' plotting area.
+#'
+#' @param ... Additional arguments passed to [piechart()]. Arguments supplied
+#'   here must not duplicate the explicitly forwarded wrapper arguments.
+#' @param radius_inside Inner radius of the donut. The outer radius is fixed at
+#'   `1`; larger values create a thinner ring.
+#' @param label_radius_inside Radius used for labels drawn inside the donut
+#'   slices. The default, `0.85`, places them near the middle of the default
+#'   ring.
+#' @param label_angle_outside Orientation of outside labels. Accepts the same
+#'   named modes or numeric degree values as
+#'   `piechart(label_angle_outside = ...)`.
+#' @param label_angle_inside Orientation of inside labels. Accepts the same
+#'   named modes or numeric degree values as
+#'   `piechart(label_angle_inside = ...)`.
+#' @param legend_pos Legend placement: `"outside"` retains the ggplot2 theme's
+#'   normal placement, while `"inside"` sets `legend.position = "inside"`.
+#' @param theme_args_add Additional named arguments appended to the theme
+#'   arguments passed to [piechart()]. When `legend_pos = "inside"`, the inside
+#'   legend setting is appended to this list.
+#'
+#' @return The same named list as [piechart()]: `plot`, containing the ggplot
+#'   object, and `data`, containing the per-slice plotting data.
+#' @export
+#'
+#' @examples
+#' donutchart(x = setNames(c(10, 6, 3, 2), letters[1:4]))
+#'
+#' donutchart(
+#'     x = c(rep("a", 10), rep("b", 6), rep("c", 3)),
+#'     label_rel_pct = TRUE,
+#'     legend_pos = "inside"
+#' )
+donutchart <- function(...,
+                       radius_inside = 0.7,
+                       label_radius_inside = 0.85,
+                       label_angle_outside = "tangent_readable",
+                       label_angle_inside = "tangent_readable",
+                       legend_pos = c("outside", "inside"),
+                       theme_args_add = list()) {
+
+    legend_pos <- rlang::arg_match(legend_pos)
+
+
+    if (legend_pos == "inside") {
+        theme_args_add <- c(theme_args_add, list(legend.position = "inside"))
+    }
+
+    piechart(radius_inside = radius_inside,
+             label_radius_inside = label_radius_inside,
+             label_angle_outside = label_angle_outside,
+             label_angle_inside = label_angle_inside,
+             theme_args_add = theme_args_add,
+             ...)
+    # guides(colour = guide_legend(nrow = 2))
+}
+
 
 check_and_add_col_pal <- function(tab, col_pal) {
     if (length(col_pal) != nlevels(tab$group)) {
@@ -215,9 +348,28 @@ check_and_add_col_pal <- function(tab, col_pal) {
     return(tab)
 }
 
+#' Choose Black or White Text for a Background Colour
+#'
+#' Selects a contrasting text colour based on the lightness of each background
+#' colour. Light backgrounds receive black text, while dark backgrounds receive
+#' white text.
+#'
+#' @param bg_col A character vector of colours in a format supported by
+#'   [farver::decode_colour()], such as hexadecimal colour codes or colour names.
+#' @param cutoff A numeric lightness threshold. Backgrounds with HCL lightness
+#'   greater than this value receive black text. Defaults to `50`.
+#'
+#' @return A character vector containing `"black"` or `"white"`, with one value
+#'   for each element of `bg_col`.
+#' @export
+#'
+#' @examples
+#' bw_txt("#253238")
+#' bw_txt(c("#FFFFFF", "#000000", "#808080"))
+#' bw_txt("#808080", cutoff = 60)
 bw_txt <- function(bg_col, cutoff = 50) {
-    # bg_col <- "#253238"
-    unname(ifelse(farver::decode_colour(bg_col, to = "hcl")[, "l"] > cutoff, "black", "white"))
+    lightness <- farver::decode_colour(bg_col, to = "hcl")[, "l"]
+    unname(ifelse(lightness > cutoff, "black", "white"))
 }
 
 make_rel_labels <- function(which = c("label_text_inside", "label_text_outside"),
@@ -287,13 +439,9 @@ make_pie_basis <- function(x, order) {
                       rel = as.numeric(tab/sum(tab)),
                       group = factor(names(tab), levels = names(tab)))
 
-    # if (!is.null(order)) {
-    #     tab <- tab[order(tab$rel, decreasing = order), ]
-    # }
-    tab$start_angle <- c(0,cumsum(tab$rel))[-(length(tab$rel) + 1)]*pi*2
-    tab$end_angle <- c(cumsum(tab$rel))*pi*2
-    tab$mid_angle <-  0.5*(tab$start_angle + tab$end_angle)
-    tab$label_angle <- ifelse(tab$mid_angle > pi, 270 - tab$mid_angle*180/pi, 90 - tab$mid_angle*180/pi)
+    tab$start_angle_rad <- c(0,cumsum(tab$rel))[-(length(tab$rel) + 1)]*pi*2
+    tab$end_angle_rad <- c(cumsum(tab$rel))*pi*2
+    tab$mid_angle_rad <-  0.5*(tab$start_angle_rad + tab$end_angle_rad)
 
     tab$rel_lag <- as.numeric(lag(tab$rel, default = 0)) # drop attributes; for rle below
     tab$rel_lag_diff <- tab$rel - tab$rel_lag
@@ -308,16 +456,15 @@ make_label_angles_and_radii <- function(tab,
                                         label_angle_outside,
                                         label_radius_outside,
                                         label_radius_inside,
-                                        label_overlap) {
+                                        label_overlap,
+                                        overlap_outside_radius) {
 
-    # text angle equal to angle of circle but readable
-    # relevant if order = T or order = F ??
-    tab$label_angle_inside  <- label_angle_inside %||% tab$label_angle
-    tab$label_angle_outside <- label_angle_outside %||% tab$label_angle
+
+    tab$label_angle_inside <- resolve_label_angle(label_angle_inside, tab$mid_angle_rad)
+    tab$label_angle_outside <- resolve_label_angle(label_angle_outside, tab$mid_angle_rad)
 
     tab$label_radius_outside <- recycle(long = tab$abs, short = label_radius_outside)
     tab$label_radius_inside <- recycle(long = tab$abs, short = label_radius_inside)
-
 
     rel_series <- rle(abs(tab$rel_lag_diff) <= 0.05)
     relcs <- cumsum(rel_series$lengths)
@@ -332,5 +479,63 @@ make_label_angles_and_radii <- function(tab,
     }
     return(tab)
 }
+
+resolve_label_angle <- function(angle, mid_angle_rad) {
+    n <- length(mid_angle_rad)
+
+    if (n == 0L) {
+        return(numeric())
+    }
+
+    if (anyNA(mid_angle_rad) || any(!is.finite(mid_angle_rad))) {
+        stop("`mid_angle_rad` must contain finite, non-missing values.")
+    }
+
+    # User-supplied geom_text angles in degrees
+    if (is.numeric(angle)) {
+        if (length(angle) == 0L ||
+            anyNA(angle) ||
+            any(!is.finite(angle))) {
+            stop("Numeric label angles must be finite and non-missing.")
+        }
+
+        if (n %% length(angle) != 0L) {
+            stop(
+                "The number of label angles must be 1, the number of slices, ",
+                "or a divisor of the number of slices."
+            )
+        }
+
+        return(rep_len(angle, n))
+    }
+
+    modes <- c("radial_readable", "radial", "tangent_readable", "tangent")
+
+    if (!is.character(angle) || length(angle) != 1L || is.na(angle)) {
+        stop(
+            "`angle` must be a numeric vector or one of: ",
+            paste(sprintf('"%s"', modes), collapse = ", "),
+            "."
+        )
+    }
+
+    angle <- match.arg(angle, modes)
+
+    # ggforce angles start at 12 o'clock and increase clockwise.
+    theta <- mid_angle_rad %% (2 * pi)
+    mid_deg <- theta * 180 / pi
+
+    switch(
+        angle,
+        radial = {90 - mid_deg},
+        radial_readable = {
+            radial_angle <- 90 - mid_deg
+            ifelse(theta > pi, radial_angle + 180, radial_angle)},
+        tangent = {-mid_deg},
+        tangent_readable = {((-mid_deg + 90) %% 180) - 90}
+    )
+}
+
+
 
 

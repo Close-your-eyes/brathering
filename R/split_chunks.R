@@ -8,6 +8,7 @@
 #'   chunks. Cannot be used together with `size`.
 #' @param size A positive whole number giving the maximum number of elements
 #'   per chunk. Cannot be used together with `chunks`.
+#' @param shuffle shuffle x before split?
 #'
 #' @return A named list containing the chunks. An empty `x` returns an empty
 #'   list.
@@ -17,7 +18,11 @@
 #' split_chunks(1:10, chunks = 3)
 #' split_chunks(letters[1:10], size = 4)
 #' split_chunks(integer(), size = 2)
-split_chunks <- function(x, chunks = NULL, size = NULL) {
+split_chunks <- function(x,
+                         chunks = NULL,
+                         size = NULL,
+                         shuffle = F) {
+
     if (is.null(chunks) == is.null(size)) {
         stop("Supply exactly one of `chunks` or `size`.", call. = FALSE)
     }
@@ -53,5 +58,11 @@ split_chunks <- function(x, chunks = NULL, size = NULL) {
         size <- length(x) / chunks
     }
 
-    split(x, ceiling(seq_along(x) / size))
+    if (shuffle) {
+        x <- sample(x)
+    }
+
+    return(split(x, ceiling(seq_along(x) / size)))
 }
+
+

@@ -32,8 +32,10 @@ pad_num_in_str <- function(x,
     x <- as.character(x)
     parts <- strsplit_at_num(x)
     ## different n of numerics across x?
-    suppressWarnings(num_positions <- purrr::map(parts, ~which(!is.na(as.numeric(.x)))))
+    suppressWarnings(num_positions <- purrr::map(parts, ~which(!is.na(as.numeric(.x)) & .x != "Infinity")))
     num_parts <- purrr::map2(parts, num_positions, ~.x[.y])
+    # as.numeric("Infinity") --> Inf
+    # num_parts <- purrr::map(num_parts, ~.x[-which(.x == "Infinity")])
 
     # lens: all the same, or each ind to max, or all the same fixed
     if (!is.null(len) && ((is.numeric(len) && length(len) == 1) || len == "overall_max")) {

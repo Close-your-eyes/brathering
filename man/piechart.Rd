@@ -2,7 +2,7 @@
 % Please edit documentation in R/freq_pie.R
 \name{piechart}
 \alias{piechart}
-\title{Make pie or donut chart}
+\title{Make a Pie or Donut Chart}
 \usage{
 piechart(
   x,
@@ -10,88 +10,175 @@ piechart(
   fill = colrr::col_pal("custom"),
   fill_na = "grey50",
   color = "white",
-  color_text = "..auto..",
   radius_inside = 0.3,
   label_outside = c("none", "abs", "rel"),
   label_inside = c("rel", "abs", "none"),
   label_rel_cutoff = 0,
   label_size = 5,
-  label_radius_inside = 0.75,
+  label_radius_inside = 0.65,
   label_radius_outside = 1.1,
-  label_angle_inside = NULL,
-  label_angle_outside = NULL,
+  label_angle_inside = "radial_readable",
+  label_angle_outside = "radial_readable",
   label_overlap = c("ignore", "alternate", "outside"),
+  label_color_inside = "..auto..",
+  label_color_outside = "..auto..",
   overlap_outside_radius = 1.1,
   label_rel_pct = F,
   label_rel_dec = 2,
   legend_title = NULL,
   theme = ggplot2::theme_classic(),
-  theme_args = list(panel.grid = ggplot2::element_blank(), axis.title =
-    ggplot2::element_blank(), axis.text = ggplot2::element_blank(), axis.ticks =
-    ggplot2::element_blank()),
-  col_pal_args = list(missing_fct_to_na = T)
+  theme_args = list(panel.grid = ggplot2::element_blank(), axis.title.x =
+    ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), axis.text.x =
+    ggplot2::element_blank(), axis.text.y = ggplot2::element_blank(), axis.ticks.x =
+    ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.line.x =
+    ggplot2::element_blank(), axis.line.y = ggplot2::element_blank()),
+  theme_args_add = list(),
+  col_pal_args = list(missing_fct_to_na = T),
+  axes_expand = 0.05
 )
 }
 \arguments{
-\item{x}{unnamed vector or named numeric vector (= already summarized)}
+\item{x}{An unnamed vector of observations to tabulate, or a named numeric
+vector of already summarized non-negative values.}
 
-\item{order}{sort summarized/tabulated groups of x; NULL for no sorting;
-TRUE for decreasing, FALSE for increasing}
+\item{order}{Controls sorting after tabulation. Use `NULL` to retain the
+existing order, `TRUE` for decreasing values, or `FALSE` for increasing
+values.}
 
-\item{fill}{color palette to fill pie pieces, can be named by groups in x}
+\item{fill}{A vector of valid slice colours. It may be named with groups in
+`x`; otherwise colours are matched by position.}
 
-\item{fill_na}{fill for NA}
+\item{fill_na}{Colour used for a missing group.}
 
-\item{color}{border color of pie pieces}
+\item{color}{Border colour of the slices. Use `NA` for no border.}
 
-\item{color_text}{text color}
+\item{radius_inside}{Inner radius of the slices. The outer radius is fixed at
+`1`; use `0` for a pie chart or a value between `0` and `1` for a donut.}
 
-\item{radius_inside}{inner radius where pieces are cut. outer radius is fixed
-to 1. set to 0 to get pie chart}
+\item{label_outside}{Outside-label content: `"none"`, `"abs"` for absolute
+values, or `"rel"` for relative values.}
 
-\item{label_outside}{which labels outside of pie pieces (radius > 1): none,
-absolute, relative}
+\item{label_inside}{Inside-label content. Accepts the same values as
+`label_outside`.}
 
-\item{label_inside}{see label_outside, radius < 1}
+\item{label_rel_cutoff}{Minimum slice proportion required for a label to be
+displayed. For example, `0.05` suppresses labels below five percent.}
 
-\item{label_rel_cutoff}{min. fraction of pie piece to plot label}
+\item{label_size}{Text size passed to [ggplot2::geom_text()].}
 
-\item{label_size}{size of label, passed to geom_text}
+\item{label_radius_inside}{Numeric vector of radii for inside labels. Values
+are recycled across slices.}
 
-\item{label_radius_inside}{vector of radii where to place labels,
-gets recycled}
+\item{label_radius_outside}{Numeric vector of radii for outside labels.
+Values are recycled across slices; values greater than `1` lie beyond the
+outer edge.}
 
-\item{label_radius_outside}{see label_radius_inside}
+\item{label_angle_inside}{Inside-label orientation. Supply
+`"radial_readable"`, `"radial"`, `"tangent_readable"`, or `"tangent"`;
+alternatively, supply one or more numeric angles in degrees as interpreted
+by [ggplot2::geom_text()]. See **Label angles**.}
 
-\item{label_angle_inside}{vector of label angles, gets recycled}
+\item{label_angle_outside}{Outside-label orientation. Accepts the same values
+as `label_angle_inside`.}
 
-\item{label_angle_outside}{see label_angle_inside}
+\item{label_overlap}{Method used to reduce overlap among nearby labels:
+`"ignore"`, `"alternate"`, or `"outside"`. `"alternate"` offsets inside
+label radii; `"outside"` moves affected inside labels to
+`overlap_outside_radius`.}
 
-\item{label_overlap}{method of trying to fix overlapping labels}
+\item{label_color_inside}{Colour for inside labels. The special value
+`"..auto.."` chooses black or white separately for each label from its
+slice fill. For an explicit vector, only the first value is used.}
 
-\item{overlap_outside_radius}{radius for label_overlap = "outside"}
+\item{label_color_outside}{Colour for outside labels. The special value
+`"..auto.."` chooses black or white from the plot-background fill. For an
+explicit vector, only the first value is used.}
 
-\item{label_rel_pct}{relative labels in percent?}
+\item{overlap_outside_radius}{Radius used when
+`label_overlap = "outside"`.}
 
-\item{label_rel_dec}{decimal places of relative labels}
+\item{label_rel_pct}{If `TRUE`, relative labels are multiplied by 100 and
+printed with a percent sign. If `FALSE`, proportions are printed.}
 
-\item{legend_title}{legend title}
+\item{label_rel_dec}{Non-negative number of decimal places used for relative
+labels.}
 
-\item{theme}{ggplot theme}
+\item{legend_title}{Optional title for the fill legend.}
 
-\item{theme_args}{arguments to ggplot2::theme()}
+\item{theme}{A ggplot2 theme added to the plot before `theme_args` are
+applied.}
 
-\item{col_pal_args}{args to colrr::make_col_pal}
+\item{theme_args}{Named list of arguments passed to [ggplot2::theme()]. The
+defaults remove axes, ticks, and axis lines.}
+
+\item{theme_args_add}{Additional named theme arguments appended to
+`theme_args`. This is useful for wrappers such as [donutchart()].}
+
+\item{col_pal_args}{Additional named arguments passed to
+`colrr::make_col_pal()`.}
+
+\item{axes_expand}{Non-negative multiplicative expansion applied to both
+Cartesian axes. Increase it to leave more room for outside labels.}
 }
 \value{
-list of plot and data frame
+A named list with two elements: `plot`, the ggplot object, and `data`,
+  the per-slice data frame used to construct it.
 }
 \description{
-Make pie or donut chart
+Draw a pie or donut chart in Cartesian coordinates. Input may be raw
+observations or an already summarized named numeric vector. Absolute or
+relative labels can be placed and rotated independently inside and outside
+the slices.
 }
+\section{Label angles}{
+
+Slice angles used by [ggforce::geom_arc_bar()] are measured in radians,
+beginning at 12 o'clock and increasing clockwise. Text angles passed to
+[ggplot2::geom_text()] are measured in degrees, with positive values rotating
+counterclockwise.
+
+The named label-angle modes are:
+
+* `"radial"`: align the text baseline with the slice's radial direction.
+* `"radial_readable"`: use radial alignment and flip labels on the opposite
+  half of the circle to keep them upright.
+* `"tangent"`: align the text baseline with the circle's tangent, making it
+  orthogonal to the slice's radial direction.
+* `"tangent_readable"`: use tangential alignment and flip equivalent
+  orientations to keep labels upright.
+
+Modes without the `_readable` suffix preserve the uncorrected geometric
+orientation, so some labels may appear upside down. Numeric angles bypass
+automatic calculation; for example, `0` makes labels horizontal.
+}
+
 \examples{
-piechart(x = c(rep("a",10), rep("b",6), rep("c", 3), rep("d",2)),
-         label_rel_pct = T,
-         label_rel_dec = 1)
+piechart(
+    x = c(rep("a", 10), rep("b", 6), rep("c", 3), rep("d", 2)),
+    label_rel_pct = TRUE,
+    label_rel_dec = 1
+)
+
 piechart(x = setNames(1:10, letters[1:10]))
+
+# Place percentage labels outside and align them with the circle tangent.
+piechart(
+    x = setNames(c(10, 6, 3, 2), letters[1:4]),
+    label_inside = "none",
+    label_outside = "rel",
+    label_rel_pct = TRUE,
+    label_angle_outside = "tangent_readable",
+    axes_expand = 0.15
+
+piechart(
+    x = setNames(c(10, 6, 3, 2), letters[1:4]),
+    radius_inside = 0.7,
+    label_inside = "none",
+    label_outside = "rel",
+    label_rel_pct = TRUE,
+    label_angle_outside = "tangent_readable",
+    axes_expand = 0.15,
+    theme = colrr::theme_material())$plot +
+    theme(legend.position = "inside")
+)
 }

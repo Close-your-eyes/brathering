@@ -13,6 +13,7 @@ venn_plot(
   upset_order_intersects = "degree",
   upset_order_sets = F,
   flip_axes = FALSE,
+  geom_circle_args = list(alpha = 0.3, linewidth = 0.75),
   ...
 )
 }

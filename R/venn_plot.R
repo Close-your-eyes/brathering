@@ -28,6 +28,7 @@
 #'   \code{upset_plot = TRUE}.
 #' @param ... Additional arguments passed to
 #'   \code{\link[ComplexUpset]{upset}} when \code{upset_plot = TRUE}.
+#' @param geom_circle_args
 #'
 #' @details
 #' Each distinct observation-category pair represents membership of an
@@ -126,6 +127,7 @@ venn_plot <- function(data,
                       upset_order_intersects = "degree",
                       upset_order_sets = F,
                       flip_axes = FALSE,
+                      geom_circle_args = list(alpha = 0.3, linewidth = 0.75),
                       ...) {
 
     # if (!requireNamespace("BiocManager", quietly = T)) {
@@ -215,7 +217,8 @@ venn_plot <- function(data,
         data = data,
         vc_df = vc_df,
         cat_col = cat_col,
-        flip_axes = flip_axes
+        flip_axes = flip_axes,
+        geom_circle_args = geom_circle_args
     )
 
     return(list(data = vc_df, data_circ = data_circ, plot = plot))
@@ -224,7 +227,8 @@ venn_plot <- function(data,
 make_venn_gg <- function(data,
                          vc_df,
                          cat_col,
-                         flip_axes) {
+                         flip_axes,
+                         geom_circle_args) {
 
     rm_outside <- F
 
@@ -462,11 +466,13 @@ make_venn_gg <- function(data,
         vc_df[which(vc_df$labels == ""), c("x","y")] <- c(1.4,-0.9)
         vc_df[which(vc_df$labels == paste(levs, collapse = sep)), c("x","y")] <- c(0,0)
 
+        geom_circle_args <- c(list(mapping = ggplot2::aes(x0 = !!rlang::sym(xx),
+                                                          y0 = !!rlang::sym(yy),
+                                                          r = 1,
+                                                          fill = labels)),
+                              geom_circle_args)
         g <- ggplot2::ggplot(venn.circ) +
-            ggforce::geom_circle(ggplot2::aes(x0 = !!rlang::sym(xx),
-                                              y0 = !!rlang::sym(yy),
-                                              r = 1,
-                                              fill = labels), alpha = 0.3, linewidth = 1)
+            Gmisc::fastDoCall(ggforce::geom_circle, args = geom_circle_args)
 
         if (rm_outside) {
             vc_df <- vc_df[-Reduce(intersect, list(which(vc_df[,1] == 0),which(vc_df[,2] == 0))),]

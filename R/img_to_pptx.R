@@ -13,10 +13,8 @@
 #' }
 img_to_pptx <- function(img_paths,
                         pptx_path) {
+    .ensure_packages(c("fs", "magick", "officer"))
 
-    if (!requireNamespace("officer", quietly = T)) {
-        utils::install.packages("officer")
-    }
 
     ppt <- officer::read_pptx()
     for (i in seq_along(img_paths)) {
@@ -46,4 +44,3 @@ img_to_pptx <- function(img_paths,
     dir.create(dirname(pptx_path), recursive = T, showWarnings = F)
     print(ppt, target = pptx_path)
 }
-

@@ -10,6 +10,7 @@
 membership_matrix <- function(x,
                               as = c("sparse", "dense"),
                               verbose = T) {
+    .ensure_packages(c("Matrix"))
 
     if (!is.list(x)) {
         stop("x has to be a list.")

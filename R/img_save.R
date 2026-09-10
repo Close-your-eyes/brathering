@@ -83,7 +83,7 @@ img_save <- function(plotdata,
                                          res = dpi),
                                     device_args))
     do.call(what = plotfun, args = c(list(x = plotdata), plotfun_args))
-    dev.off()
+    grDevices::dev.off()
 
     message(target)
     invisible(target)

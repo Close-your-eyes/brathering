@@ -127,7 +127,6 @@ fft_tsne <- function(
     perplexity_list = NULL,
     get_costs = FALSE,
     df = 1.0) {
-
   version_number <- '1.2.1'
 
   # if (is.null(fast_tsne_path)) {
@@ -151,7 +150,7 @@ fft_tsne <- function(
   result_path <- tempfile(pattern = 'fftRtsne_result_', fileext = '.dat')
 
   fast_tsne_path <- normalizePath(fast_tsne_path)
-  if (!file_test('-x', fast_tsne_path)) {
+  if (!utils::file_test('-x', fast_tsne_path)) {
     stop(fast_tsne_path, " does not exist or is not executable; check your fast_tsne_path parameter")
   }
 
@@ -192,6 +191,7 @@ fft_tsne <- function(
   }
 
   if (is.character(initialization) && initialization =='pca') {
+    .ensure_package("rsvd")
     if (rand_seed != -1)  {
       set.seed(rand_seed)
     }
@@ -206,15 +206,11 @@ fft_tsne <- function(
       irlba_out <- irlba::irlba(X,nv=dims, center=X_colmeans)
       X_top_pcs <- irlba_out$u %*% diag(irlba_out$d, nrow=dims)
     }else{
-      stop("By default, FIt-SNE initializes the embedding with the
-                     top PCs. We use either rsvd or irlba for fast computation.
-                     To use this functionality, please install the rsvd package
-                     with install.packages('rsvd') or the irlba package with
-                     install.packages('ilrba').  Otherwise, set initialization
-                     to NULL for random initialization, or any N by dims matrix
+      stop("PCA initialization requires either rsvd or irlba. Set initialization
+                     to NULL for random initialization, or provide an N by dims matrix
                      for custom initialization.")
     }
-    initialization <- 0.0001*(X_top_pcs/sd(X_top_pcs[,1]))
+    initialization <- 0.0001*(X_top_pcs/stats::sd(X_top_pcs[,1]))
 
   }else if (is.character(initialization) && initialization == 'random'){
     message('Random initialization')

@@ -26,6 +26,7 @@ combnn <- function(x,
                    min_len = 1,
                    consecutive_only = F,
                    return_numeric = F) {
+    .ensure_packages(c("gtools"))
 
     # Combinations -> subsets, order doesn’t matter, no repetition.
     # Permutations -> subsets, order matters, no repetition.
@@ -92,5 +93,4 @@ combnn <- function(x,
 
     return(all_grouped)
 }
-
 

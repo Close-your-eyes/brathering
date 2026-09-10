@@ -29,6 +29,7 @@
 #' out$result
 #' out$best_match
 best_match_str <- function(x, candidates, method = "osa") {
+    .ensure_packages(c("stringdist"))
     d <- stringdist::stringdistmatrix(x, candidates, method = method)
 
     idx <- max.col(-d, ties.method = "first")
@@ -42,9 +43,8 @@ best_match_str <- function(x, candidates, method = "osa") {
 
     res <- list(
         result = result,
-        best_match = setNames(result$best_match, result$query)
+        best_match = stats::setNames(result$best_match, result$query)
     )
 
     return(res)
 }
-

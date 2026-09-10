@@ -11,7 +11,8 @@ compare_labels(
   make_plots = T,
   freq_label_cutoff = 0,
   join_label_sep = "_",
-  join_label_thresh = 0.05
+  join_label_thresh = 0.05,
+  NA_to = NULL
 )
 }
 \arguments{
@@ -19,6 +20,10 @@ compare_labels(
 the first column is used as `x` and the second column as `y`.}
 
 \item{y}{A second label vector. Ignored when `x` is a data frame or matrix.}
+
+\item{adjust_order}{adjust axis label order in tile plots?}
+
+\item{make_plots}{make tile plots}
 
 \item{freq_label_cutoff}{Numeric cutoff used for displaying text labels in
 heatmap plots. Values less than or equal to this cutoff are not printed
@@ -29,6 +34,9 @@ inside tiles.}
 \item{join_label_thresh}{Numeric threshold for joined-label frequencies.
 Joined labels with relative frequency below this threshold are reassigned
 to the most frequent joined label within the same parent label.}
+
+\item{NA_to}{convert NAs to another character to keep them in the analysis;
+e.g. NA or `_NA_` or `*NA*`}
 }
 \value{
 A list with entries:

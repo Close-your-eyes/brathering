@@ -149,6 +149,7 @@ piechart <- function(x,
                      theme_args_add = list(),
                      col_pal_args = list(missing_fct_to_na = T),
                      axes_expand = 0.05) {
+    .ensure_packages(c("colrr", "ggforce", "ggplot2", "Gmisc"))
 
     label_overlap <- rlang::arg_match(label_overlap)
     label_outside <- rlang::arg_match(label_outside)
@@ -319,6 +320,7 @@ donutchart <- function(...,
 
 
 check_and_add_col_pal <- function(tab, col_pal) {
+    .ensure_packages(c("scales"))
     if (length(col_pal) != nlevels(tab$group)) {
         if (is.null(names(col_pal))) {
             if (length(col_pal) < length(unique(tab$group))) {
@@ -368,6 +370,7 @@ check_and_add_col_pal <- function(tab, col_pal) {
 #' bw_txt(c("#FFFFFF", "#000000", "#808080"))
 #' bw_txt("#808080", cutoff = 60)
 bw_txt <- function(bg_col, cutoff = 50) {
+    .ensure_packages(c("farver"))
     lightness <- farver::decode_colour(bg_col, to = "hcl")[, "l"]
     unname(ifelse(lightness > cutoff, "black", "white"))
 }
@@ -443,7 +446,7 @@ make_pie_basis <- function(x, order) {
     tab$end_angle_rad <- c(cumsum(tab$rel))*pi*2
     tab$mid_angle_rad <-  0.5*(tab$start_angle_rad + tab$end_angle_rad)
 
-    tab$rel_lag <- as.numeric(lag(tab$rel, default = 0)) # drop attributes; for rle below
+    tab$rel_lag <- as.numeric(stats::lag(tab$rel, default = 0)) # drop attributes; for rle below
     tab$rel_lag_diff <- tab$rel - tab$rel_lag
     tab$rel_lag_diff_series <- cumsum(abs(tab$rel_lag_diff) <= 0.05) ## not used yet
 
@@ -468,7 +471,7 @@ make_label_angles_and_radii <- function(tab,
 
     rel_series <- rle(abs(tab$rel_lag_diff) <= 0.05)
     relcs <- cumsum(rel_series$lengths)
-    lagrelcs <- lag(relcs+1)
+    lagrelcs <- stats::lag(relcs+1)
     if (label_overlap == "alternate") {
         tab$label_radius_inside[unlist(seq2(lagrelcs[-1], relcs[-1]))] <-
             ifelse(unlist(seq2(lagrelcs[-1], relcs[-1])) %% 2 == 0,
@@ -535,7 +538,5 @@ resolve_label_angle <- function(angle, mid_angle_rad) {
         tangent_readable = {((-mid_deg + 90) %% 180) - 90}
     )
 }
-
-
 
 

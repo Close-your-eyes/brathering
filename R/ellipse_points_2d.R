@@ -182,7 +182,7 @@ ellipsoid_points_3d_ran <- function(
     Q <- eig$vectors
     A <- Q %*% diag(sqrt(eig$values * c))
 
-    U <- matrix(rnorm(3 * n), nrow = 3)
+    U <- matrix(stats::rnorm(3 * n), nrow = 3)
     U <- sweep(U, 2, sqrt(colSums(U^2)), "/")  # normalize columns
 
     pts <- t(A %*% U)
@@ -272,4 +272,3 @@ givens_rotation <- function(n, i, j, theta) {
 
     R
 }
-

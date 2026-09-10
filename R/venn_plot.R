@@ -129,13 +129,7 @@ venn_plot <- function(data,
                       flip_axes = FALSE,
                       geom_circle_args = list(alpha = 0.3, linewidth = 0.75),
                       ...) {
-
-    # if (!requireNamespace("BiocManager", quietly = T)) {
-    #     utils::install.packages("BiocManager")
-    # }
-    # if (!requireNamespace("limma", quietly = T)) {
-    #     BiocManager::install("limma")
-    # }
+    .ensure_packages(c("ComplexUpset", "limma", "scales"))
 
     if (missing(data)) {
         stop("Please provide a data frame or tibble as data.")
@@ -229,6 +223,7 @@ make_venn_gg <- function(data,
                          cat_col,
                          flip_axes,
                          geom_circle_args) {
+    .ensure_packages(c("ggforce", "ggplot2", "Gmisc"))
 
     rm_outside <- F
 

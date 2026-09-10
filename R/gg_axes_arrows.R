@@ -25,10 +25,12 @@ gg_axes_arrows <- function(ggobj,
                                              type = "open"),
                            segment_args = list(linewidth = 0.2,
                                                color = "black")) {
+    .ensure_packages(c("ggplot2"))
 
-    brathering::gg_lims(ggobj)
 
-    lims <-  brathering::gg_lims(ggobj)
+
+    lims <- brathering::gg_lims(ggobj)
+    print(lims)
     xlim <- lims[[1]]
     ylim <- lims[[2]]
 
@@ -56,11 +58,12 @@ gg_axes_arrows <- function(ggobj,
                                                 segment_args)) +
         ggplot2::coord_cartesian(xlim = xlim, ylim = ylim, expand = F, clip = "off")
 
+
     if (add_names) {
         ggobj <- ggobj +
-            do.call(ggplot2::annotate, args = c(list(geom = "text", x = x0 + xlen*1.1, y = y0, label = names(lims)[1], hjust = 0),
+            do.call(ggplot2::annotate, args = c(list(geom = "text", x = x0 + xlen*1.1, y = y0, label = names(lims)[1], hjust = 0, vjust = 0.5),
                                                 annotate_args)) +
-            do.call(ggplot2::annotate, args = c(list(geom = "text", x = x0, y = y0 + ylen*1.1, label = names(lims)[2], hjust = 0, angle = 90),
+            do.call(ggplot2::annotate, args = c(list(geom = "text", x = x0, y = y0 + ylen*1.1, label = names(lims)[2], hjust = 0, vjust = 0.5, angle = 90),
                                                 annotate_args))
     }
 
@@ -68,6 +71,7 @@ gg_axes_arrows <- function(ggobj,
 }
 
 enforce_min_margin <- function(p, min_pt = 10) {
+    .ensure_packages(c("ggplot2"))
     # Merge theme to get actual margins
     th <- ggplot2::theme_get() %+replace% p$theme
 

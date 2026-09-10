@@ -8,13 +8,14 @@ image_sorter(
   input_dir = "images",
   folder_a = "folder_a",
   folder_b = "folder_b",
-  rate = 2,
+  rate = 0.5,
   select_key = "Space",
   mode = c("move", "copy"),
   recursive = FALSE,
   host = "127.0.0.1",
   port = 3838L,
-  launch_browser = TRUE
+  launch_browser = TRUE,
+  advance_on_select = FALSE
 )
 }
 \arguments{
@@ -53,6 +54,11 @@ Images already within either destination directory are excluded.}
 \item{port}{Numeric scalar. Whole-number port from 1 through 65535.}
 
 \item{launch_browser}{Logical scalar. Whether to open the app in a browser.}
+
+\item{advance_on_select}{Logical scalar. If \code{TRUE}, pressing the
+selection key or clicking the selection button immediately sends the
+current image to folder A and displays the next image. If \code{FALSE}
+(the default), selection remains latched until the current interval ends.}
 }
 \value{
 Invisibly \code{NULL} after the app stops. The function performs
@@ -74,11 +80,14 @@ remains latched for the current image after the key or button is released,
 and resets for every new image. Holding the selection key does not select
 later images.
 The on-screen button always works, regardless of \code{select_key}.
-A selection made while paused is retained when playback resumes.
+With the default \code{advance_on_select = FALSE}, a selection made while
+paused is retained when playback resumes.
 
 At the end of each interval the selected image is moved or copied to A;
-otherwise it goes to B. Selecting an image does not advance it immediately.
-Pausing leaves the current image unsorted; resuming starts a fresh interval.
+otherwise it goes to B. With \code{advance_on_select = TRUE}, selection
+instead transfers the current image to A immediately, even while paused, and
+the next image receives a fresh interval. Pausing otherwise leaves the
+current image unsorted; resuming starts a fresh interval.
 Keep the browser tab visible and focused. Timing is approximate: rendering,
 file operations, and browser/server latency can reduce the effective rate.
 
@@ -114,6 +123,7 @@ image_sorter(
   folder_b = "reject",
   rate = 3,
   select_key = "a",
+  advance_on_select = TRUE,
   mode = "copy"
 )
 

@@ -17,6 +17,7 @@
 ungunzip <- function(file,
                      out_file = NULL,
                      out_dir = NULL) {
+    .ensure_packages(c("fs"))
 
     if (!file.exists(file)) {
         stop("file not found.")

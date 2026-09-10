@@ -40,6 +40,10 @@
 #' @param join_label_thresh Numeric threshold for joined-label frequencies.
 #'   Joined labels with relative frequency below this threshold are reassigned
 #'   to the most frequent joined label within the same parent label.
+#' @param adjust_order adjust axis label order in tile plots?
+#' @param make_plots make tile plots
+#' @param NA_to convert NAs to another character to keep them in the analysis;
+#'    e.g. NA or `_NA_` or `*NA*`
 #'
 #' @returns A list with entries:
 #' \describe{
@@ -83,7 +87,9 @@ compare_labels <- function(x,
                            make_plots = T,
                            freq_label_cutoff = 0,
                            join_label_sep = "_",
-                           join_label_thresh = 0.05) {
+                           join_label_thresh = 0.05,
+                           NA_to = NULL) {
+    .ensure_packages(c("aricode"))
 
     # related:
     # https://github.com/lazappi/clustree
@@ -106,6 +112,11 @@ compare_labels <- function(x,
 
     if (is.numeric(x) || is.numeric(y)) {
         stop("x or y is numeric. not allowed.")
+    }
+
+    if (!is.null(NA_to)) {
+        x[which(is.na(x))] <- NA_to
+        y[which(is.na(y))] <- NA_to
     }
 
     # remove NA by default
@@ -223,6 +234,7 @@ compare_labels <- function(x,
 
 make_matrix_and_df <- function(m,
                                adjust_order = T) {
+    .ensure_packages(c("fcexpr"))
 
     mat <- matrix(
         data = as.vector(m),
@@ -254,6 +266,7 @@ make_matrix_and_df <- function(m,
 make_plot <- function(df,
                       legend_name,
                       freq_label_cutoff = 0) {
+    .ensure_packages(c("colrr", "ggplot2"))
 
     plot <- ggplot2::ggplot(df, ggplot2::aes(x, y)) +
         ggplot2::geom_tile(ggplot2::aes(fill = value), color = "black") +
@@ -276,4 +289,3 @@ make_jaccard <- function(raw) {
     jaccard[is.na(jaccard)] <- 0  # just in case of zeros
     return(jaccard)
 }
-

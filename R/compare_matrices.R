@@ -102,5 +102,6 @@ compare_matrices <- function(x1,
 }
 
 hash_matrix <- function(x, margin = 1) {
+    .ensure_packages(c("digest"))
     apply(x, MARGIN = margin, function(y) digest::digest(y, algo = "xxhash64"))
 }

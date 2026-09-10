@@ -17,10 +17,8 @@
 #' img_convert(path/to/image.heic, format = "png")
 #' }
 img_convert <- function(path, format = "jpeg", path_save = NULL, ...) {
+    .ensure_packages(c("magick"))
 
-    if (!requireNamespace("magick", quietly = T)) {
-        utils::install.packages("magick")
-    }
 
     # pathnew <- file.path(dirname(path), paste0(strsplit2(basename(path), pattern = "\\.", inds = "last")[[1]][1], ".", format))
     if (is.null(path_save)) {

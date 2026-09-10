@@ -13,6 +13,7 @@
 #' clr(x)
 #' compositions::clr(x)
 clr <- function(x, margin = 1) {
+    .ensure_packages(c("Matrix"))
 
     clr_base <- function(x) {
         reconstruct <- function(x, zero_idx, original_length) {
@@ -72,5 +73,4 @@ clr <- function(x, margin = 1) {
     }
     return(y)
 }
-
 

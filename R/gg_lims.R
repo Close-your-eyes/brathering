@@ -13,6 +13,7 @@
 #' gg_lims(ggobj)
 
 gg_lims <- function(ggobj) {
+    .ensure_packages(c("ggplot2"))
 
     plot_build <- ggplot2::ggplot_build(ggobj)
     x_limits <- plot_build$layout$panel_params[[1]]$x.range
@@ -38,5 +39,4 @@ gg_lims <- function(ggobj) {
         #y_data = y_data
     ), c(xvar, yvar)))
 }
-
 

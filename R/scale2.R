@@ -13,6 +13,7 @@
 #' @examples
 #' scale2(rnorm(100), -1, 1)
 scale2 <- function (x, min = 0, max = 1, margin = 2) {
+    .ensure_packages(c("scales"))
 
     if (is.matrix(x) || is.data.frame(x)) {
         if (is.data.frame(x)) {

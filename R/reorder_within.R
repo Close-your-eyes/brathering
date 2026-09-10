@@ -32,6 +32,7 @@ reorder_within <- function(x, by, within, fun = mean, sep = "___") {
 #'     scale_x_reordered()
 #' }
 scale_x_reordered <- function(..., sep = "___") {
+    .ensure_packages(c("ggplot2"))
     reg <- paste0(sep, ".+$")
     ggplot2::scale_x_discrete(labels = function(x) gsub(reg, "", x), ...)
 }
@@ -49,6 +50,7 @@ scale_x_reordered <- function(..., sep = "___") {
 #'     scale_y_reordered()
 #' }
 scale_y_reordered <- function(..., sep = "___") {
+    .ensure_packages(c("ggplot2"))
     reg <- paste0(sep, ".+$")
     ggplot2::scale_y_discrete(labels = function(x) gsub(reg, "", x), ...)
 }

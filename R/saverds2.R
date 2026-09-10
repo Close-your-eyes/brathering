@@ -18,6 +18,7 @@
 #' restored <- readr::read_rds(path)
 #' unlink(path)
 saverds2 <- function(x, file, compression = 1) {
+    .ensure_packages(c("readr"))
     readr::write_rds(
         x = x,
         file = file,

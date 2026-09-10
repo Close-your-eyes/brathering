@@ -58,7 +58,6 @@ sample_leverage <- function(x,
                             seed = 42,
                             n = 1,
                             ...) {
-
     stopifnot("x must a matrix." = is.matrix(x))
 
     if (is.null(size)) {
@@ -95,9 +94,7 @@ sample_leverage <- function(x,
 
 
     if (leverage) {
-        if (!requireNamespace("Seurat", quietly = T)) {
-            utils::install.packages("Seurat")
-        }
+        .ensure_package("Seurat")
         levscore <- Seurat::LeverageScore(t(x), ...)
         prob <- levscore/sum(levscore) # not necessary but anyways
         rows <- nrow(x)
@@ -107,5 +104,3 @@ sample_leverage <- function(x,
     rowinds <- replicate(n, sample(x = 1:rows, size = size, replace = replace, prob = prob), simplify = F)
     return(rowinds)
 }
-
-

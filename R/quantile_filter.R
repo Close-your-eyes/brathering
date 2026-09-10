@@ -26,8 +26,8 @@ quantile_filter <- function(df,
     dplyr::filter(df,
                   dplyr::between(
                       x = !!rlang::sym(valuecol),
-                      left = quantile(!!rlang::sym(valuecol), min(quantiles)),
-                      right = quantile(!!rlang::sym(valuecol), max(quantiles))),
+                      left = stats::quantile(!!rlang::sym(valuecol), min(quantiles)),
+                      right = stats::quantile(!!rlang::sym(valuecol), max(quantiles))),
                   .by = groupcol)
 }
 
@@ -52,8 +52,8 @@ quantile_filter2 <- function(x,
 
     zz <- purrr::map(columns, function(y) {
         dplyr::between(x = x[,y],
-                       left = quantile(x[,y], min(quantiles)),
-                       right = quantile(x[,y], max(quantiles)))
+                       left = stats::quantile(x[,y], min(quantiles)),
+                       right = stats::quantile(x[,y], max(quantiles)))
     })
 
     # all TRUE? --> keep row

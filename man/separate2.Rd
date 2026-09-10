@@ -38,7 +38,7 @@ df <- tibble::tibble(
 )
 
 separate_plain <- function(df) {
-    df \%>\% tidyr::separate(code, into = c("a", "b"), sep = "-")
+    df |> tidyr::separate(code, into = c("a", "b"), sep = "-")
 }
 
 microbenchmark::microbenchmark(

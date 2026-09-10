@@ -35,11 +35,11 @@ combine_pvalues <- function(pvalues,
         # Fisher's method: Chi-square combination
         k <- length(pvalues)
         chi_stat <- -2 * sum(log(pvalues), na.rm = TRUE)
-        p_combined <- pchisq(chi_stat, df = 2 * k, lower.tail = FALSE)
+        p_combined <- stats::pchisq(chi_stat, df = 2 * k, lower.tail = FALSE)
 
     } else if (method == "stouffer") {
         # Stouffer's method: combine z-scores (optionally weighted)
-        z_scores <- qnorm(1 - pvalues / 2)  # two-sided to z-scores
+        z_scores <- stats::qnorm(1 - pvalues / 2)  # two-sided to z-scores
 
         if (is.null(sample_sizes)) {
             z_combined <- mean(z_scores, na.rm = TRUE) / sqrt(1 / length(z_scores))
@@ -53,7 +53,7 @@ combine_pvalues <- function(pvalues,
         }
 
         # back to two-sided p-value
-        p_combined <- 2 * (1 - pnorm(abs(z_combined)))
+        p_combined <- 2 * (1 - stats::pnorm(abs(z_combined)))
     }
 
     return(p_combined)

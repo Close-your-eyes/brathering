@@ -32,6 +32,10 @@
 #'   \code{"Spacebar"}, and a literal space select the space bar. Ctrl, Alt,
 #'   and Meta key combinations are ignored. Letters are recommended because
 #'   browsers or operating systems may reserve special keys.
+#' @param advance_on_select Logical scalar. If \code{TRUE}, pressing the
+#'   selection key or clicking the selection button immediately sends the
+#'   current image to folder A and displays the next image. If \code{FALSE}
+#'   (the default), selection remains latched until the current interval ends.
 #' @param mode Character scalar, either \code{"move"} (the default) or
 #'   \code{"copy"}. Copy mode leaves the original images in place.
 #' @param recursive Logical scalar. Whether to include input subdirectories.
@@ -51,11 +55,14 @@
 #' and resets for every new image. Holding the selection key does not select
 #' later images.
 #' The on-screen button always works, regardless of \code{select_key}.
-#' A selection made while paused is retained when playback resumes.
+#' With the default \code{advance_on_select = FALSE}, a selection made while
+#' paused is retained when playback resumes.
 #'
 #' At the end of each interval the selected image is moved or copied to A;
-#' otherwise it goes to B. Selecting an image does not advance it immediately.
-#' Pausing leaves the current image unsorted; resuming starts a fresh interval.
+#' otherwise it goes to B. With \code{advance_on_select = TRUE}, selection
+#' instead transfers the current image to A immediately, even while paused, and
+#' the next image receives a fresh interval. Pausing otherwise leaves the
+#' current image unsorted; resuming starts a fresh interval.
 #' Keep the browser tab visible and focused. Timing is approximate: rendering,
 #' file operations, and browser/server latency can reduce the effective rate.
 #'
@@ -96,6 +103,7 @@
 #'   folder_b = "reject",
 #'   rate = 3,
 #'   select_key = "a",
+#'   advance_on_select = TRUE,
 #'   mode = "copy"
 #' )
 #'
@@ -114,13 +122,15 @@
 image_sorter <- function(input_dir = "images",
                          folder_a = "folder_a",
                          folder_b = "folder_b",
-                         rate = 2,
+                         rate = 0.5,
                          select_key = "Space",
                          mode = c("move", "copy"),
                          recursive = FALSE,
                          host = "127.0.0.1",
                          port = 3838L,
-                         launch_browser = TRUE) {
+                         launch_browser = TRUE,
+                         advance_on_select = FALSE) {
+    .ensure_packages(c("shiny"))
     scalar_string <- function(value) {
         is.character(value) && length(value) == 1L &&
             !is.na(value) && nzchar(value)
@@ -139,7 +149,7 @@ image_sorter <- function(input_dir = "images",
         port != floor(port) || port < 1 || port > 65535) {
         stop("port must be a whole number from 1 to 65535.", call. = FALSE)
     }
-    for (argument in c("recursive", "launch_browser")) {
+    for (argument in c("advance_on_select", "recursive", "launch_browser")) {
         value <- get(argument, inherits = FALSE)
         if (!is.logical(value) || length(value) != 1L || is.na(value)) {
             stop(argument, " must be TRUE or FALSE.", call. = FALSE)
@@ -164,16 +174,6 @@ image_sorter <- function(input_dir = "images",
     }
     if (tolower(select_key) %in% c("space", "spacebar")) select_key <- " "
     key_label <- if (identical(select_key, " ")) "Space" else select_key
-
-    require_package <- function(package) {
-        if (!requireNamespace(package, quietly = TRUE)) {
-            stop(
-                "Package '", package, "' is required. Install it with:\n",
-                "  install.packages(\"", package, "\")",
-                call. = FALSE
-            )
-        }
-    }
 
     absolute_path <- function(path, must_work = FALSE) {
         path <- path.expand(path)
@@ -247,8 +247,6 @@ image_sorter <- function(input_dir = "images",
             "application/octet-stream"
         )
     }
-
-    require_package("shiny")
 
     input_dir <- absolute_path(input_dir, must_work = TRUE)
     folder_a <- absolute_path(folder_a)
@@ -381,9 +379,12 @@ image_sorter <- function(input_dir = "images",
                                        "SELECT FOLDER A"),
                     shiny::p(class = "muted", style = "margin-top: 10px;",
                              paste0("Click once or tap ", key_label,
-                                    " to select this image for A. No press = B.")),
+                                    " to select this image for A. No press = B.",
+                                    if (advance_on_select) " Selection advances immediately." else "")),
                     shiny::hr(),
                     shiny::strong("Speed: "), paste0(rate, " image(s)/second"), shiny::br(),
+                    shiny::strong("Advance on selection: "),
+                    if (advance_on_select) "yes" else "no", shiny::br(),
                     shiny::strong("Operation: "), mode, shiny::br(),
                     shiny::strong("Folder A: "), shiny::tags$span(title = folder_a, basename(folder_a)), shiny::br(),
                     shiny::strong("Folder B: "), shiny::tags$span(title = folder_b, basename(folder_b))
@@ -406,7 +407,7 @@ image_sorter <- function(input_dir = "images",
 
         add_message <- function(message) {
             new_messages <- c(messages(), message)
-            messages(tail(new_messages, 8L))
+            messages(utils::tail(new_messages, 8L))
         }
 
         current_file <- shiny::reactive({
@@ -414,6 +415,39 @@ image_sorter <- function(input_dir = "images",
             if (index < 1L || index > total) return(NULL)
             images[[index]]
         })
+
+        advance_current <- function(route_a) {
+            source <- current_file()
+            if (is.null(source)) {
+                running(FALSE)
+                return(invisible(FALSE))
+            }
+
+            destination_dir <- if (route_a) folder_a else folder_b
+            route_name <- if (route_a) "A" else "B"
+            destination <- unique_destination(destination_dir, basename(source))
+
+            tryCatch({
+                transfer_file(source, destination, mode)
+                if (route_a) count_a(count_a() + 1L) else count_b(count_b() + 1L)
+                add_message(sprintf("%s -> %s", basename(source), route_name))
+            }, error = function(error) {
+                count_errors(count_errors() + 1L)
+                add_message(sprintf("ERROR: %s (%s)", basename(source), conditionMessage(error)))
+            })
+
+            new_index <- current_index() + 1L
+            selected_for_a(FALSE)
+            current_index(new_index)
+            if (new_index > total) {
+                running(FALSE)
+                shiny::updateActionButton(session, "toggle", label = "Finished")
+                add_message("Finished processing the queue.")
+            } else {
+                next_tick(Sys.time() + (1 / rate))
+            }
+            invisible(TRUE)
+        }
 
         shiny::observe({
             index <- current_index()
@@ -423,7 +457,11 @@ image_sorter <- function(input_dir = "images",
         shiny::observeEvent(input$select_a, {
             press <- input$select_a
             if (current_index() <= total && isTRUE(press$index == current_index())) {
-                selected_for_a(TRUE)
+                if (advance_on_select) {
+                    advance_current(TRUE)
+                } else {
+                    selected_for_a(TRUE)
+                }
             }
         }, ignoreNULL = TRUE, priority = 10)
 
@@ -453,36 +491,7 @@ image_sorter <- function(input_dir = "images",
             due <- next_tick()
             if (is.na(due) || Sys.time() < due) return()
 
-            source <- current_file()
-            if (is.null(source)) {
-                running(FALSE)
-                return()
-            }
-
-            route_a <- selected_for_a()
-            destination_dir <- if (route_a) folder_a else folder_b
-            route_name <- if (route_a) "A" else "B"
-            destination <- unique_destination(destination_dir, basename(source))
-
-            tryCatch({
-                transfer_file(source, destination, mode)
-                if (route_a) count_a(count_a() + 1L) else count_b(count_b() + 1L)
-                add_message(sprintf("%s -> %s", basename(source), route_name))
-            }, error = function(error) {
-                count_errors(count_errors() + 1L)
-                add_message(sprintf("ERROR: %s (%s)", basename(source), conditionMessage(error)))
-            })
-
-            new_index <- current_index() + 1L
-            selected_for_a(FALSE)
-            current_index(new_index)
-            if (new_index > total) {
-                running(FALSE)
-                shiny::updateActionButton(session, "toggle", label = "Finished")
-                add_message("Finished processing the queue.")
-            } else {
-                next_tick(Sys.time() + (1 / rate))
-            }
+            advance_current(selected_for_a())
         })
 
         output$image <- shiny::renderImage({
@@ -503,7 +512,7 @@ image_sorter <- function(input_dir = "images",
         output$state <- shiny::renderUI({
             if (total == 0L) return(shiny::tags$p("No supported images found."))
             if (current_index() > total) return(shiny::tags$p("Finished."))
-            status <- if (running()) "" else "Paused — "
+            status <- if (running()) "" else "Paused -- "
             if (selected_for_a()) {
                 shiny::tags$p(class = "status-a", paste0(status, "SELECTED: current image goes to folder A"))
             } else {
@@ -553,6 +562,7 @@ image_sorter <- function(input_dir = "images",
         "  --folder-b PATH    Destination for unselected images (default: folder_b)",
         "  --rate N           Images per second; may be fractional (default: 2)",
         "  --select-key KEY   Selection key, e.g. a, Enter, Space (default: Space)",
+        "  --advance-on-select  Show the next image immediately after selection",
         "  --mode move|copy   Move or copy source files (default: move)",
         "  --recursive        Include images in input subfolders",
         "  --host HOST        Shiny bind address (default: 127.0.0.1)",
@@ -586,6 +596,11 @@ image_sorter <- function(input_dir = "images",
         argument <- args[[index]]
         if (identical(argument, "--recursive")) {
             options$recursive <- TRUE
+            index <- index + 1L
+            next
+        }
+        if (identical(argument, "--advance-on-select")) {
+            options$advance_on_select <- TRUE
             index <- index + 1L
             next
         }

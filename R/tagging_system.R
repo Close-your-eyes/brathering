@@ -12,11 +12,12 @@
 #'
 #' @examples
 tagging_system <- function(filevector, output_file = "tags.csv") {
+    .ensure_packages(c("crayon"))
 
     videos <- filevector
     # Load existing data if available
     if (file.exists(output_file)) {
-        tag_data <- read.csv(output_file, stringsAsFactors = FALSE)
+        # tag_data <- utils::read.csv(output_file, stringsAsFactors = FALSE)
     } else {
         tag_data <- data.frame(video = character(), tags = character(), stringsAsFactors = FALSE)
     }
@@ -26,7 +27,7 @@ tagging_system <- function(filevector, output_file = "tags.csv") {
     available_tags <- sort(available_tags[available_tags != ""])
 
     prev_file <- file.path(tempdir(), "tagging_temp_file.csv")
-    write.csv(tag_data, prev_file, row.names = FALSE)
+    utils::write.csv(tag_data, prev_file, row.names = FALSE)
 
     # -----------------------------
     # ASK WHETHER TO SKIP OR APPEND EXISTING VIDEOS
@@ -142,7 +143,7 @@ tagging_system <- function(filevector, output_file = "tags.csv") {
                     video_name = video_name,
                     current_tags = current_tags)
 
-                write.csv(tag_data, output_file, row.names = FALSE)
+                utils::write.csv(tag_data, output_file, row.names = FALSE)
                 cat("Progress saved to", output_file, "\n")
                 stop_tagging <- TRUE
                 break
@@ -180,7 +181,7 @@ tagging_system <- function(filevector, output_file = "tags.csv") {
 
         # Save CSV
         # done after loop iteration
-        write.csv(tag_data, output_file, row.names = FALSE)
+        utils::write.csv(tag_data, output_file, row.names = FALSE)
         cat("\nTags saved for", video_name, ":", paste(current_tags, collapse = ", "), "\n")
     }
 

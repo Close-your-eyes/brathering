@@ -50,10 +50,8 @@ plot2 <- function(x,
                   color_text = NULL,
                   discrete_lvls = 8,
                   ...) {
+    .ensure_packages(c("colrr", "scales", "scattermore"))
 
-    if (!requireNamespace("colrr", quietly = T)) {
-        devtools::install_github("Close-your-eyes/colrr")
-    }
 
     if (missing(x) || is.null(x)) {
         message("plot2: x missing.")
@@ -222,19 +220,19 @@ plot2 <- function(x,
 
 add_color_text <- function(txt, pos = c("tl", "tr", "bl", "br")) {
     pos <- rlang::arg_match(pos)
-    u <- par("usr")  # (x1, x2, y1, y2)
+    u <- graphics::par("usr")  # (x1, x2, y1, y2)
 
     if (pos == "tl") {
         # Top-left
-        text(u[1]*0.98, u[4]*0.98, txt, adj=c(0,1))
+        graphics::text(u[1]*0.98, u[4]*0.98, txt, adj=c(0,1))
     } else if (pos == "tr") {
         # Top-right
-        text(u[2]*0.98, u[4]*0.98, txt, adj=c(1,1))
+        graphics::text(u[2]*0.98, u[4]*0.98, txt, adj=c(1,1))
     } else if (pos == "bl") {
         # Bottom-left
-        text(u[1]*0.98, u[3]*0.98, txt, adj=c(0,0))
+        graphics::text(u[1]*0.98, u[3]*0.98, txt, adj=c(0,0))
     } else if (pos == "br") {
         # Bottom-right
-        text(u[2]*0.98, u[3]*0.98, txt, adj=c(1,0))
+        graphics::text(u[2]*0.98, u[3]*0.98, txt, adj=c(1,0))
     }
 }

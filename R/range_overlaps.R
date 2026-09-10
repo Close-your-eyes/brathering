@@ -19,6 +19,7 @@
 range_overlaps <- function(ranges,
                            rm_self = T,
                            rm_mirrored_dup = T) {
+    .ensure_packages(c("IRanges"))
 
     # ranges can be start end only, sorted or unsorted vectors
     # ranges <- purrr::map(ranges, ~c(min(x), max(x)))

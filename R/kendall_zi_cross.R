@@ -11,10 +11,8 @@
 #'
 #' @examples
 kendall_zi_cross <- function(mat1, mat2, mc.cores = 1) {
+    .ensure_packages(c("dismay", "parallel"))
 
-    if (!requireNamespace("dismay", quietly = T)) {
-        devtools::install_github("skinnider/dismay")
-    }
 
     allcombdf <- dplyr::filter(expand.grid(colnames(mat1), colnames(mat2)), Var1 != Var2)
     allcomb <- asplit(allcombdf, 1)

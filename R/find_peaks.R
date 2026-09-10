@@ -263,7 +263,7 @@ find_peaks <- function(x,
             right <- purrr::map(inds, ~x[.x[(length(.x)-min_mono_width[2]):length(.x)]])
             win <- purrr::map(inds, ~x[.x[(min_mono_width[1]+1):(length(.x)-min_mono_width[2])]])
             wininds <- purrr::map(inds, ~.x[(min_mono_width[1]+1):(length(.x)-min_mono_width[2])])
-            win <- purrr::map2(win, wininds, ~setNames(.x,.y))
+            win <- purrr::map2(win, wininds, ~stats::setNames(.x,.y))
 
             # subject to filter below
             winxtrmrelind <- purrr::map(win, brathering::which.max2)
@@ -650,5 +650,4 @@ get_median_val <- function(y) {
     val <- y[which.min(abs(mid-y))]
     return(val)
 }
-
 

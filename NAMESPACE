@@ -147,6 +147,9 @@ export(which.max2)
 export(which.min2)
 importFrom(knitr,kable)
 importFrom(magrittr,"%>%")
-importFrom(rlang,"%||%")
-importFrom(rlang,":=")
+importFrom(rlang,
+  "%||%",
+  ":=",
+  .data
+)
 importFrom(zeallot,"%<-%")

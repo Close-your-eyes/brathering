@@ -40,6 +40,7 @@ tsne_animation <- function(x,
                                                                       #r = 25,
                                                                       preset = "faster",
                                                                       `c:v` = "libx264"))) {
+    .ensure_packages(c("colrr", "fs", "gganimate", "ggplot2", "Gmisc", "parallel"))
     # y same rows as x
     # y df with names
     names(max_iters) <- max_iters

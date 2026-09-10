@@ -9,5 +9,6 @@
 #' @examples
 gg_get_theme_element <- function(ggobj,
                                  element = "plot.background") {
+    .ensure_packages(c("ggplot2"))
     ggplot2::calc_element(element, ggplot2::ggplot_build(ggobj)$plot$theme)
 }

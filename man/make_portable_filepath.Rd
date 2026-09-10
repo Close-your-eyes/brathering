@@ -44,13 +44,13 @@ are treated separately.
 }
 \examples{
 make_portable_filepath(x = file.path("my", "file", "path",
-                                     c("näme1",
-                                       "næme2",
+                                     c("n\u00e4me1",
+                                       "n\u00e6me2",
                                        "name~3!",
                                        "name!!4",
-                                       "...name§5___",
+                                       "...name\u00a75___",
                                        "name/\\\\6",
-                                       "name_βγ7",
+                                       "name_\u03b2\u03b37",
                                        "name{(8)}",
                                        "name_9\%")))
 make_portable_filepath("path\%20withspace/file!!1")

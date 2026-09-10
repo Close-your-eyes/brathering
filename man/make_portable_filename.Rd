@@ -41,13 +41,13 @@ special non-numeric and non-character values.
 }
 \examples{
 make_portable_filename(x = c(
-  "näme1",
-  "næme2",
+  "n\u00e4me1",
+  "n\u00e6me2",
   "name~3!",
   "name!!4",
-  "...name§5___",
+  "...name\u00a75___",
   "name/\\\\6",
-  "name_βγ7",
+  "name_\u03b2\u03b37",
   "name{(8)}",
   "name_9\%",
   "",
@@ -56,7 +56,9 @@ make_portable_filename(x = c(
 make_portable_filename(x = c("name\%20_\%9"))
 make_portable_filename(x = c("name\%20_\%9"), urldecode = F)
 # not everything works
-make_portable_filename(x = c("北亰","げんまい茶","🦄☣","…","ᔕᓇᓇ"))
+make_portable_filename(x = c("\u5317\u4eb0", "\u3052\u3093\u307e\u3044\u8336",
+  "\U0001f984\u2623", "\u2026", "\u1515\u14c7\u14c7"))
 # but with deunicode it does
-make_portable_filename(x = c("北亰","げんまい茶","🦄☣","…","ᔕᓇᓇ"), try_deunicode = T)
+make_portable_filename(x = c("\u5317\u4eb0", "\u3052\u3093\u307e\u3044\u8336",
+  "\U0001f984\u2623", "\u2026", "\u1515\u14c7\u14c7"), try_deunicode = T)
 }

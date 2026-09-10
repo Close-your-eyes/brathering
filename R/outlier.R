@@ -50,16 +50,11 @@ outlier <- function(df,
                     pcs = 2,
                     return = c("outlier", "numeric"),
                     methods = c("HDoutliers", "dbscan", "Seurat", "mahalanobis", "Rlof", "mvoutlier", "robustbase", "mclust")) {
-
     return <- rlang::arg_match(return)
     methods <- rlang::arg_match(methods, multiple = T)
 
     to_install <- intersect(c("HDoutliers", "dbscan", "Seurat", "Rlof", "mvoutlier", "robustbase", "mclust"), methods)
-    for (i in to_install) {
-        if (!requireNamespace(i, quietly = T)) {
-            utils::install.packages(i)
-        }
-    }
+    .ensure_packages(to_install)
 
     if (pca && pcs < ncol(df)) {
         df <- stats::prcomp(df)[["x"]][,c(1:pcs)]
@@ -131,9 +126,9 @@ outlier <- function(df,
     ## 9
     mcl <- NULL
     if ("mclust" %in% methods) {
+        library(mclust)
         #dtach <- !"mclust" %in% .packages()
         #null <- capture.output(library(mclust))
-        library(mclust)
         mcl <- mclust::Mclust(df, verbose = F)
         mclt <- table(mcl[["classification"]])
         if (return == "outlier") {
@@ -254,5 +249,3 @@ generate_datasets <- function(row_powers = c(2,4,6),
     }
     return(datasets)
 }
-
-

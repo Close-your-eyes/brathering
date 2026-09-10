@@ -55,12 +55,11 @@ plot3d <- function(object,
                    type = c("scatter3d", "mesh3d"),
                    backend = c("plotly", "rgl"),
                    ...) {
-    if (!requireNamespace("colrr", quietly = T)) {
-        devtools::install_github("Close-your-eyes/colrr")
-    }
+    .ensure_packages(c("colrr", "scales"))
     colortype <- rlang::arg_match(colortype)
     type <- rlang::arg_match(type)
     backend <- rlang::arg_match(backend)
+    .ensure_package(backend)
 
     if (missing(x)) {
         x <- colnames(object)[1]

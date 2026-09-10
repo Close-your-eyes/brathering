@@ -11,7 +11,7 @@
 #' @param remove see tidyr::separate
 #'
 #' @returns data frame
-#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
@@ -26,7 +26,7 @@
 #' )
 #'
 #' separate_plain <- function(df) {
-#'     df %>% tidyr::separate(code, into = c("a", "b"), sep = "-")
+#'     df |> tidyr::separate(code, into = c("a", "b"), sep = "-")
 #' }
 #'
 #' microbenchmark::microbenchmark(
@@ -37,8 +37,8 @@
 separate2 <- function(data, col, into, sep, ..., remove = FALSE) {
     col <- rlang::enquo(col)
 
-    lookup <- data %>%
-        dplyr::distinct(!!col) %>%
+    lookup <- data |>
+        dplyr::distinct(!!col) |>
         tidyr::separate(
             col = !!col,
             into = into,
@@ -47,9 +47,11 @@ separate2 <- function(data, col, into, sep, ..., remove = FALSE) {
             ...
         )
 
-    data <- data %>%
-        dplyr::left_join(lookup, by = rlang::quo_name(col)) %>%
-        { if (remove) dplyr::select(., -!!col) else . }
+    data <- data |>
+        dplyr::left_join(lookup, by = rlang::quo_name(col))
+    if (remove) {
+        data <- dplyr::select(data, -!!col)
+    }
 
     return(data)
 }

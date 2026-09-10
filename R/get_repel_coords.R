@@ -64,10 +64,8 @@ get_repel_coords <- function(obj,
                                                    max.iter = 2e4,
                                                    seed = 42),
                              fun = ggrepel::geom_label_repel) {
+    .ensure_packages(c("ggplot2", "ggrepel", "Gmisc"))
 
-    if (!requireNamespace("Gmisc", quietly = T)) {
-        utils::install.packages("Gmisc")
-    }
 
     grid::grid.newpage()
     grid::pushViewport(grid::viewport(width = width, height = height))
@@ -125,6 +123,7 @@ get_repel_coords <- function(obj,
 }
 
 get_tree <- function(gPath, plot) {
+    .ensure_packages(c("ggplot2"))
     grid::getGrob(
       gTree = grid::grid.force(x = ggplot2::ggplotGrob(plot), draw = F),
       gPath = gPath,

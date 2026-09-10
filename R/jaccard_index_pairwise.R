@@ -20,6 +20,7 @@ jaccard_index_pairwise <- function(x,
                                               "upper", "lower", "no_diag"),
                                    calc_order = T,
                                    return_plot = T) {
+    .ensure_packages(c("fcexpr", "ggplot2"))
 
     stopifnot("x must be a list" = is.list(x),
               "x needs names" = !is.null(names(x)))

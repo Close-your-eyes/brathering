@@ -22,7 +22,8 @@ Imports:
     methods,
     magrittr,
     zeallot,
-    knitr
+    knitr,
+    Rcpp
 Suggests:
     aricode,
     bench,
@@ -77,4 +78,6 @@ Suggests:
     stringdist,
     stringi,
     styler
+LinkingTo:
+    Rcpp
 Config/roxygen2/version: 8.1.0

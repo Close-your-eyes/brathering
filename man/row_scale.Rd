@@ -2,7 +2,7 @@
 % Please edit documentation in R/row_scale.R
 \name{row_scale}
 \alias{row_scale}
-\title{Title}
+\title{Center and scale matrix rows}
 \usage{
 row_scale(
   x,
@@ -11,9 +11,28 @@ row_scale(
   add_attr = TRUE,
   rows = NULL,
   cols = NULL,
-  drop.na.rows = T
+  drop.na.rows = TRUE
 )
 }
+\arguments{
+\item{x}{A numeric matrix or Matrix object.}
+
+\item{center}{Whether to subtract each row mean.}
+
+\item{scale}{Whether to divide by each row's sample standard deviation.}
+
+\item{add_attr}{Whether to attach scaling parameters.}
+
+\item{rows}{Optional row indices.}
+
+\item{cols}{Optional column indices.}
+
+\item{drop.na.rows}{Whether to remove rows that are entirely NA/NaN
+after scaling.}
+}
+\value{
+A dense numeric matrix.
+}
 \description{
-Title
+Center and scale matrix rows
 }

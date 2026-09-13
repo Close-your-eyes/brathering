@@ -1,7 +1,7 @@
 #' Count number of leading elements of one kind
 #'
 #' Use it to count number of leading zero in a time series, e.g. To count
-#' trailing use rev(vec).
+#' trailing use rev(x).
 #'
 #' @param x vector of whatever
 #' @param what element to count

@@ -9,7 +9,7 @@
 #'
 #' @examples
 s2n <- function(mat1, mat2, eps = 1e-6) {
-    .ensure_packages(c("Matrix"))
+    brathering:::.ensure_packages(c("Matrix"))
 
     rn1 <- rownames(mat1)
     rn2 <- rownames(mat2)
@@ -63,7 +63,7 @@ s2n <- function(mat1, mat2, eps = 1e-6) {
 #'
 #' @examples
 rowsds <- function(x) {
-    .ensure_packages(c("Matrix"))
+    brathering:::.ensure_packages(c("Matrix"))
     m  <- Matrix::rowMeans(x)
     m2 <- Matrix::rowMeans(x^2)
     sqrt(pmax(m2 - m^2, 0))

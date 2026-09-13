@@ -11,7 +11,7 @@
 #'
 #' @examples
 kendall_zi_cross <- function(mat1, mat2, mc.cores = 1) {
-    .ensure_packages(c("dismay", "parallel"))
+    brathering:::.ensure_packages(c("dismay", "parallel"))
 
 
     allcombdf <- dplyr::filter(expand.grid(colnames(mat1), colnames(mat2)), Var1 != Var2)

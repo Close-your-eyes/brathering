@@ -105,27 +105,35 @@ rotate_cov_2d <- function(covmat = c(1,0, 0,1),
 }
 
 
-#' Title
+#' Generate Points on an Ellipsoid
 #'
-#' @param mu
-#' @param covmat
-#' @param n_theta
-#' @param n_phi
-#' @param c
+#' This function generates points on the surface of an ellipsoid defined by a center \code{mu} and a covariance matrix \code{covmat}.
+#' The ellipsoid is scaled by the factor \code{c} (typically 1 for standard deviation ellipses).
 #'
-#' @returns
-#' @export
+#' @param mu A numeric vector of length 3 specifying the center of the ellipsoid (default \code{c(0,0,0)}).
+#' @param covmat A 3x3 covariance matrix (or a vector of 9 elements) defining the shape of the ellipsoid.
+#'   If a vector is provided, it is converted to a 3x3 matrix in row-major order.
+#' @param n_theta Number of points in the azimuthal angle (theta) direction (default 50).
+#' @param n_phi Number of points in the polar angle (phi) direction (default 25).
+#' @param c Scaling factor for the ellipsoid (default 1). Controls the size (e.g., c=1 for 1 standard deviation).
+#'
+#' @return A matrix with 3 columns ("x", "y", "z") and \code{n_theta * n_phi} rows, representing points on the ellipsoid surface.
 #'
 #' @examples
+#' # Default unit sphere centered at origin
+#' pts <- ellipsoid_points_3d()
+#'
+#' # Ellipsoid with elongation along x-axis (5x, 1x, 1x)
+#' pts2 <- ellipsoid_points_3d(covmat = c(5,0,0, 0,1,0, 0,0,1))
+#'
+#' # Custom center and scaling
+#' pts3 <- ellipsoid_points_3d(mu = c(2, -1, 3), covmat = c(2,0,0, 0,3,0, 0,0,1), c = 2)
 #' brathering::plot3d(ellipsoid_points_3d())
 #' brathering::plot3d(ellipsoid_points_3d(covmat = c(5,0,0, 0,1,0, 0,0,1)))
 #' brathering::plot3d(ellipsoid_points_3d_ran())
-#'
-#'
 #' brathering::plot3d(ellipsoid_points_3d(covmat = rotate_cov_3d(c(5,0,0, 0,1,0, 0,0,1), Rz = 0)))
 #' # does it work?
 #' brathering::plot3d(ellipsoid_points_3d(covmat = rotate_cov_3d(c(5,0,0, 0,1,0, 0,0,1), Rz = pi)))
-
 ellipsoid_points_3d <- function(mu = c(0,0,0),
                                 covmat = c(1,0,0, 0,1,0, 0,0,1),
                                 n_theta = 50,

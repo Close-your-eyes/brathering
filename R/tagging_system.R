@@ -12,7 +12,7 @@
 #'
 #' @examples
 tagging_system <- function(filevector, output_file = "tags.csv") {
-    .ensure_packages(c("crayon"))
+    brathering:::.ensure_packages(c("crayon"))
 
     videos <- filevector
     # Load existing data if available

@@ -14,7 +14,7 @@
 #' sci10(c(NA,1,10,30))
 #' # or pass to ggplot2::scale_y_log10(label = sci10)
 sci10 <- function(x) {
-    .ensure_packages(c("scales"))
+    brathering:::.ensure_packages(c("scales"))
 
 
   if (all(substr(formatC(x[which(!is.na(x))], format = "e"),1,1) %in% c("0", "1"))) {

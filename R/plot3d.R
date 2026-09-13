@@ -55,11 +55,11 @@ plot3d <- function(object,
                    type = c("scatter3d", "mesh3d"),
                    backend = c("plotly", "rgl"),
                    ...) {
-    .ensure_packages(c("colrr", "scales"))
+    brathering:::.ensure_packages(c("colrr", "scales"))
     colortype <- rlang::arg_match(colortype)
     type <- rlang::arg_match(type)
     backend <- rlang::arg_match(backend)
-    .ensure_package(backend)
+    brathering:::.ensure_package(backend)
 
     if (missing(x)) {
         x <- colnames(object)[1]

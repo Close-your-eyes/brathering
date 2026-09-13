@@ -17,7 +17,7 @@
 #' img_convert(path/to/image.heic, format = "png")
 #' }
 img_convert <- function(path, format = "jpeg", path_save = NULL, ...) {
-    .ensure_packages(c("magick"))
+    brathering:::.ensure_packages(c("magick"))
 
 
     # pathnew <- file.path(dirname(path), paste0(strsplit2(basename(path), pattern = "\\.", inds = "last")[[1]][1], ".", format))

@@ -33,7 +33,7 @@ get_contour_2d <- function(x,
                            scale = T,
                            nlevels = 10,
                            levels = NULL) {
-    .ensure_packages(c("MASS"))
+    brathering:::.ensure_packages(c("MASS"))
 
     xname <- "x"
     yname <- "y"

@@ -2,6 +2,7 @@
 #'
 #' @param x list of character vectors
 #' @param as how to return
+#' @param verbose print messages?
 #'
 #' @returns (sparse) matrix
 #' @export
@@ -10,7 +11,7 @@
 membership_matrix <- function(x,
                               as = c("sparse", "dense"),
                               verbose = T) {
-    .ensure_packages(c("Matrix"))
+    brathering:::.ensure_packages(c("Matrix"))
 
     if (!is.list(x)) {
         stop("x has to be a list.")

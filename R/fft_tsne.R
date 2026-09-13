@@ -191,7 +191,7 @@ fft_tsne <- function(
   }
 
   if (is.character(initialization) && initialization =='pca') {
-    .ensure_package("rsvd")
+    brathering:::.ensure_package("rsvd")
     if (rand_seed != -1)  {
       set.seed(rand_seed)
     }

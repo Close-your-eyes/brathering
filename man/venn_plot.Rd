@@ -48,6 +48,8 @@ UpSet plot. If \code{FALSE}, the original set order is retained.}
 ggplot-based Venn diagram. Ignored when \code{limma_plot = TRUE} or
 \code{upset_plot = TRUE}.}
 
+\item{geom_circle_args}{arguments to geom_circle}
+
 \item{...}{Additional arguments passed to
 \code{\link[ComplexUpset]{upset}} when \code{upset_plot = TRUE}.}
 }

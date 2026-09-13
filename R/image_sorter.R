@@ -130,7 +130,7 @@ image_sorter <- function(input_dir = "images",
                          port = 3838L,
                          launch_browser = TRUE,
                          advance_on_select = FALSE) {
-    .ensure_packages(c("shiny"))
+    brathering:::.ensure_packages(c("shiny"))
     scalar_string <- function(value) {
         is.character(value) && length(value) == 1L &&
             !is.na(value) && nzchar(value)

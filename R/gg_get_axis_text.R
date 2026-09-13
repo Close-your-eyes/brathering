@@ -7,7 +7,7 @@
 #'
 #' @examples
 gg_get_axis_text <- function(ggobj) {
-    .ensure_packages(c("ggplot2"))
+    brathering:::.ensure_packages(c("ggplot2"))
 
     ggobj <- ggplot2::ggplot_build(ggobj)
     xorder <- ggobj[["layout"]][["panel_scales_x"]][[1]][["range"]][["range"]]

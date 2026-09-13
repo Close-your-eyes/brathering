@@ -7,6 +7,8 @@
 #' @returns character or factor
 #' @export
 #'
+#' @importFrom rlang .data
+#'
 #' @examples
 #' # one num per character
 #' factor_num_order(c("C3", "C1", "C2"))
@@ -30,7 +32,7 @@ factor_num_order <- function(x, return = c("levels", "factor")) {
 
     order <- as.data.frame(t(as.data.frame(nums, col.names = seq_along(nums)))) %>%
         dplyr::mutate(dplyr::across(dplyr::everything(), ~ifelse(is.na(.x), Inf, .x))) %>%
-        dplyr::mutate(!!random_varname(names(.)) := dplyr::row_number()) %>%
+        dplyr::mutate(!!random_varname(names(.data)) := dplyr::row_number()) %>%
         dplyr::arrange(dplyr::pick(dplyr::everything())) %>%
         dplyr::pull()
 

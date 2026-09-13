@@ -17,7 +17,7 @@
 #' y <- RcppAlgos::primeFactorizeSieve(1e2)
 #' mat2 <- list_to_binary_matrix(y) # not only 1s
 list_to_binary_matrix <- function(x) {
-    .ensure_packages(c("Matrix"))
+    brathering:::.ensure_packages(c("Matrix"))
 
     if (is.null(names(x))) {
         names(x) <- as.character(seq_along(x))

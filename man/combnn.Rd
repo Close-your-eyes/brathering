@@ -2,40 +2,84 @@
 % Please edit documentation in R/combnn.R
 \name{combnn}
 \alias{combnn}
-\title{Get all element combinations of every lengths, except zero}
+\title{Generate combinations or permutations of a vector}
 \usage{
 combnn(
   x,
-  order_matters = F,
-  repeats_allowed = F,
-  min_len = 1,
-  consecutive_only = F,
-  return_numeric = F
+  order_matters = FALSE,
+  repeats_allowed = FALSE,
+  min_len = 1L,
+  consecutive_only = FALSE,
+  return_numeric = FALSE,
+  max_results = 1000000
 )
 }
 \arguments{
-\item{x}{a vector}
+\item{x}{A one-dimensional atomic vector.}
 
-\item{order_matters}{if F: get all combinations; if T: permutations}
+\item{order_matters}{A single logical value. If `FALSE`, generate
+combinations; if `TRUE`, generate permutations.}
 
-\item{repeats_allowed}{allow repeated elements}
+\item{repeats_allowed}{A single logical value indicating whether the same
+position in `x` may be selected more than once.}
 
-\item{min_len}{min combination length of x}
+\item{min_len}{A positive integer giving the minimum selection length. If
+greater than `length(x)`, an empty list is returned.}
 
-\item{return_numeric}{return values as in x (=F), or as numeric (=T)}
+\item{consecutive_only}{A single logical value. If `TRUE`, retain only
+selections whose positions form a forward consecutive run.}
+
+\item{return_numeric}{A single logical value. If `FALSE`, return values from
+`x`. If `TRUE`, return their one-based positions in `x`.}
+
+\item{max_results}{A positive integer giving the maximum number of selections
+that may be generated. This protects against accidental excessive memory
+use. Use `Inf` to disable the limit.}
 }
 \value{
-list
+A named list grouped by selection length. Each group is a list of vectors.
+The vectors contain values from `x`, or integer positions when
+`return_numeric = TRUE`.
 }
 \description{
-The empty element is not included.
-Combinations -> subsets, order doesn’t matter, no repetition. This is binomial
-coefficients.
-Permutations -> subsets, order matters, no repetition. With factorial().
-Cartesian product -> subsets, order matters, with repetition. This is expand.grid
-of all lengths of x.
+Generates selections of `x` for every length from `min_len` through
+`length(x)`. The empty selection is never included.
+}
+\details{
+The arguments define four kinds of selection:
+
+* `order_matters = FALSE`, `repeats_allowed = FALSE`: combinations.
+* `order_matters = FALSE`, `repeats_allowed = TRUE`: combinations with
+  replacement.
+* `order_matters = TRUE`, `repeats_allowed = FALSE`: permutations.
+* `order_matters = TRUE`, `repeats_allowed = TRUE`: ordered selections with
+  replacement (Cartesian powers).
+
+When `consecutive_only = TRUE`, each selected position must be exactly one
+greater than the preceding position. Thus, selections longer than one are
+forward, nonrepeated runs from `x`. Single-element selections are considered
+consecutive.
+
+Selections are generated from positions in `x`. Consequently, duplicate
+values at different positions are treated as distinct elements.
 }
 \examples{
 vec <- c("this", "is", "a", "character", "vector")
-out <- combnn(vec)
+
+# Combinations without repetition
+combnn(vec, min_len = 4L)
+
+# Permutations represented by positions
+combnn(
+    vec,
+    order_matters = TRUE,
+    min_len = 4L,
+    return_numeric = TRUE
+)
+
+# Forward consecutive runs
+combnn(vec, min_len = 2L, consecutive_only = TRUE)
+
+# Combinations with replacement
+combnn(letters[1:3], repeats_allowed = TRUE)
 }

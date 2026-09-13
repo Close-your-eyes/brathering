@@ -9,7 +9,7 @@
 #' @examples
 intersect_pairwise <- function(x,
                                as = c("sparse", "dense")) {
-    .ensure_packages(c("Matrix"))
+    brathering:::.ensure_packages(c("Matrix"))
     as <- rlang::arg_match(as)
 
     M <- membership_matrix(x)

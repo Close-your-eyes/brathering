@@ -35,7 +35,7 @@
 #' @importFrom knitr kable
 #' @export
 kable_columns <- function(x, rows_per_page = 10, n_pages = NULL, ...) {
-    .ensure_packages(c("knitr"))
+    brathering:::.ensure_packages(c("knitr"))
     stopifnot(is.data.frame(x) || is.matrix(x))
 
     x <- as.data.frame(x)

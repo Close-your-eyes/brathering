@@ -17,6 +17,8 @@
 #' @param size dot size
 #' @param color_text_pos NULL or c("tl", "tr", "bl", "br"); if NULL not plotted
 #' @param color_text which string to plot, if NULL color is chosen
+#' @param discrete_lvls discrete color levels (bins) to split continuous variable
+#' into
 #'
 #' @return nothing, scattermore plot is plotted
 #' @export
@@ -50,7 +52,7 @@ plot2 <- function(x,
                   color_text = NULL,
                   discrete_lvls = 8,
                   ...) {
-    .ensure_packages(c("colrr", "scales", "scattermore"))
+    brathering:::.ensure_packages(c("colrr", "scales", "scattermore"))
 
 
     if (missing(x) || is.null(x)) {

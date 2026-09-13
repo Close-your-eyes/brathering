@@ -66,6 +66,16 @@
 #' )
 #'
 #' out <- compare_labels(x = x)
+#' out[["local_comp"]][["raw"]][["plot"]]
+#' out[["local_comp"]][["x_props"]][["plot"]]
+#' out[["local_comp"]][["y_props"]][["plot"]]
+#' out[["local_comp"]][["jaccard"]][["plot"]]
+#'
+#' # here jaccard index is:
+#' # inspect raw plot. for one cell compute sum of values on row and col.
+#' # then divide value of the cell by this sum. this what is plotted as jaccard.
+#' # e.g. for shared C/Z in example: 3/5 = 0.6 and shared C/X = 1/6 = 0.1667
+#'
 #' out$x_corres
 #' out$y_corres
 #'
@@ -89,7 +99,7 @@ compare_labels <- function(x,
                            join_label_sep = "_",
                            join_label_thresh = 0.05,
                            NA_to = NULL) {
-    .ensure_packages(c("aricode"))
+    brathering:::.ensure_packages(c("aricode"))
 
     # related:
     # https://github.com/lazappi/clustree
@@ -234,7 +244,7 @@ compare_labels <- function(x,
 
 make_matrix_and_df <- function(m,
                                adjust_order = T) {
-    .ensure_packages(c("fcexpr"))
+    brathering:::.ensure_packages(c("fcexpr"))
 
     mat <- matrix(
         data = as.vector(m),
@@ -266,7 +276,7 @@ make_matrix_and_df <- function(m,
 make_plot <- function(df,
                       legend_name,
                       freq_label_cutoff = 0) {
-    .ensure_packages(c("colrr", "ggplot2"))
+    brathering:::.ensure_packages(c("colrr", "ggplot2"))
 
     plot <- ggplot2::ggplot(df, ggplot2::aes(x, y)) +
         ggplot2::geom_tile(ggplot2::aes(fill = value), color = "black") +
@@ -280,6 +290,36 @@ make_plot <- function(df,
 }
 
 make_jaccard <- function(raw) {
+
+    # abdiv::jaccard(x = c(rep("a", 10), rep("b", 10), rep("c", 10)),
+    #                y = c(rep("a", 10), rep("b", 10), rep("c", 10)))
+    # abdiv does not work
+    # brathering::jaccard_index(a = c(rep("a", 10), rep("b", 10), rep("c", 10)),
+    #                           b = c(rep("a", 10), rep("b", 10), rep("c", 10)))
+    # # order irrelevant
+    # brathering::jaccard_index(a = c(rep("b", 10), rep("a", 10), rep("c", 10)),
+    #                           b = c(rep("a", 10), rep("b", 10), rep("c", 10)))
+    # # replicates irrelevant
+    # brathering::jaccard_index(a = c("a", "b", "c"),
+    #                           b = c("a", "b", "c"))
+    # # different lengths no problem
+    # brathering::jaccard_index(a = c("a", "b", "c"),
+    #                           b = c("a", "b", "c", "d"))
+    # here jaccard decreases in a linear fashion
+    # jacc <- purrr::map_dbl(purrr::map(1:24, ~seq(1,.x)), function(x) {
+    #     brathering::jaccard_index(a = letters[1:25],
+    #                               b = letters[1:25][-x])
+    # })
+    # plot(jacc)
+    # # with a non-intersect substitution in one set jaccard decreases non-linear
+    # #
+    # jacc <- purrr::map_dbl(purrr::map(1:24, ~seq(1,.x)), function(x) {
+    #     brathering::jaccard_index(a = letters[1:25],
+    #                               b = c(letters[1:25][-x], LETTERS[x]))
+    # })
+    # plot(jacc)
+
+
     # 2) Jaccard matrix between labels in col1 (rows) and col2 (cols)
     # J_ij = n_ij / (n_i + m_j - n_ij)
     n_i <- rowSums(raw)

@@ -5,7 +5,7 @@
 #'
 #' @examples
 correlation_demo1 <- function() {
-    .ensure_packages(c("colrr", "ggplot2", "parallel"))
+    brathering:::.ensure_packages(c("colrr", "ggplot2", "parallel"))
 
 
 

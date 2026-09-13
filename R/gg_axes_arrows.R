@@ -25,7 +25,7 @@ gg_axes_arrows <- function(ggobj,
                                              type = "open"),
                            segment_args = list(linewidth = 0.2,
                                                color = "black")) {
-    .ensure_packages(c("ggplot2"))
+    brathering:::.ensure_packages(c("ggplot2"))
 
 
 
@@ -71,7 +71,7 @@ gg_axes_arrows <- function(ggobj,
 }
 
 enforce_min_margin <- function(p, min_pt = 10) {
-    .ensure_packages(c("ggplot2"))
+    brathering:::.ensure_packages(c("ggplot2"))
     # Merge theme to get actual margins
     th <- ggplot2::theme_get() %+replace% p$theme
 

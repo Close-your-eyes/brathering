@@ -17,7 +17,7 @@ contour_est <- function(x,
                         n = 100,
                         levels = NULL,
                         ...) {
-    .ensure_packages(c("MASS"))
+    brathering:::.ensure_packages(c("MASS"))
     if (missing(y) && (is.matrix(x) || is.data.frame(x))) {
         name1 <- names(x)[1]
         name2 <- names(x)[2]

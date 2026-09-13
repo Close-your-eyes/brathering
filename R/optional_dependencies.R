@@ -100,5 +100,5 @@
 }
 
 .ensure_packages <- function(packages) {
-    invisible(lapply(unique(packages), .ensure_package))
+    invisible(lapply(unique(packages), brathering:::.ensure_package))
 }

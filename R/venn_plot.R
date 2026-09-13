@@ -28,7 +28,7 @@
 #'   \code{upset_plot = TRUE}.
 #' @param ... Additional arguments passed to
 #'   \code{\link[ComplexUpset]{upset}} when \code{upset_plot = TRUE}.
-#' @param geom_circle_args
+#' @param geom_circle_args arguments to geom_circle
 #'
 #' @details
 #' Each distinct observation-category pair represents membership of an
@@ -129,7 +129,7 @@ venn_plot <- function(data,
                       flip_axes = FALSE,
                       geom_circle_args = list(alpha = 0.3, linewidth = 0.75),
                       ...) {
-    .ensure_packages(c("ComplexUpset", "limma", "scales"))
+    brathering:::.ensure_packages(c("ComplexUpset", "limma", "scales"))
 
     if (missing(data)) {
         stop("Please provide a data frame or tibble as data.")
@@ -223,7 +223,7 @@ make_venn_gg <- function(data,
                          cat_col,
                          flip_axes,
                          geom_circle_args) {
-    .ensure_packages(c("ggforce", "ggplot2", "Gmisc"))
+    brathering:::.ensure_packages(c("ggforce", "ggplot2", "Gmisc"))
 
     rm_outside <- F
 

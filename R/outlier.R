@@ -54,7 +54,7 @@ outlier <- function(df,
     methods <- rlang::arg_match(methods, multiple = T)
 
     to_install <- intersect(c("HDoutliers", "dbscan", "Seurat", "Rlof", "mvoutlier", "robustbase", "mclust"), methods)
-    .ensure_packages(to_install)
+    brathering:::.ensure_packages(to_install)
 
     if (pca && pcs < ncol(df)) {
         df <- stats::prcomp(df)[["x"]][,c(1:pcs)]
@@ -126,9 +126,8 @@ outlier <- function(df,
     ## 9
     mcl <- NULL
     if ("mclust" %in% methods) {
-        library(mclust)
-        #dtach <- !"mclust" %in% .packages()
-        #null <- capture.output(library(mclust))
+        #library(mclust)
+        mclustBIC <- mclust::mclustBIC
         mcl <- mclust::Mclust(df, verbose = F)
         mclt <- table(mcl[["classification"]])
         if (return == "outlier") {
@@ -150,9 +149,6 @@ outlier <- function(df,
         } else {
             mcl <- mcl[["classification"]]
         }
-        # if (dtach) {
-        #     detach("package:mclust", unload = T)
-        # }
     }
 
     out <- cbind(hdout, db, lvs, mah, lof, mv, rb, mcl)

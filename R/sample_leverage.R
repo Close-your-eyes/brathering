@@ -94,7 +94,7 @@ sample_leverage <- function(x,
 
 
     if (leverage) {
-        .ensure_package("Seurat")
+        brathering:::.ensure_package("Seurat")
         levscore <- Seurat::LeverageScore(t(x), ...)
         prob <- levscore/sum(levscore) # not necessary but anyways
         rows <- nrow(x)

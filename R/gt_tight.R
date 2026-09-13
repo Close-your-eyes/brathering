@@ -20,7 +20,7 @@
 gt_tight <- function(df,
                      font_size = 11,
                      font_family = "Arial") {
-    .ensure_packages(c("gt"))
+    brathering:::.ensure_packages(c("gt"))
     gt::gt(df) |>
         gt::tab_options(
             table.font.size = gt::px(font_size),

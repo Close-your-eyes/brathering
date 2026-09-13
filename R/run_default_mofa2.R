@@ -23,7 +23,7 @@ run_default_mofa2 <- function(list_of_matrices,
                               transpose = F,
                               outfile = file.path(getwd(), "MOFA2_object.hdf5"),
                               interactive_cluster_select = T) {
-    .ensure_packages(c("Matrix", "MOFA2"))
+    brathering:::.ensure_packages(c("Matrix", "MOFA2"))
 
     # system("which python", intern = T)
     # system("pip show mofapy2", intern = T)
@@ -63,7 +63,7 @@ run_default_mofa2 <- function(list_of_matrices,
 }
 
 plot_eigen <- function(x, title = "", max_pc = 10) {
-    .ensure_packages(c("ggplot2"))
+    brathering:::.ensure_packages(c("ggplot2"))
     x <- dplyr::slice_max(x, order_by = variance, n = max_pc, by = view, with_ties = F)
     ggplot2::ggplot(x, ggplot2::aes(x = pc, y = variance, color = view)) +
         ggplot2::geom_point() +
@@ -72,7 +72,7 @@ plot_eigen <- function(x, title = "", max_pc = 10) {
 }
 
 plot_loadings_pc12 <- function(pca_prcomp, title, limits = c(-1,1), limits_col = NULL) {
-    .ensure_packages(c("colrr", "forcats", "ggplot2", "patchwork"))
+    brathering:::.ensure_packages(c("colrr", "forcats", "ggplot2", "patchwork"))
 
     loadings <- brathering::mat_to_df_long(x = pca_prcomp$rotation[,c(1,2)],
                                            colnames_to = "PC",
@@ -113,7 +113,7 @@ plot_loadings_pc12 <- function(pca_prcomp, title, limits = c(-1,1), limits_col =
 }
 
 plot_loadings <- function(pca_prcomp, title, limits = c(-1,1)) {
-    .ensure_packages(c("colrr", "ggplot2"))
+    brathering:::.ensure_packages(c("colrr", "ggplot2"))
 
     #loadings <- purrr::map(pcas, ~.x$rotation)
     loadings <- pca_prcomp$rotation
@@ -140,7 +140,7 @@ plot_loadings <- function(pca_prcomp, title, limits = c(-1,1)) {
 }
 
 plot_pca_vars <- function(prcomp_pca, cluster = NULL, title = "") {
-    .ensure_packages(c("colrr", "ggplot2"))
+    brathering:::.ensure_packages(c("colrr", "ggplot2"))
 
     if (is.null(cluster)) {
         plot <- ggplot2::ggplot(prcomp_pca$x, ggplot2::aes(x = PC1, y = PC2))
@@ -163,7 +163,7 @@ plot_pca_vars <- function(prcomp_pca, cluster = NULL, title = "") {
 
 
 plot_silhoutte <- function(clusters, dist, title) {
-    .ensure_packages(c("cluster", "colrr", "ggplot2"))
+    brathering:::.ensure_packages(c("cluster", "colrr", "ggplot2"))
 
     if (length(unique(clusters)) == 1) {
         return(NULL)
@@ -210,7 +210,7 @@ plot_silhoutte <- function(clusters, dist, title) {
 
 inspect_matrices <- function(liofma,
                              interactive_cluster_select = F) {
-    .ensure_packages(c("colrr", "fcexpr", "ggplot2", "patchwork"))
+    brathering:::.ensure_packages(c("colrr", "fcexpr", "ggplot2", "patchwork"))
 
     ## impute missing values, how?
     if (any(purrr::map_lgl(liofma, anyNA))) {
@@ -408,7 +408,7 @@ check_matrices <- function(liofma) {
 get_cluster_by_pca <- function(pca,
                                view,
                                interactive_cluster_select) {
-    .ensure_packages(c("fcexpr", "patchwork"))
+    brathering:::.ensure_packages(c("fcexpr", "patchwork"))
     matrix <- pca$x[,1:min(4, ncol(pca$x))]
     matrix_dist <- stats::dist(matrix)
 

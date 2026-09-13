@@ -45,7 +45,7 @@ gg_save <- function(plot = ggplot2::last_plot(),
                     overwrite = T,
                     append_filename = T,
                     ...) {
-    .ensure_packages(c("ggplot2", "ragg"))
+    brathering:::.ensure_packages(c("ggplot2", "ragg"))
 
     if (!is.null(h)) {
         height <- h

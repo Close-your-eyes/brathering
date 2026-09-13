@@ -13,7 +13,7 @@
 #' }
 img_to_pptx <- function(img_paths,
                         pptx_path) {
-    .ensure_packages(c("fs", "magick", "officer"))
+    brathering:::.ensure_packages(c("fs", "magick", "officer"))
 
 
     ppt <- officer::read_pptx()

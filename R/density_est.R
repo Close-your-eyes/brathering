@@ -18,7 +18,7 @@ density_est <- function(x,
                         n = 100,
                         type = c("2D", "3D"),
                         ...) {
-    .ensure_packages(c("MASS"))
+    brathering:::.ensure_packages(c("MASS"))
 
     type <- rlang::arg_match(type)
 
@@ -51,7 +51,7 @@ density_est <- function(x,
 
 
 kde3d <- function (x, y, z, h, n = 100, lims = c(range(x), range(y), range(z))) {
-    .ensure_packages(c("MASS"))
+    brathering:::.ensure_packages(c("MASS"))
     # from misc3d::kde3d
     nx <- length(x)
     if (length(y) != nx || length(z) != nx)

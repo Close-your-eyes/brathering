@@ -161,13 +161,13 @@ make_portable <- function(x,
                           make_unique = F,
                           repl_empty = "x",
                           try_deunicode = F) {
-    .ensure_packages(c("fs", "stringi"))
+    brathering:::.ensure_packages(c("fs", "stringi"))
 
     if (try_deunicode) {
         check_and_prompt_rust()
         rust_path <- Sys.which("rustc")
         if (nzchar(rust_path)) {
-            .ensure_package("deunicode")
+            brathering:::.ensure_package("deunicode")
         } else {
             message("deunicode not available.")
             try_deunicode <- F

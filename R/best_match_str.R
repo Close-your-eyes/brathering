@@ -29,7 +29,7 @@
 #' out$result
 #' out$best_match
 best_match_str <- function(x, candidates, method = "osa") {
-    .ensure_packages(c("stringdist"))
+    brathering:::.ensure_packages(c("stringdist"))
     d <- stringdist::stringdistmatrix(x, candidates, method = method)
 
     idx <- max.col(-d, ties.method = "first")

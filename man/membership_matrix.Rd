@@ -10,6 +10,8 @@ membership_matrix(x, as = c("sparse", "dense"), verbose = T)
 \item{x}{list of character vectors}
 
 \item{as}{how to return}
+
+\item{verbose}{print messages?}
 }
 \value{
 (sparse) matrix

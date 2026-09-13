@@ -44,6 +44,9 @@ frequency to avoid burying low frequent groups}
 
 \item{color_text}{which string to plot, if NULL color is chosen}
 
+\item{discrete_lvls}{discrete color levels (bins) to split continuous variable
+into}
+
 \item{...}{arguments to scattermore::scattermoreplot}
 }
 \value{

@@ -90,6 +90,16 @@ x <- data.frame(
 )
 
 out <- compare_labels(x = x)
+out[["local_comp"]][["raw"]][["plot"]]
+out[["local_comp"]][["x_props"]][["plot"]]
+out[["local_comp"]][["y_props"]][["plot"]]
+out[["local_comp"]][["jaccard"]][["plot"]]
+
+# here jaccard index is:
+# inspect raw plot. for one cell compute sum of values on row and col.
+# then divide value of the cell by this sum. this what is plotted as jaccard.
+# e.g. for shared C/Z in example: 3/5 = 0.6 and shared C/X = 1/6 = 0.1667
+
 out$x_corres
 out$y_corres
 

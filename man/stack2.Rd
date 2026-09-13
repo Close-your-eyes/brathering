@@ -23,6 +23,7 @@ A data frame with two columns:
 }
 }
 \description{
+Use tibble::enframe()
 A wrapper around [utils::stack()] that returns a long-format data frame
 with customizable column names and ensures the variable column is
 returned as character (not factor).

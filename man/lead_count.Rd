@@ -16,7 +16,7 @@ integer of count of leading occurrences of what
 }
 \description{
 Use it to count number of leading zero in a time series, e.g. To count
-trailing use rev(vec).
+trailing use rev(x).
 }
 \examples{
 lead_count(c(0,0,1,2,3,4,5))

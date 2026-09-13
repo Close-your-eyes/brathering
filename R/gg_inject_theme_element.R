@@ -17,7 +17,7 @@ gg_inject_theme_element <- function(theme_args,
                                     elem,
                                     elem_sub,
                                     value) {
-    .ensure_packages(c("ggplot2"))
+    brathering:::.ensure_packages(c("ggplot2"))
     if (is.null(theme_args[[elem]])) {
         theme_args[[elem]] <- ggplot2::theme_get()[[elem]]
     }

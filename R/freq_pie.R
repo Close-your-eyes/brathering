@@ -149,7 +149,7 @@ piechart <- function(x,
                      theme_args_add = list(),
                      col_pal_args = list(missing_fct_to_na = T),
                      axes_expand = 0.05) {
-    .ensure_packages(c("colrr", "ggforce", "ggplot2", "Gmisc"))
+    brathering:::.ensure_packages(c("colrr", "ggforce", "ggplot2", "Gmisc"))
 
     label_overlap <- rlang::arg_match(label_overlap)
     label_outside <- rlang::arg_match(label_outside)
@@ -320,7 +320,7 @@ donutchart <- function(...,
 
 
 check_and_add_col_pal <- function(tab, col_pal) {
-    .ensure_packages(c("scales"))
+    brathering:::.ensure_packages(c("scales"))
     if (length(col_pal) != nlevels(tab$group)) {
         if (is.null(names(col_pal))) {
             if (length(col_pal) < length(unique(tab$group))) {
@@ -370,7 +370,7 @@ check_and_add_col_pal <- function(tab, col_pal) {
 #' bw_txt(c("#FFFFFF", "#000000", "#808080"))
 #' bw_txt("#808080", cutoff = 60)
 bw_txt <- function(bg_col, cutoff = 50) {
-    .ensure_packages(c("farver"))
+    brathering:::.ensure_packages(c("farver"))
     lightness <- farver::decode_colour(bg_col, to = "hcl")[, "l"]
     unname(ifelse(lightness > cutoff, "black", "white"))
 }

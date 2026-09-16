@@ -57,8 +57,7 @@
     "Seurat",
     "shiny",
     "stringdist",
-    "stringi",
-    "styler"
+    "stringi"
 )
 
 .brathering_optional_packages <- c(

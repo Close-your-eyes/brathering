@@ -34,7 +34,7 @@
 #' gg_save(pp)
 gg_save <- function(plot = ggplot2::last_plot(),
                     filename = paste0(deparse(substitute(plot)), ".", deparse(substitute(device))),
-                    device = ragg::agg_png,
+                    device = grDevices::png, #ragg::agg_png,
                     path = getOption("im_path", default = getwd()),
                     width = 8,
                     w = NULL,

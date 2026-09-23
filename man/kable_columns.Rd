@@ -4,7 +4,14 @@
 \alias{kable_columns}
 \title{Display a Data Frame in Multiple Column Blocks}
 \usage{
-kable_columns(x, rows_per_page = 10, n_pages = NULL, ...)
+kable_columns(
+  x,
+  rows_per_page = 10,
+  n_pages = NULL,
+  ...,
+  page_spacing = 0,
+  pad = ""
+)
 }
 \arguments{
 \item{x}{A data frame or matrix to display.}
@@ -17,6 +24,13 @@ side-by-side column blocks. When `NULL`, the number of blocks is determined
 automatically from `rows_per_page`.}
 
 \item{...}{Additional arguments passed to [knitr::kable()].}
+
+\item{page_spacing}{A non-negative integer specifying the number of blank
+spaces between column blocks. Defaults to `0` (no extra spacing).}
+
+\item{pad}{A single value used to fill unused cells in the final block.
+Defaults to `""`. Use `NA` to display missing-value padding.
+Existing missing values in `x` are unaffected.}
 }
 \value{
 A `knitr_kable` object containing the formatted table.
@@ -32,8 +46,11 @@ number of rows per block is then calculated as
 `ceiling(nrow(x) / n_pages)`.
 
 
-The final block is padded with `NA` rows when the number of observations is
-not evenly divisible by the number of rows per block.
+The final block is padded with `pad` when the number of observations is
+not evenly divisible by the number of rows per block. Positive
+`page_spacing` inserts an unnamed spacer column between blocks, filled with
+non-breaking spaces so that whitespace is preserved in rendered tables.
+The rendered gap also includes the table format's normal cell padding.
 }
 \examples{
 # Determine the number of blocks automatically
@@ -41,6 +58,12 @@ kable_columns(mtcars, rows_per_page = 10)
 
 # Create exactly four blocks; rows_per_page is ignored
 kable_columns(mtcars, n_pages = 4)
+
+# Add five blank spaces between blocks
+kable_columns(mtcars, n_pages = 2, page_spacing = 5)
+
+# Use a dash for unused cells in the final block
+kable_columns(mtcars, rows_per_page = 10, pad = "-")
 
 # Pass formatting options to knitr::kable()
 kable_columns(mtcars, n_pages = 2, digits = 2)

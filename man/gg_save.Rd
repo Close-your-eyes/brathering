@@ -15,15 +15,16 @@ gg_save(
   h = NULL,
   aspect_ratio = 4/3,
   ar = NULL,
-  overwrite = T,
-  append_filename = T,
+  overwrite = TRUE,
+  append_filename = TRUE,
   ...
 )
 }
 \arguments{
-\item{plot}{plot}
+\item{plot}{A plot, or a list of plots. Named lists use their names for the
+default filenames; unnamed elements use the list expression plus an index.}
 
-\item{filename}{filename}
+\item{filename}{Filename, or one filename per plot when `plot` is a list.}
 
 \item{device}{device}
 
@@ -48,7 +49,7 @@ gg_save(
 \item{...}{other arg to ggplot2::ggsave}
 }
 \value{
-nothing
+Invisibly, a character vector containing the paths that were saved.
 }
 \description{
 filename on disk derives from plot var name and format (device) by default.
@@ -67,4 +68,6 @@ pp <- ggplot2::ggplot(tt, ggplot2::aes(x,y)) +
     ggplot2::geom_point()
 
 gg_save(pp)
+
+gg_save(list(points = pp, points_again = pp))
 }

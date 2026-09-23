@@ -7,8 +7,9 @@
 #'
 #' set im_path global option: options(im_path = file.path(...))
 #'
-#' @param plot plot
-#' @param filename filename
+#' @param plot A plot, or a list of plots. Named lists use their names for the
+#'   default filenames; unnamed elements use the list expression plus an index.
+#' @param filename Filename, or one filename per plot when `plot` is a list.
 #' @param device device
 #' @param path filepath
 #' @param width w
@@ -21,7 +22,7 @@
 #' @param h height shorthand
 #' @param ar aspect_ratio shorthand
 #'
-#' @returns nothing
+#' @returns Invisibly, a character vector containing the paths that were saved.
 #' @export
 #'
 #' @examples
@@ -32,6 +33,8 @@
 #'     ggplot2::geom_point()
 #'
 #' gg_save(pp)
+#'
+#' gg_save(list(points = pp, points_again = pp))
 gg_save <- function(plot = ggplot2::last_plot(),
                     filename = paste0(deparse(substitute(plot)), ".", deparse(substitute(device))),
                     device = grDevices::png, #ragg::agg_png,
@@ -42,10 +45,53 @@ gg_save <- function(plot = ggplot2::last_plot(),
                     h = NULL,
                     aspect_ratio = 4/3,
                     ar = NULL,
-                    overwrite = T,
-                    append_filename = T,
+                    overwrite = TRUE,
+                    append_filename = TRUE,
                     ...) {
     brathering:::.ensure_packages(c("ggplot2", "ragg"))
+
+    plot_expression <- paste(deparse(substitute(plot)), collapse = "")
+    device_expression <- paste(deparse(substitute(device)), collapse = "")
+    plot_is_list <- is.list(plot) && !inherits(plot, c("ggplot", "grob"))
+    plots <- if (plot_is_list) plot else list(plot)
+
+    if (length(plots) == 0L) {
+        return(invisible(character()))
+    }
+
+    normalise_extension <- function(x) {
+        x <- gsub("cairo_pdf$", "pdf", x)
+        x <- gsub("ragg::agg_png$", "png", x)
+        gsub("grDevices::png$", "png", x)
+    }
+
+    if (missing(filename)) {
+        extension <- normalise_extension(device_expression)
+
+        if (plot_is_list) {
+            plot_names <- names(plots)
+            if (is.null(plot_names)) {
+                plot_names <- rep("", length(plots))
+            }
+            unnamed <- is.na(plot_names) | !nzchar(plot_names)
+            plot_names[unnamed] <- paste0(plot_expression, "_", which(unnamed))
+            filename <- paste0(plot_names, ".", extension)
+        } else {
+            filename <- paste0(plot_expression, ".", extension)
+        }
+    }
+
+    if (!is.character(filename) ||
+        length(filename) != length(plots) ||
+        anyNA(filename) ||
+        any(!nzchar(filename))) {
+        stop("`filename` must contain exactly one non-empty filename per plot.", call. = FALSE)
+    }
+
+    filename <- normalise_extension(filename)
+    if (anyDuplicated(file.path(path, filename))) {
+        stop("Each plot must have a unique output filename.", call. = FALSE)
+    }
 
     if (!is.null(h)) {
         height <- h
@@ -76,36 +122,36 @@ gg_save <- function(plot = ggplot2::last_plot(),
     message("w: ", round(width,1), " h: ", round(height,1), " ar: ", round(aspect_ratio,1))
 
 
-    filename <- gsub("cairo_pdf$", "pdf", filename)
-    filename <- gsub("ragg::agg_png$", "png", filename)
+    save_plot <- function(plot, filename) {
+        target <- file.path(path, filename)
 
-    target <- file.path(path, filename)
-
-    if (file.exists(target)) {
-        if (overwrite) {
-            # nothing
-            # append_filename irrelevant
-        } else if (!overwrite && append_filename) {
-            target <- make_filepath_unique(target)
-            filename <- basename(target)
-        } else if (!overwrite && !append_filename) {
-            message("gg_save: cannot overwrite ", target)
-            invisible(NULL)
+        if (file.exists(target)) {
+            if (overwrite) {
+                # nothing; append_filename is irrelevant
+            } else if (append_filename) {
+                target <- make_filepath_unique(target)
+                filename <- basename(target)
+            } else {
+                message("gg_save: cannot overwrite ", target)
+                return(NULL)
+            }
         }
+
+        ggplot2::ggsave(
+          filename = filename,
+          plot = plot,
+          device = device,
+          path = path,
+          width = width,
+          height = height,
+          create.dir = TRUE,
+          ...
+        )
+
+        message(file.path(path, filename))
+        file.path(path, filename)
     }
 
-    ggplot2::ggsave(
-      filename = filename,
-      plot = plot,
-      device = device,
-      path = path,
-      width = width,
-      height = height,
-      create.dir = T,
-      ...
-    )
-
-    message(file.path(path, filename))
-    invisible(file.path(path, filename))
+    saved_files <- unlist(Map(save_plot, plots, filename), use.names = FALSE)
+    invisible(saved_files)
 }
-

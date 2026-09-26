@@ -5,6 +5,7 @@
 #' If any number does not start with a 1, then the leading 1x or 3x or so are added.
 #'
 #' @param x vector of axis numbers to convert
+#' @param omit_zero omit zero from labels?
 #'
 #' @return vector of modified numbers
 #' @export
@@ -13,38 +14,52 @@
 #' sci10(c(NA,1,10,100,1000,NA))
 #' sci10(c(NA,1,10,30))
 #' # or pass to ggplot2::scale_y_log10(label = sci10)
-sci10 <- function(x) {
+sci10 <- function(x, omit_zero = F) {
     brathering:::.ensure_packages(c("scales"))
 
+    if (all(substr(formatC(x[which(!is.na(x))], format = "e"),1,1) %in% c("0", "1"))) {
+        x <- sapply(x, function(y) {
+            if (is.na(y)) {
+                return(NA)
+            }
+            if (y == 0 && omit_zero) {
+                return('""')
+            }
+            if (y >= 100) {
+                return(gsub("1e\\+", "10^", scales::scientific_format()(y)))
+            } else if (y < 1 && y != 0) {
+                return(gsub("1e", "10^", scales::scientific_format()(y)))
+            } else {
+                return(y)
+            }
+        })
+    } else {
+        x <- sapply(x, function(y) {
+            if (is.na(y)) {
+                return(NA)
+            }
+            if (y == 0 && omit_zero) {
+                return('""')
+            }
+            # if (y >= 100) {
+            #     return(gsub("e\\+", "%*%10^", scales::scientific_format()(y)))
+            # } else if (y < 1 && y != 0) {
+            #     return(gsub("e", "%*%10^", scales::scientific_format()(y)))
+            # } else {
+            #     return(y)
+            # }
 
-  if (all(substr(formatC(x[which(!is.na(x))], format = "e"),1,1) %in% c("0", "1"))) {
-    x <- sapply(x, function(y) {
-      if (is.na(y)) {
-        return(NA)
-      }
-      if (y >= 100) {
-        return(gsub("1e\\+", "10^", scales::scientific_format()(y)))
-      } else if (y < 1 && y != 0) {
-        return(gsub("1e", "10^", scales::scientific_format()(y)))
-      } else {
-        return(y)
-      }
-    })
-  } else {
-    x <- sapply(x, function(y) {
-      if (is.na(y)) {
-        return(NA)
-      }
-      if (y >= 100) {
-        return(gsub("e\\+", "%*%10^", scales::scientific_format()(y)))
-      } else if (y < 1 && y != 0) {
-        return(gsub("e", "%*%10^", scales::scientific_format()(y)))
-      } else {
-        return(y)
-      }
-    })
-  }
-  parse(text = x)
+            # no spaces
+            if (y >= 100) {
+                return(gsub("e\\+", "*'×'*10^", scales::scientific_format()(y)))
+            } else if (y < 1 && y != 0) {
+                return(gsub("e", "*'×'*10^", scales::scientific_format()(y)))
+            } else {
+                return(y)
+            }
+        })
+    }
+    parse(text = x)
 }
 
 

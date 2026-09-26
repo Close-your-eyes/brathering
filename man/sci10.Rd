@@ -4,10 +4,12 @@
 \alias{sci10}
 \title{Make appealing axis labels for log axis}
 \usage{
-sci10(x)
+sci10(x, omit_zero = F)
 }
 \arguments{
 \item{x}{vector of axis numbers to convert}
+
+\item{omit_zero}{omit zero from labels?}
 }
 \value{
 vector of modified numbers

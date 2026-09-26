@@ -28,6 +28,7 @@ Suggests:
     aricode,
     bench,
     BiocManager,
+    clue,
     cluster,
     colrr,
     ComplexUpset,

@@ -17,6 +17,7 @@
     "aricode",
     "bench",
     "BiocManager",
+    "clue",
     "cluster",
     "ComplexUpset",
     "crayon",

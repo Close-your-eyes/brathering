@@ -11,8 +11,8 @@ piechart(
   fill_na = "grey50",
   color = "white",
   radius_inside = 0.3,
-  label_outside = c("none", "abs", "rel"),
-  label_inside = c("rel", "abs", "none"),
+  label_outside = c("none", "abs", "rel", "curved"),
+  label_inside = c("rel", "abs", "none", "curved"),
   label_rel_cutoff = 0,
   label_size = 5,
   label_radius_inside = 0.65,
@@ -56,7 +56,9 @@ values.}
 `1`; use `0` for a pie chart or a value between `0` and `1` for a donut.}
 
 \item{label_outside}{Outside-label content: `"none"`, `"abs"` for absolute
-values, or `"rel"` for relative values.}
+values, `"rel"` for relative values, or `"curved"` for group names drawn
+along circular paths using [geomtextpath::geom_textpath()]. Curved labels
+stay upright; labels longer than their slice path are omitted.}
 
 \item{label_inside}{Inside-label content. Accepts the same values as
 `label_outside`.}
@@ -64,7 +66,8 @@ values, or `"rel"` for relative values.}
 \item{label_rel_cutoff}{Minimum slice proportion required for a label to be
 displayed. For example, `0.05` suppresses labels below five percent.}
 
-\item{label_size}{Text size passed to [ggplot2::geom_text()].}
+\item{label_size}{Text size passed to [ggplot2::geom_text()] or
+[geomtextpath::geom_textpath()].}
 
 \item{label_radius_inside}{Numeric vector of radii for inside labels. Values
 are recycled across slices.}
@@ -76,10 +79,11 @@ outer edge.}
 \item{label_angle_inside}{Inside-label orientation. Supply
 `"radial_readable"`, `"radial"`, `"tangent_readable"`, or `"tangent"`;
 alternatively, supply one or more numeric angles in degrees as interpreted
-by [ggplot2::geom_text()]. See **Label angles**.}
+by [ggplot2::geom_text()]. Ignored for curved labels, whose orientation
+follows the path. See **Label angles**.}
 
 \item{label_angle_outside}{Outside-label orientation. Accepts the same values
-as `label_angle_inside`.}
+as `label_angle_inside`. Ignored for curved labels.}
 
 \item{label_overlap}{Method used to reduce overlap among nearby labels:
 `"ignore"`, `"alternate"`, or `"outside"`. `"alternate"` offsets inside
@@ -128,7 +132,7 @@ A named list with two elements: `plot`, the ggplot object, and `data`,
 Draw a pie or donut chart in Cartesian coordinates. Input may be raw
 observations or an already summarized named numeric vector. Absolute or
 relative labels can be placed and rotated independently inside and outside
-the slices.
+the slices. Group names can also follow curved paths along the slices.
 }
 \section{Label angles}{
 
@@ -169,6 +173,7 @@ piechart(
     label_rel_pct = TRUE,
     label_angle_outside = "tangent_readable",
     axes_expand = 0.15
+)
 
 piechart(
     x = setNames(c(10, 6, 3, 2), letters[1:4]),
@@ -179,6 +184,5 @@ piechart(
     label_angle_outside = "tangent_readable",
     axes_expand = 0.15,
     theme = colrr::theme_material())$plot +
-    theme(legend.position = "inside")
-)
+    ggplot2::theme(legend.position = "inside")
 }

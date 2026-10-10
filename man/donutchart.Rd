@@ -16,7 +16,9 @@ donutchart(
 }
 \arguments{
 \item{...}{Additional arguments passed to [piechart()]. Arguments supplied
-here must not duplicate the explicitly forwarded wrapper arguments.}
+here must not duplicate the explicitly forwarded wrapper arguments. Use
+`label_inside = "curved"` or `label_outside = "curved"` for curved group
+names.}
 
 \item{radius_inside}{Inner radius of the donut. The outer radius is fixed at
 `1`; larger values create a thinner ring.}
@@ -27,11 +29,11 @@ ring.}
 
 \item{label_angle_outside}{Orientation of outside labels. Accepts the same
 named modes or numeric degree values as
-`piechart(label_angle_outside = ...)`.}
+`piechart(label_angle_outside = ...)`. Ignored for curved labels.}
 
 \item{label_angle_inside}{Orientation of inside labels. Accepts the same
 named modes or numeric degree values as
-`piechart(label_angle_inside = ...)`.}
+`piechart(label_angle_inside = ...)`. Ignored for curved labels.}
 
 \item{legend_pos}{Legend placement: `"outside"` retains the ggplot2 theme's
 normal placement, while `"inside"` sets `legend.position = "inside"`.}
@@ -57,4 +59,13 @@ donutchart(
     label_rel_pct = TRUE,
     legend_pos = "inside"
 )
+
+# Curve group names inside and retain percentages outside.
+donutchart(
+    x = c(Alpha = 40, Beta = 30, Gamma = 20, Delta = 10),
+    label_inside = "curved",
+    label_outside = "rel",
+    label_rel_pct = TRUE,
+    label_rel_dec = 0
+)$plot
 }

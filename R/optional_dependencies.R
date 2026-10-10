@@ -27,6 +27,7 @@
     "foreign",
     "forcats",
     "fs",
+    "geomtextpath",
     "gganimate",
     "ggforce",
     "ggplot2",

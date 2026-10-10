@@ -3,7 +3,7 @@
 #' Draw a pie or donut chart in Cartesian coordinates. Input may be raw
 #' observations or an already summarized named numeric vector. Absolute or
 #' relative labels can be placed and rotated independently inside and outside
-#' the slices.
+#' the slices. Group names can also follow curved paths along the slices.
 #'
 #' @param x An unnamed vector of observations to tabulate, or a named numeric
 #'   vector of already summarized non-negative values.
@@ -17,12 +17,15 @@
 #' @param radius_inside Inner radius of the slices. The outer radius is fixed at
 #'   `1`; use `0` for a pie chart or a value between `0` and `1` for a donut.
 #' @param label_outside Outside-label content: `"none"`, `"abs"` for absolute
-#'   values, or `"rel"` for relative values.
+#'   values, `"rel"` for relative values, or `"curved"` for group names drawn
+#'   along circular paths using [geomtextpath::geom_textpath()]. Curved labels
+#'   stay upright; labels longer than their slice path are omitted.
 #' @param label_inside Inside-label content. Accepts the same values as
 #'   `label_outside`.
 #' @param label_rel_cutoff Minimum slice proportion required for a label to be
 #'   displayed. For example, `0.05` suppresses labels below five percent.
-#' @param label_size Text size passed to [ggplot2::geom_text()].
+#' @param label_size Text size passed to [ggplot2::geom_text()] or
+#'   [geomtextpath::geom_textpath()].
 #' @param label_radius_inside Numeric vector of radii for inside labels. Values
 #'   are recycled across slices.
 #' @param label_radius_outside Numeric vector of radii for outside labels.
@@ -31,9 +34,10 @@
 #' @param label_angle_inside Inside-label orientation. Supply
 #'   `"radial_readable"`, `"radial"`, `"tangent_readable"`, or `"tangent"`;
 #'   alternatively, supply one or more numeric angles in degrees as interpreted
-#'   by [ggplot2::geom_text()]. See **Label angles**.
+#'   by [ggplot2::geom_text()]. Ignored for curved labels, whose orientation
+#'   follows the path. See **Label angles**.
 #' @param label_angle_outside Outside-label orientation. Accepts the same values
-#'   as `label_angle_inside`.
+#'   as `label_angle_inside`. Ignored for curved labels.
 #' @param label_overlap Method used to reduce overlap among nearby labels:
 #'   `"ignore"`, `"alternate"`, or `"outside"`. `"alternate"` offsets inside
 #'   label radii; `"outside"` moves affected inside labels to
@@ -103,6 +107,7 @@
 #'     label_rel_pct = TRUE,
 #'     label_angle_outside = "tangent_readable",
 #'     axes_expand = 0.15
+#' )
 #'
 #' piechart(
 #'     x = setNames(c(10, 6, 3, 2), letters[1:4]),
@@ -113,16 +118,15 @@
 #'     label_angle_outside = "tangent_readable",
 #'     axes_expand = 0.15,
 #'     theme = colrr::theme_material())$plot +
-#'     theme(legend.position = "inside")
-#' )
+#'     ggplot2::theme(legend.position = "inside")
 piechart <- function(x,
                      order = NULL,
                      fill = colrr::col_pal("custom"),
                      fill_na = "grey50",
                      color = "white",
                      radius_inside = 0.3,
-                     label_outside = c("none", "abs", "rel"),
-                     label_inside = c("rel", "abs", "none"),
+                     label_outside = c("none", "abs", "rel", "curved"),
+                     label_inside = c("rel", "abs", "none", "curved"),
                      label_rel_cutoff = 0,
                      label_size = 5,
                      label_radius_inside = 0.65,
@@ -155,6 +159,10 @@ piechart <- function(x,
     label_outside <- rlang::arg_match(label_outside)
     label_inside <- rlang::arg_match(label_inside)
 
+    if (label_inside == "curved" || label_outside == "curved") {
+        brathering:::.ensure_packages("geomtextpath")
+    }
+
     theme_args <- c(theme_args, theme_args_add)
 
     tab <- make_pie_basis(x = x,
@@ -186,6 +194,10 @@ piechart <- function(x,
                                tab = tab)
     } else if (label_inside == "abs") {
         tab$label_text_inside <- ifelse(tab[["rel"]] > label_rel_cutoff, tab[["abs"]], "")
+    } else if (label_inside == "curved") {
+        tab$label_text_inside <- ifelse(
+            tab$rel > label_rel_cutoff, as.character(tab$group), ""
+        )
     }
 
     if (label_outside == "rel") {
@@ -197,6 +209,10 @@ piechart <- function(x,
                                tab = tab)
     } else if (label_outside == "abs") {
         tab$label_text_outside <- ifelse(tab[["rel"]] > label_rel_cutoff, tab[["abs"]], "")
+    } else if (label_outside == "curved") {
+        tab$label_text_outside <- ifelse(
+            tab$rel > label_rel_cutoff, as.character(tab$group), ""
+        )
     }
 
 
@@ -232,7 +248,9 @@ piechart <- function(x,
         tab[["text_color_outside"]] <- label_color_outside[1]
     }
 
-    if (label_inside != "none") {
+    if (label_inside == "curved") {
+        plot <- plot + curved_pie_labels(tab, side = "inside", size = label_size)
+    } else if (label_inside != "none") {
         plot <- plot +
             ggplot2::geom_text(data = tab, ggplot2::aes(color = I(text_color_inside),
                                                         x = label_radius_inside*sin(mid_angle_rad),
@@ -242,7 +260,9 @@ piechart <- function(x,
                                size = label_size)
     }
 
-    if (label_outside != "none") {
+    if (label_outside == "curved") {
+        plot <- plot + curved_pie_labels(tab, side = "outside", size = label_size)
+    } else if (label_outside != "none") {
         plot <- plot +
             ggplot2::geom_text(data = tab, ggplot2::aes(color = I(text_color_outside),
                                                         x = label_radius_outside*sin(mid_angle_rad),
@@ -257,6 +277,50 @@ piechart <- function(x,
 }
 
 
+# Draw group labels along each slice at its already resolved label radius.
+curved_pie_labels <- function(tab, side = c("inside", "outside"), size = 5) {
+    side <- match.arg(side)
+    label_col <- paste0("label_text_", side)
+    radius_col <- paste0("label_radius_", side)
+    color_col <- paste0("text_color_", side)
+
+    keep <- !is.na(tab[[label_col]]) &
+        nzchar(as.character(tab[[label_col]])) &
+        is.finite(tab$start_angle_rad) & is.finite(tab$end_angle_rad) &
+        tab$end_angle_rad > tab$start_angle_rad &
+        is.finite(tab[[radius_col]]) & tab[[radius_col]] > 0
+    tab <- tab[which(keep), , drop = FALSE]
+    if (nrow(tab) == 0L) return(NULL)
+
+    paths <- lapply(seq_len(nrow(tab)), function(i) {
+        theta <- seq(tab$start_angle_rad[i], tab$end_angle_rad[i],
+                     length.out = 200)
+        radius <- tab[[radius_col]][i]
+        data.frame(
+            x = radius * sin(theta),
+            y = radius * cos(theta),
+            path_id = i,
+            label = as.character(tab[[label_col]][i]),
+            text_color = tab[[color_col]][i]
+        )
+    })
+
+    geomtextpath::geom_textpath(
+        data = do.call(rbind, paths),
+        mapping = ggplot2::aes(x = x, y = y, group = path_id,
+                               label = label, colour = I(text_color)),
+        inherit.aes = FALSE,
+        text_only = TRUE,
+        upright = TRUE,
+        hjust = 0.5,
+        vjust = 0.5,
+        size = size,
+        remove_long = TRUE,
+        show.legend = FALSE
+    )
+}
+
+
 #' Make a Donut Chart
 #'
 #' A convenience wrapper around [piechart()] with a larger inner radius,
@@ -264,7 +328,9 @@ piechart <- function(x,
 #' plotting area.
 #'
 #' @param ... Additional arguments passed to [piechart()]. Arguments supplied
-#'   here must not duplicate the explicitly forwarded wrapper arguments.
+#'   here must not duplicate the explicitly forwarded wrapper arguments. Use
+#'   `label_inside = "curved"` or `label_outside = "curved"` for curved group
+#'   names.
 #' @param radius_inside Inner radius of the donut. The outer radius is fixed at
 #'   `1`; larger values create a thinner ring.
 #' @param label_radius_inside Radius used for labels drawn inside the donut
@@ -272,10 +338,10 @@ piechart <- function(x,
 #'   ring.
 #' @param label_angle_outside Orientation of outside labels. Accepts the same
 #'   named modes or numeric degree values as
-#'   `piechart(label_angle_outside = ...)`.
+#'   `piechart(label_angle_outside = ...)`. Ignored for curved labels.
 #' @param label_angle_inside Orientation of inside labels. Accepts the same
 #'   named modes or numeric degree values as
-#'   `piechart(label_angle_inside = ...)`.
+#'   `piechart(label_angle_inside = ...)`. Ignored for curved labels.
 #' @param legend_pos Legend placement: `"outside"` retains the ggplot2 theme's
 #'   normal placement, while `"inside"` sets `legend.position = "inside"`.
 #' @param theme_args_add Additional named arguments appended to the theme
@@ -294,6 +360,15 @@ piechart <- function(x,
 #'     label_rel_pct = TRUE,
 #'     legend_pos = "inside"
 #' )
+#'
+#' # Curve group names inside and retain percentages outside.
+#' donutchart(
+#'     x = c(Alpha = 40, Beta = 30, Gamma = 20, Delta = 10),
+#'     label_inside = "curved",
+#'     label_outside = "rel",
+#'     label_rel_pct = TRUE,
+#'     label_rel_dec = 0
+#' )$plot
 donutchart <- function(...,
                        radius_inside = 0.7,
                        label_radius_inside = 0.85,

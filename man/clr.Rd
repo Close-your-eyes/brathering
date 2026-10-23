@@ -2,7 +2,7 @@
 % Please edit documentation in R/clr.R
 \name{clr}
 \alias{clr}
-\title{Title}
+\title{Centered log-ratio calculation}
 \usage{
 clr(x, margin = 1)
 }

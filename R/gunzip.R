@@ -12,11 +12,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' ungunzip(file/to/gunzip/file.gz)
+#' gunzip(file/to/gunzip/file.gz)
 #' }
-ungunzip <- function(file,
-                     out_file = NULL,
-                     out_dir = NULL) {
+gunzip <- function(file,
+                   out_file = NULL,
+                   out_dir = NULL) {
     brathering:::.ensure_packages(c("fs"))
 
     if (!file.exists(file)) {

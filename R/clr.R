@@ -1,4 +1,4 @@
-#' Title
+#' Centered log-ratio calculation
 #'
 #' compositions::clr(c(0.2,0.5,0.3,0))
 #'

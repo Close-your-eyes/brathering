@@ -4,12 +4,14 @@
 \alias{seq2}
 \title{Vectorized version of seq}
 \usage{
-seq2(from = 1, to = 1, algorithm = c("1", "2"))
+seq2(from = 1, to = 1, by = 1, algorithm = c("1", "2"))
 }
 \arguments{
 \item{from}{vector of start values}
 
 \item{to}{vector of end values}
+
+\item{by}{passed to by of base::seq()}
 
 \item{algorithm}{two procedures to choose from, for education only,
 use algorithm 1 which is quicker}

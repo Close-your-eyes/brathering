@@ -4,6 +4,7 @@
 #' @param to vector of end values
 #' @param algorithm two procedures to choose from, for education only,
 #' use algorithm 1 which is quicker
+#' @param by passed to by of base::seq()
 #'
 #' @return list of integer sequences
 #' @export
@@ -14,7 +15,10 @@
 #' fun_alg2 <- seq2(c(1:1000), c(2001:3000), algorithm = 2)
 #' system.time(replicate(1000, fun_alg1))
 #' system.time(replicate(10, fun_alg2))
-seq2 <- function(from = 1, to = 1, algorithm = c("1","2")) {
+seq2 <- function(from = 1,
+                 to = 1,
+                 by = 1,
+                 algorithm = c("1","2")) {
 
     stopifnot("from and to need to have same length." = length(from) == length(to))
 
@@ -23,7 +27,7 @@ seq2 <- function(from = 1, to = 1, algorithm = c("1","2")) {
 
     if (algorithm == "1") {
         # seq2_default <- Vectorize(seq.default, vectorize.args = c("from", "to"))
-        x <- Vectorize(seq.default, vectorize.args = c("from", "to"))(from = from, to = to)
+        x <- Vectorize(seq.default, vectorize.args = c("from", "to", "by"))(from = from, to = to, by = by)
 
         # make sure always a list is returned
         if (is.matrix(x)) {

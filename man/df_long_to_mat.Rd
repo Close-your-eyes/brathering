@@ -34,6 +34,11 @@ a matrix
 \description{
 Just for convenience.
 }
+\details{
+\code{df_long_to_mat()} silently collapses duplicate row-column
+combinations when their values are identical. If values differ within a
+combination, the function warns and keeps the first value in input order.
+}
 \examples{
 df <- expand.grid(rname = letters[1:5], cname = LETTERS[5:1])
 df$value <- 1:25

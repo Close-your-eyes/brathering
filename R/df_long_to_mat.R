@@ -7,6 +7,10 @@
 #' @param to_cols column to become columns in matrix
 #' @param values column to populate the matrix
 #'
+#' @details \code{df_long_to_mat()} silently collapses duplicate row-column
+#' combinations when their values are identical. If values differ within a
+#' combination, the function warns and keeps the first value in input order.
+#'
 #' @return a matrix
 #' @export
 #'
@@ -51,31 +55,28 @@ df_long_to_mat <- function(
     # A linear index follows R's native column-major matrix layout.
     index <- row_index + (col_index - 1L) * length(row_names)
 
-    # add option to use make.unique to modify row col combinations instaed of rempving them?
     # Retain the first occurrence of each row-column combination.
     keep <- !duplicated(index)
 
     if (!all(keep)) {
-        n_duplicates <- sum(!keep)
-        message(
-            n_duplicates,
-            if (n_duplicates == 1L) {
-                " duplicate row-column combination was removed; "
-            } else {
-                " duplicate row-column combinations were removed; "
-            },
-            "the first value for each combination was retained."
-        )
+        duplicate_rows <- which(!keep)
+        first_rows <- match(index[duplicate_rows], index)
+        same_value <- vapply(seq_along(duplicate_rows), function(i) {
+            identical(vals[[duplicate_rows[i]]], vals[[first_rows[i]]])
+        }, logical(1L))
+        n_conflicts <- length(unique(index[duplicate_rows[!same_value]]))
+        if (n_conflicts > 0L) {
+            combinations <- if (n_conflicts == 1L) "combination" else "combinations"
+            warning(
+                "df_long_to_mat: conflicting values for ", n_conflicts,
+                " row-column ", combinations, ". Kept the first value for each.",
+                call. = FALSE
+            )
+        }
 
         index <- index[keep]
         vals  <- vals[keep]
     }
-    # if (anyDuplicated(index)) {
-    #     stop(
-    #         "`df` contains duplicate row-column combinations.",
-    #         call. = FALSE
-    #     )
-    # }
 
     # Create an appropriately typed missing value.
     mat <- matrix(
